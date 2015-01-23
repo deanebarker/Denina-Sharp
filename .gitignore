@@ -1,0 +1,5 @@
+packages/
+Tests/bin/
+Tests/obj/
+Library/bin/
+Library/obj/
