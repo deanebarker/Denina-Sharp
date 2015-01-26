@@ -1,47 +1,61 @@
-﻿using HtmlAgilityPack;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Web;
-using System.Xml;
-using System.Xml.Xsl;
 
 namespace BlendInteractive.TextFilterPipeline.Core
 {
-
     public class TextFilterPipeline
     {
         private const string COMMENT_PREFIX = "#";
+        private const string WRITE_TO_VARIABLE_COMMAND = "writeto";
+        private const string READ_FROM_VARIABLE_COMMAND = "readfrom";
+        private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
 
-        private List<TextFilterCommand> pipeline = new List<TextFilterCommand>();
+
+        private readonly List<TextFilterCommand> pipeline = new List<TextFilterCommand>();
+
+        private readonly Dictionary<string, object> variables = new Dictionary<string, object>();
+
+        static TextFilterPipeline()
+        {
+            // Iterate all the classes in this assembly
+            foreach (Type thisType in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                // Does this assembly have the TextFilters attribute?
+                if (thisType.GetCustomAttributes(typeof (TextFiltersAttribute), true).Any())
+                {
+                    // Process It
+                    AddType(thisType);
+                }
+            }
+        }
 
         public List<TextFilterCommand> Commands
         {
             get { return pipeline; }
         }
 
-        private Dictionary<string, MethodInfo> CommandMethods;
-
-        public TextFilterPipeline()
+        public static Dictionary<string, MethodInfo> CommandMethods
         {
-            CommandMethods = new Dictionary<string, MethodInfo>();
-            LoadMethodTable();
+            get { return commandMethods; }
         }
 
-        public void LoadMethodTable()
+        public Dictionary<string, object> Variables
         {
-            foreach (var method in GetType().GetMethods())
+            get { return variables; }
+        }
+
+        public static void AddType(Type type)
+        {
+            string category = ((TextFiltersAttribute) type.GetCustomAttributes(typeof (TextFiltersAttribute), true).First()).Category.ToLower();
+
+            foreach (MethodInfo method in type.GetMethods())
             {
-                foreach (var attribute in method.GetCustomAttributes())
+                if (method.GetCustomAttributes(typeof (TextFilterAttribute), true).Any())
                 {
-                    if (attribute is TextFilterAttribute)
-                    {
-                        var commandAttribute = (TextFilterAttribute)attribute;
-                        CommandMethods.Add(commandAttribute.Name.ToLower(), method);
-                    }
+                    string name = ((TextFilterAttribute) method.GetCustomAttributes(typeof (TextFilterAttribute), true).First()).Name;
+                    commandMethods.Add(String.Concat(category, ".", name.ToLower()), method);
                 }
             }
         }
@@ -56,16 +70,68 @@ namespace BlendInteractive.TextFilterPipeline.Core
 
             foreach (var command in pipeline)
             {
+                // Are we writing to a variable?
+                if (command.CommandName == WRITE_TO_VARIABLE_COMMAND)
+                {
+                    var variableName = command.CommandArgs.First().Value;
+
+                    if (variables.ContainsKey(variableName))
+                    {
+                        variables.Remove(variableName);
+                    }
+
+                    variables.Add(variableName, input);
+
+                    continue;
+                }
+
+                // Are we reading from a variable?
+                if (command.CommandName == READ_FROM_VARIABLE_COMMAND)
+                {
+                    var variableName = command.CommandArgs.First().Value;
+
+                    if (variables.ContainsKey(variableName))
+                    {
+                        input = variables[variableName].ToString();
+                    }
+                    else
+                    {
+                        // Do we have a default argument as the second argument?
+                        if (command.CommandArgs.Count > 1)
+                        {
+                            // Yes, use it
+                            input = command.CommandArgs[1];
+                        }
+                        else
+                        {
+                            throw new Exception("Variable name \"" + variableName + "\" not found.");
+                        }
+                    }
+
+                    continue;
+                }
+
+
+                // If it doesn't contain a dot, then put it in the "core" category
+                if (!command.CommandName.Contains("."))
+                {
+                    command.CommandName = String.Concat("core.", command.CommandName);
+                }
+
+                // Do we have such a command?
                 if (!CommandMethods.ContainsKey(command.CommandName))
                 {
                     throw new Exception("No command method found for \"" + command.CommandName + "\"");
                 }
 
-                var method = CommandMethods[command.CommandName];
+                // Set a pipeline reference
+                command.Pipeline = this;
 
+                // Execute
+                MethodInfo method = CommandMethods[command.CommandName];
                 try
                 {
-                    input = (string)method.Invoke(this, new object[] { input, command });
+                    input = (string) method.Invoke(null, new object[] {input, command});
                 }
                 catch (Exception e)
                 {
@@ -77,17 +143,20 @@ namespace BlendInteractive.TextFilterPipeline.Core
                         Environment.NewLine,
                         e.GetBaseException().StackTrace));
                 }
-
             }
 
             return input;
+        }
 
+        public object GetVariable(string key)
+        {
+            return variables[key];
         }
 
         public void AddCommand(string commandName, string defaultCommandArg, string variableName = null)
         {
             var command = new TextFilterCommand(commandName);
-            command.CommandArgs = new Dictionary<string, string>() { { "default", defaultCommandArg } };
+            command.CommandArgs = new Dictionary<object, string> {{"default", defaultCommandArg}};
             command.VariableName = variableName;
             pipeline.Add(command);
         }
@@ -99,7 +168,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
 
         public void AddCommands(IEnumerable<string> commandLines)
         {
-            foreach (var line in commandLines)
+            foreach (string line in commandLines)
             {
                 if (String.IsNullOrWhiteSpace(line) || line.Trim().StartsWith(COMMENT_PREFIX))
                 {
@@ -107,7 +176,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 }
 
                 pipeline.Add(new TextFilterCommand(line.Trim()));
-            }            
+            }
         }
 
         public void AddCommands(string commandString)
@@ -120,140 +189,16 @@ namespace BlendInteractive.TextFilterPipeline.Core
             pipeline.Add(command);
         }
 
+        public void AddCommand(string commandString)
+        {
+            AddCommand(new TextFilterCommand(commandString));
+        }
 
-        public void AddCommand(string commandName, Dictionary<string, string> commandArgs = null, string variableName = null)
+        public void AddCommand(string commandName, Dictionary<object, string> commandArgs)
         {
             var command = new TextFilterCommand(commandName);
             command.CommandArgs = commandArgs;
-            command.VariableName = variableName;
             pipeline.Add(command);
-        }
-
-        [TextFilter("replace")]
-        public string Replace(string input, TextFilterCommand command)
-        {
-            return input.Replace(command.CommandArgs["1"], command.CommandArgs["2"]);
-        }
-
-        [TextFilter("replaceall")]
-        public string ReplaceAll(string input, TextFilterCommand command)
-        {
-            return command.DefaultArgument;
-        }
-
-        [TextFilter("format")]
-        public string Format(string input, TextFilterCommand command)
-        {
-            var template = command.CommandArgs.ContainsKey("1") ? command.CommandArgs["1"] : String.Empty;
-            template = command.CommandArgs.ContainsKey("template") && !String.IsNullOrWhiteSpace(command.CommandArgs["template"]) ? command.CommandArgs["template"] : template;
-
-            return String.Format(template, input);
-        }
-
-        [TextFilter("extractfromhtml")]
-        public string ExtractFromHtml(string input, TextFilterCommand command)
-        {
-            var doc = new HtmlDocument();
-            doc.LoadHtml(input);
-
-            var node = doc.DocumentNode.SelectSingleNode(command.CommandArgs["1"]);
-
-            return node != null ? node.InnerHtml : String.Empty;
-        }
-
-        [TextFilter("extractfromxml")]
-        public string ExtractFromXml(string input, TextFilterCommand command)
-        {
-            var doc = new XmlDocument();
-            doc.LoadXml(input);
-
-            var node = doc.DocumentElement.SelectSingleNode(command.CommandArgs["1"]);
-
-            return node != null ? node.Value : String.Empty;
-        }
-
-        [TextFilter("transformxmlfromtemplate")]
-        public string TransformXml(string input, TextFilterCommand command)
-        {
-            var arguments = new XsltArgumentList();
-            arguments.AddExtensionObject("http://extensions", new XslExtensionObject());
-
-
-            // We're going to do this transform using the templae as XSL
-            var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(input);
-
-            var transform = new XslCompiledTransform();
-            transform.Load(XmlReader.Create(new StringReader(command.CommandArgs["template"])));
-
-            var writer = new StringWriter();
-            transform.Transform(xmlDoc, arguments, writer);
-            return writer.ToString();
-        }
-
-        [TextFilter("ExtractFromJson")]
-        public string ExtractFromJson(string input, TextFilterCommand command)
-        {
-            var jobject = (JToken)JObject.Parse(input);
-            
-            foreach (var segment in command.CommandArgs["1"].Split('.'))
-            {
-                if (segment[0] == '~')
-                {
-                    jobject = jobject[Convert.ToInt32(segment.Replace("~", String.Empty))];
-                    continue;
-                }
-
-                if (jobject[segment] is JValue)
-                {
-                    return jobject[segment].ToString();
-                }
-
-                jobject = jobject[segment];
-            }
-
-            return String.Empty;
-        }
-
-        [TextFilter("addquerystringarg")]
-        public string AddQuerysgtringArg(string input, TextFilterCommand command)
-        {
-            var uriBuilder = new UriBuilder(input);
-            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query[command.CommandArgs["1"]] = command.CommandArgs["2"];
-            uriBuilder.Query = query.ToString();
-            return uriBuilder.Uri.AbsoluteUri;
-        }
-
-        [TextFilter("append")]
-        public string Append(string input, TextFilterCommand command)
-        {
-            return String.Concat(input, command.DefaultArgument);
-        }
-
-        [TextFilter("prepend")]
-        public string Prepend(string input, TextFilterCommand command)
-        {
-            return String.Concat(command.DefaultArgument, input);
-        }
-
-    }
-
-
-    public class XslExtensionObject
-    {
-        public string DateFormat(string input, string format)
-        {
-            return DateTime.Parse(input).ToLocalTime().ToString(format);
-        }
-
-        // This was really just for a demo...
-        public string KToF(string input)
-        {
-            var kelvin = Double.Parse(input);
-
-            return (((kelvin - 273.15) * 1.8)+32).ToString("###");
-
         }
     }
 }

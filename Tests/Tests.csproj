@@ -50,14 +50,24 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Core.cs" />
+    <Compile Include="CommandParsing.cs" />
+    <Compile Include="CoreFilterTests.cs" />
+    <Compile Include="FileSystemFilterTests.cs" />
+    <Compile Include="HtmlTests.cs" />
+    <Compile Include="HttpFilterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="VariableTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Library\Library.csproj">
       <Project>{2d145f1d-c223-414c-99cc-da556c54384f}</Project>
       <Name>Library</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Utility\text.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

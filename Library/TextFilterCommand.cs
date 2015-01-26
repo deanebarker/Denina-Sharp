@@ -1,37 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Web;
 
 namespace BlendInteractive.TextFilterPipeline.Core
 {
     public class TextFilterCommand
     {
+        public TextFilterPipeline Pipeline;
         private string commandName;
-        public string CommandName { get { return commandName; } set { commandName = value.ToLower().Trim(); } }
-        public Dictionary<string, string> CommandArgs { get; set; }
-        public string VariableName { get; set; }
 
         public TextFilterCommand()
         {
-            CommandArgs = new Dictionary<string, string>();
+            CommandArgs = new Dictionary<object, string>();
         }
 
         public TextFilterCommand(string commandString)
         {
-            CommandArgs = new Dictionary<string, string>();
+            CommandArgs = new Dictionary<object, string>();
 
-            var tokens = GetTokens(commandString);
+            List<string> tokens = GetTokens(commandString);
 
             CommandName = tokens.First().ToLower();
-            var counter = 0;
-            foreach (var command in tokens.Skip(1))
+            int counter = 0;
+            foreach (string command in tokens.Skip(1))
             {
+                CommandArgs.Add(counter, command);
                 counter++;
-                CommandArgs.Add(counter.ToString(), command);
             }
         }
+
+        public string CommandName
+        {
+            get { return commandName; }
+            set { commandName = value.ToLower().Trim(); }
+        }
+
+        public Dictionary<object, string> CommandArgs { get; set; }
+        public string VariableName { get; set; }
 
         public string DefaultArgument
         {
@@ -42,14 +47,12 @@ namespace BlendInteractive.TextFilterPipeline.Core
         {
             var tokens = new List<string>();
             var rx = new Regex(@"(?<="")[^""]+(?="")|[^\s""]\S*");
-            for (var match = rx.Match(input); match.Success; match = match.NextMatch())
+            for (Match match = rx.Match(input); match.Success; match = match.NextMatch())
             {
                 tokens.Add(match.ToString());
             }
 
             return tokens;
         }
-
-
     }
 }
