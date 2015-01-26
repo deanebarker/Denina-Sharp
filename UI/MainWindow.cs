@@ -22,7 +22,7 @@ namespace UI
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 var pipeline = new TextFilterPipeline();
-                pipeline.AddCommands(PipelineCommands.Text);
+                pipeline.AddCommand(PipelineCommands.Text);
                 long parseTime = stopWatch.ElapsedMilliseconds;
                 PipelineResults.Text = pipeline.Execute(InputTextbox.Text);
                 long executionTime = stopWatch.ElapsedMilliseconds;
@@ -39,8 +39,6 @@ namespace UI
 
         private void MainWindow_Load(object sender, EventArgs e)
         {
-
         }
-
     }
 }

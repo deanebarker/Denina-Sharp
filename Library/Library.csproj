@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandParser.cs" />
     <Compile Include="Filters\FileSystem.cs" />
     <Compile Include="Filters\Html.cs" />
     <Compile Include="Filters\Http.cs" />

@@ -5,32 +5,35 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
     [TextFilters("Core")]
     public static class Core
     {
-        [TextFilter("append")]
+        [TextFilter("Append")]
         public static string Append(string input, TextFilterCommand command)
         {
             return String.Concat(input, command.DefaultArgument);
         }
 
-        [TextFilter("prepend")]
+        [TextFilter("Prepend")]
         public static string Prepend(string input, TextFilterCommand command)
         {
             return String.Concat(command.DefaultArgument, input);
         }
 
 
-        [TextFilter("replace")]
+        [TextFilter("Replace")]
         public static string Replace(string input, TextFilterCommand command)
         {
-            return input.Replace(command.CommandArgs[0], command.CommandArgs[1]);
+            // If they didn't pass in a second argument, then we're using String.Empty (so, less "replace" and more "remove"
+            var replaceWith = command.CommandArgs.Count > 1 ? command.CommandArgs[1] : String.Empty;
+
+            return input.Replace(command.CommandArgs[0], replaceWith);
         }
 
-        [TextFilter("replaceall")]
+        [TextFilter("ReplaceAll")]
         public static string ReplaceAll(string input, TextFilterCommand command)
         {
             return command.DefaultArgument;
         }
 
-        [TextFilter("format")]
+        [TextFilter("Format")]
         public static string Format(string input, TextFilterCommand command)
         {
             string template = command.CommandArgs.ContainsKey(0) ? command.CommandArgs[0] : String.Empty;
@@ -44,10 +47,16 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             return String.Format(template, input);
         }
 
-        [TextFilter("trim")]
+        [TextFilter("Trim")]
         public static string Trim(string input, TextFilterCommand command)
         {
             return input.Trim();
+        }
+
+        [TextFilter("Clear")]
+        public static string Clear(string input, TextFilterCommand command)
+        {
+            return String.Empty;
         }
     }
 }

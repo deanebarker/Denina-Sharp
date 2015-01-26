@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BlendInteractive.TextFilterPipeline.Core;
+﻿using BlendInteractive.TextFilterPipeline.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -25,14 +20,14 @@ namespace Tests
         public void ReadFromVariable()
         {
             var pipeline = new TextFilterPipeline();
-            pipeline.AddCommand("WriteTo Name");        // Writes original input to the variable "Name"
-            pipeline.AddCommand("ReplaceAll Annie");    // Resets input to "Annie"
-            
-            Assert.AreEqual("Annie", pipeline.Execute("Anything")); 
+            pipeline.AddCommand("WriteTo Name"); // Writes original input to the variable "Name"
+            pipeline.AddCommand("ReplaceAll Annie"); // Resets input to "Annie"
 
-            pipeline.AddCommand("ReadFrom Name");       // Input should be the original again
+            Assert.AreEqual("Annie", pipeline.Execute("Anything"));
 
-            Assert.AreEqual("Deane", pipeline.Execute("Deane")); 
+            pipeline.AddCommand("ReadFrom Name"); // Input should be the original again
+
+            Assert.AreEqual("Deane", pipeline.Execute("Deane"));
         }
 
 
@@ -40,8 +35,8 @@ namespace Tests
         public void ReadNonExistentVariableWithDefault()
         {
             var pipeline = new TextFilterPipeline();
-            pipeline.AddCommand("ReadFrom Name Deane");       
-            
+            pipeline.AddCommand("ReadFrom Name Deane");
+
             Assert.AreEqual("Deane", pipeline.Execute("Annie"));
         }
     }

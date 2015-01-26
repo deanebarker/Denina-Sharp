@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using BlendInteractive.TextFilterPipeline.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -16,17 +17,8 @@ namespace Tests
             command.CommandArgs.Add("1", "a");
             command.CommandArgs.Add("2", "b");
 
-            Assert.AreEqual("replace", command.CommandName);
-            Assert.AreEqual("a", command.CommandArgs.First().Value);
-            Assert.AreEqual("b", command.CommandArgs.Last().Value);
-        }
-
-        [TestMethod]
-        public void ParseCommandString()
-        {
-            var command = new TextFilterCommand("Replace a b");
-
-            Assert.AreEqual("replace", command.CommandName);
+            Assert.AreEqual("Replace", command.CommandName);
+            Assert.AreEqual("replace", command.NormalizedCommandName);
             Assert.AreEqual("a", command.CommandArgs.First().Value);
             Assert.AreEqual("b", command.CommandArgs.Last().Value);
         }
@@ -42,7 +34,7 @@ namespace Tests
             pipeline.AddCommand(command);
 
             Assert.AreEqual(1, pipeline.Commands.Count());
-            Assert.AreEqual("replace", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
             Assert.AreEqual("b", pipeline.Commands.First().CommandArgs.First().Value);
         }
 
@@ -62,7 +54,7 @@ namespace Tests
             var pipeline = new TextFilterPipeline();
             pipeline.AddCommand("Replace Deane \"Annie was here\"");
 
-            Assert.AreEqual("replace", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
             Assert.AreEqual("Deane", pipeline.Commands.First().CommandArgs.First().Value);
             Assert.AreEqual("Annie was here", pipeline.Commands.First().CommandArgs.Last().Value);
         }
@@ -76,10 +68,10 @@ namespace Tests
             ";
 
             var pipeline = new TextFilterPipeline();
-            pipeline.AddCommands(commandString);
+            pipeline.AddCommand(commandString);
 
-            Assert.AreEqual("replace", pipeline.Commands.First().CommandName);
-            Assert.AreEqual("replace", pipeline.Commands[1].CommandName);
+            Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Replace", pipeline.Commands[1].CommandName);
             Assert.AreEqual("b", pipeline.Commands.First().CommandArgs.Last().Value);
         }
 
@@ -92,9 +84,9 @@ namespace Tests
             ";
 
             var pipeline = new TextFilterPipeline();
-            pipeline.AddCommands(commandString);
+            pipeline.AddCommand(commandString);
 
-            Assert.AreEqual(1, pipeline.Commands.Count);          
+            Assert.AreEqual(1, pipeline.Commands.Count);
         }
 
         [TestMethod]
@@ -110,7 +102,7 @@ namespace Tests
             ";
 
             var pipeline = new TextFilterPipeline();
-            pipeline.AddCommands(commandString);
+            pipeline.AddCommand(commandString);
 
             Assert.AreEqual(2, pipeline.Commands.Count);
         }

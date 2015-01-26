@@ -7,7 +7,7 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
     [TextFilters("Url")]
     public static class Url
     {
-        [TextFilter("addquerystringarg")]
+        [TextFilter("AddQuerystringArg")]
         public static string AddQuerysgtringArg(string input, TextFilterCommand command)
         {
             var uriBuilder = new UriBuilder(input);
