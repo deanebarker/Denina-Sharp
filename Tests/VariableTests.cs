@@ -39,5 +39,16 @@ namespace Tests
 
             Assert.AreEqual("Deane", pipeline.Execute("Annie"));
         }
+
+        [TestMethod]
+        public void WritingIntoImplicitVariable()
+        {
+            var pipeline = new TextFilterPipeline();
+            pipeline.AddCommand("Append \" married Deane.\" => myVar");
+            var result = pipeline.Execute("Annie");
+
+            Assert.AreEqual(result, "Annie");   // The input text should be unchanged
+            Assert.AreEqual(pipeline.Variables["myVar"], "Annie married Deane.");
+        }
     }
 }
