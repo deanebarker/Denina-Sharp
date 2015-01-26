@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.RegularExpressions;
 
 namespace BlendInteractive.TextFilterPipeline.Core.Filters
 {
@@ -43,6 +44,9 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             {
                 template = template.Replace(String.Concat("{", variable.Key, "}"), variable.Value.ToString());
             }
+
+            // Escape any remaining {string} patterns, because these will break String.Format...
+            template = Regex.Replace(template, "{([^0-9]+)}", "{{$1}}");
 
             return String.Format(template, input);
         }
