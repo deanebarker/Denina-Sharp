@@ -11,6 +11,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
     public static class CommandParser
     {
         private const string COMMENT_PREFIX = "#";
+        private const string VARIABLE_DELIMITER = "=>";
         
         public static IEnumerable<TextFilterCommand> ParseCommandString(string commandString)
         {
@@ -22,12 +23,25 @@ namespace BlendInteractive.TextFilterPipeline.Core
                     continue;
                 }
 
-                var tokens = GetTokens(line);
+                // Do we have a variable output?
+                String variableName = null;
+                List<string> tokens;
+                if (line.Contains(VARIABLE_DELIMITER))
+                {
+                    var parts = Regex.Split(line, VARIABLE_DELIMITER);
+                    variableName = parts.Last().Trim();
+                    tokens = GetTokens(parts.First().Trim());
+                }
+                else
+                {
+                    tokens = GetTokens(line);   
+                }
 
                 var command = new TextFilterCommand()
                 {
                     // The first token is the command name (every line that gets here should have at least one token)...
-                    CommandName = tokens.First()
+                    CommandName = tokens.First(),
+                    VariableName = variableName
                 };
 
                 //... the remaining tokens are the arguments.

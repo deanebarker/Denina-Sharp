@@ -9,6 +9,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
         public TextFilterPipeline Pipeline;
         public string CommandName { get; set; }
         public Dictionary<object, string> CommandArgs { get; set; }
+        public string VariableName { get; set; }
 
         public TextFilterCommand()
         {

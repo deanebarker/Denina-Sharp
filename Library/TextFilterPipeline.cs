@@ -143,7 +143,18 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 MethodInfo method = CommandMethods[command.NormalizedCommandName];
                 try
                 {
-                    input = (string) method.Invoke(null, new object[] {input, command});
+                    // This is where we make the method call
+                    var result = (string) method.Invoke(null, new object[] {input, command});
+
+                    if (!String.IsNullOrWhiteSpace(command.VariableName))
+                    {
+                        WriteToVariable(command.VariableName, result);
+                    }
+                    else
+                    {
+                        // If we're not writing to a variable, then we're changing the active text
+                        input = result;
+                    }
                 }
                 catch (Exception e)
                 {
@@ -158,6 +169,12 @@ namespace BlendInteractive.TextFilterPipeline.Core
             }
 
             return input;
+        }
+
+        public void WriteToVariable(string key, string value)
+        {
+            variables.Remove(key);
+            variables.Add(key, value);
         }
 
         public object GetVariable(string key)
