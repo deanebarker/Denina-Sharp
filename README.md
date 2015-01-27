@@ -39,6 +39,11 @@ We'd get "FOOBAZ."  We could pass a thousand different strings to the pipeline, 
 
 "Prepend" is one example of several dozen pre-built filters. Some take arguments, some don't. It's up to the individual filter how many arguments it needs, what order it needs them in, and what it does with them during execution (much like function calls in any programming language).
 
+Commands can be passed in _en masse_, separated by line breaks.  Each line is parsed as a separate command.
+
+    var pipeline = new TextFilterPipeline();
+    pipeline.AddCommand(thousandsAndThousandsOfCommands);
+
 The pipeline doesn't technically have to even start with text, as some filters allow the pipeline to acquire text mid-stream.  For example, the command configuration to call the home page of Gadgetopia and extract the title looks like this:
 
     Http.Get gadgetopia.com
