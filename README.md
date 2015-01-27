@@ -101,11 +101,11 @@ This command is now available as:
 
     Text.Left 10
 
-(If your category and command name are identical to another one, the last one in wins. This means you can "over-write" previous filters by registering new ones that take their place.)
+If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.
 
 In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
 
-(And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.)
+And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.
 
 You can map the same filter to multiple command names, then use that name inside the method to change execution.
 
