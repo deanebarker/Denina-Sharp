@@ -52,7 +52,7 @@ After the first command executes, the active text is _all_ the HTML from the hom
 
 Commands are grouped into categories.  Any command without a "dot" is assumed to be a member of the "Core" category.
 
-By default, a command changes the active text and passes it to the next command. However, the result of a command can be instead redirected into variable stored and stored for later use.  This does _not_ change the active text.
+By default, a command changes the active text and passes it to the next command. However, the result of a command can be instead redirected into variable stored for later use.  This does _not_ change the active text.
 
 You can direct the result of an operation to a variable by using the "=>" operator and a variable name at the end of a statement.
 
@@ -89,7 +89,7 @@ This command is now available as:
 
     Text.Left 10
 
-In this case, we're trusting that this will be called with (1)at least one argument (any extra arguments are simply ignored), (2) that will parse to an Int32, and (3) isn't longer than the active text.  Clearly, you're gonna want to validate and error check this before doing anything.
+In this case, we're trusting that this will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, you're gonna want to validate and error check this before doing anything.
 
 You can map the same filter to multiple command names, then use that name inside the method to do different things.
 
@@ -118,21 +118,31 @@ This filter will map to both of these commands:
     Text.Left 10
     Text.Right 10
 
+## Contents
+
+This repo contains three projects.
+
+1. The source to create a DLL named "BlendInteractive.TextFilterPipeline.dll"
+2. A test project with moderate unit test coverage
+3. A WinForms testing app which provides a GUI to run and test filters.
+
+On build, the DLL, a supporting DLL (HtmlAgilityPack), and the WinForms EXE are copied into the "Binaries" folder. The WinForms tester should run directly from there.
+
 ## History
 
-This started out as a simple project to include the contents of a text file in EPiServer.  That CMS provides "blocks," which are reusable content elements.
+This started out as a simple project to allow editors to include the contents of a text file within EPiServer content.
 
-I wrote a simple block into which a editor could specify the path to a file on the file system. The block would read the contents of the file and dump it into the page.  It was essentially a server-side file include for content editors.
+That CMS provides "blocks," which are reusable content elements.  I wrote a simple block into which a editor could specify the path to a file on the file system. The block would read the contents of the file and dump it into the page.  It was essentially a server-side file include for content editors.
 
 Then I got to thinking that some files might need to have newlines replaced with BR tags, and how would I specify that?  And what if the file wasn't local?  How would I specify a remote file?  And what if it was XML -- could I specify a transform?
 
-And the idea of a text filter pipeline was born.  To support this, I needed to come up with language constructs, and that's when I started parsing commands. And then I found I could enable some neat functionality by tweaking and tuning and making small changes.
+And the idea of a text filter pipeline was born.  To support this, I needed to come up with language constructs, and that's when I started parsing commands. And then I found I could enable some really neat functionality by tweaking and tuning and making small changes.
 
 And when the snowball finally came to a rest at the bottom of the hill, you had, well, this.
 
-The constant challenge with this type of project is when to stop. At what point are you simply inventing a new programming language.  When do you cross the line from simple and useful to pointless and redundant?
+The constant challenge with this type of project is knowing when to stop. At what point are you simply inventing a new programming language?  When do you cross the line from simple and useful to pointless and redundant?  And when do you cross another line into something which is potentially dangerous in the hands of non-programmers?
 
-I don't have an answer for that (hell, I may have crossed that line already).  I leave it to you to judge.
+I don't have an answer for that (hell, we may have crossed that line already).  I leave it to you to judge. Implement with care.
 
 Happy filtering.
 
