@@ -1,8 +1,8 @@
 # Text Filtering Pipeline
 
-TFP is a pipeline processor for text, intended for editorial usage through configuration by simple text commands. A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
+(Note: be sure to read the "History and Context" section at the end for more information about why this project was created, and what it means for you.)
 
-(Note: be sure to read the "History" section at the end for more context about why this project was created.)
+TFP is a pipeline processor for text, intended for editorial usage through configuration by simple text commands. A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
 
 The filters are linear and sequential.  Text is passed "down the line," and is usually modified during each step, coming out the other end in a different form than when it started.
 
@@ -150,7 +150,7 @@ This repo contains three projects.
 
 On build, the DLL, a supporting DLL (HtmlAgilityPack), and the WinForms EXE are copied into the "Binaries" folder. The WinForms tester should run directly from there.
 
-## History
+## History and Context
 
 This started out as a simple project to allow editors to include the contents of a text file within [EPiServer](http://episerver.com) content.
 
@@ -164,10 +164,10 @@ And when the snowball finally came to a rest at the bottom of the hill, you had,
 
 The constant challenge with this type of project is knowing when to stop. At what point are you simply inventing a new programming language?  When do you cross the line from simple and useful to pointless and redundant?  And when do you cross another line into something which is potentially dangerous in the hands of non-programmers?
 
-(Look back to the weather example from above -- that really has nothing to do with text filtering. The pipeline is executed without input, the XML is obtained in the first step, and content is extracted then formatted. In this case, we're edging into a procedural programming language. How far is too far?)
+Look back to the weather example from above -- that really has nothing to do with text filtering. The pipeline is executed without input, the XML is obtained in the first step, and content is extracted then formatted. In this case, we're not filtering at all. We're really edging into a simplistic procedural programming language. How far is too far?  At what point does [Alan Turing roll over in his grave](http://stackoverflow.com/questions/7284/what-is-turing-complete)?
 
-I don't have an answer for that (hell, we may have crossed the line already).  I leave it to you to judge. Implement with care.
+I don't have an answer for that (hell, we may have crossed the line already).  I leave it to you to judge.
 
-Happy filtering.
+Implement with care. Happy Filtering.
 
 Deane Barker, January 2015
