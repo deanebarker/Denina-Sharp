@@ -44,7 +44,7 @@ The pipeline doesn't technically have to even start with text, as some filters a
     Http.Get gadgetopia.com
     Html.Extract //title
 
-Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. If the currently active text prior to that was anything, itsimply  gets over-written.
+Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. If the currently active text prior to that was anything, it gets over-written.
 
 In this case, the pipeline is invoked without arguments.
 
@@ -66,7 +66,9 @@ Here's an example of chaining filters and writing into and out of variables to o
     Format "The temp in {city} is {temp}."
     Html.Wrap p weather-data
 
-The first command gets an XML document. Since the second command sends the results to a variable named "city," the active text remains the original full XML document which is then still available to the third command.  (Note that in this case, that XML document is going to be fully parsed twice from the string source, which may or may not work for your situation, performance-wise. Remember that filters only pass simple text, not more complex objects.)
+The first command gets an XML document. Since the second command sends the results to a variable named "city," the active text remains the original full XML document which is then still available to the third command.
+
+(Note that in this case, that XML document is going to be fully parsed twice from the string source, which may or may not work for your situation, performance-wise. Remember that filters only pass simple text, not more complex objects.)
 
 The result of this pipeline is:
 
@@ -97,7 +99,9 @@ This command is now available as:
 
 (If your category and command name are identical to another one, the last one in wins. This means you can "over-write" previous filters by registering new ones that take their place.)
 
-In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.  (And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.)
+In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
+
+(And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.)
 
 You can map the same filter to multiple command names, then use that name inside the method to change execution.
 
@@ -138,7 +142,7 @@ On build, the DLL, a supporting DLL (HtmlAgilityPack), and the WinForms EXE are 
 
 ## History
 
-This started out as a simple project to allow editors to include the contents of a text file within EPiServer content.
+This started out as a simple project to allow editors to include the contents of a text file within [EPiServer](http://episerver.com) content.
 
 That CMS provides "blocks," which are reusable content elements.  I wrote a simple block into which a editor could specify the path to a file on the file system. The block would read the contents of the file and dump it into the page.  It was essentially a server-side file include for content editors.
 
