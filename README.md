@@ -103,7 +103,7 @@ This command is now available as:
 
     Text.Left 10
 
-The name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filename ("Left"). While it would make sense to call the method the same name as the filter, this isn't required.
+The name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
 
 If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.  New filters are loaded statically, so they're globally available to all executions of the pipeline.
 
