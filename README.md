@@ -54,9 +54,11 @@ In this case, the pipeline is invoked without arguments.
 
     pipeline.Execute();
 
-After the first filter executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the first filter executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the Execute method of the pipeline object (it's what comes out "the other end" of the pipe).
+How a filter "treats" the active text is up to the filter. _The active text becomes whatever the filter returns._  It can return some derivation of the input text (such as with "Prepend," from above), or it can return something completely new without regard to the active text it took in. It can even use the active text to configure itself and then return something else. (Example: if invoked without arguments, Http.Get assumes the active text is the URL it should use. It retrieves the HTML at that URL, and returns the result.)
 
-Filters are grouped into categories (really, they should be called "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
+In our example above, after the first filter (Http.Get) executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the second filter (Html.Extract) executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the Execute method of the pipeline object (it's what comes out "the other end" of the pipe).
+
+Filters are grouped into categories (think "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
 
 By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable which is stored for later use.  This does _not_ change the active text -- it remains unchanged.
 
@@ -101,9 +103,9 @@ This command is now available as:
 
     Text.Left 10
 
-If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.
+If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.  New filters are loaded statically, so they're globally available to all executions of the pipeline.
 
-In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
+In the example above case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
 
 And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.
 
