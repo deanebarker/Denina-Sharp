@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Web.UI;
+using Fizzler.Systems.HtmlAgilityPack;
 using HtmlAgilityPack;
 
 namespace BlendInteractive.TextFilterPipeline.Core.Filters
@@ -15,6 +16,9 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             doc.LoadHtml(input);
 
             HtmlNode node = doc.DocumentNode.SelectSingleNode(command.CommandArgs[0]);
+            if (node == null) { 
+                node = doc.DocumentNode.QuerySelector(command.CommandArgs[0]);
+            }
 
             return node != null ? node.InnerHtml : String.Empty;
         }
