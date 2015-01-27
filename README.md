@@ -164,7 +164,9 @@ And when the snowball finally came to a rest at the bottom of the hill, you had,
 
 The constant challenge with this type of project is knowing when to stop. At what point are you simply inventing a new programming language?  When do you cross the line from simple and useful to pointless and redundant?  And when do you cross another line into something which is potentially dangerous in the hands of non-programmers?
 
-I don't have an answer for that (hell, we may have crossed that line already).  I leave it to you to judge. Implement with care.
+(Look back to the weather example from above -- that really has nothing to do with text filtering. The pipeline is executed without input, the XML is obtained in the first step, and content is extracted then formatted. In this case, we're edging into a procedural programming language. How far is too far?)
+
+I don't have an answer for that (hell, we may have crossed the line already).  I leave it to you to judge. Implement with care.
 
 Happy filtering.
 
