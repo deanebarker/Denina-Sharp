@@ -26,6 +26,14 @@ namespace BlendInteractive.TextFilterPipeline.Core
             }
         }
 
+        public TextFilterPipeline(string commandString = null)
+        {
+            if (!String.IsNullOrWhiteSpace(commandString))
+            {
+                AddCommand(commandString);
+            }
+        }
+
         public static Dictionary<string, MethodInfo> CommandMethods
         {
             get { return commandMethods; }
