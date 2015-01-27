@@ -103,6 +103,8 @@ This command is now available as:
 
     Text.Left 10
 
+The name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filename ("Left"). While it would make sense to call the method the same name as the filter, this isn't required.
+
 If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.  New filters are loaded statically, so they're globally available to all executions of the pipeline.
 
 In the example above case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
@@ -135,6 +137,8 @@ This filter will map to both of these commands:
 
     Text.Left 10
     Text.Right 10
+
+Note that this is true even though the method name ("Left") did not change.
 
 ## Contents
 
