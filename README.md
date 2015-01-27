@@ -26,7 +26,7 @@ Here's the C#:
 Clearly, this is way too verbose.  So commands can be added by simple text strings.  The strings are tokenized on whitespace. The first token is the command name, the subsequent tokens are arguments. (Any arguments which contain whitespace need to be in quotes.)
 
     var pipeline = new TextFilterPipeline();
-    pipeline.AddCommand("Prepend FOO")
+    pipeline.AddCommand("Prepend FOO");  //Note: this can also be passed into the constructor
     var result = pipeline.Execute("BAR");
 
 The result will be "FOOBAR".
@@ -41,8 +41,7 @@ We'd get "FOOBAZ."  We could pass a thousand different strings to the pipeline, 
 
 Commands can be passed in _en masse_, separated by line breaks.  Each line is parsed as a separate command.
 
-    var pipeline = new TextFilterPipeline();
-    pipeline.AddCommand(thousandsAndThousandsOfCommands);
+    var pipeline = new TextFilterPipeline(thousandsAndThousandsOfCommands);
 
 The pipeline doesn't technically have to even start with text, as some filters allow the pipeline to acquire text mid-stream.  For example, the command configuration to call the home page of Gadgetopia and extract the title looks like this:
 
