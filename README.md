@@ -48,11 +48,11 @@ In this case, the pipeline is simply invoked without arguments.
 
     pipeline.Execute();
 
-After the first command executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the second command executes, the active text is just the contents of the "title" tag.  The active text after the last command executes is what is returned by the pipeline (it's what comes out "the other end" of the pipe).
+After the first filter executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the filter command executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the pipeline (it's what comes out "the other end" of the pipe).
 
-Commands are grouped into categories.  Any command without a "dot" is assumed to be a member of the "Core" category.
+Filters are grouped into categories (really, they should be called "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
 
-By default, a command changes the active text and passes it to the next command. However, the result of a command can be instead redirected into variable stored for later use.  This does _not_ change the active text.
+By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable stored for later use.  This does _not_ change the active text -- it remains unchanged.
 
 You can direct the result of an operation to a variable by using the "=>" operator and a variable name at the end of a statement.
 
@@ -64,7 +64,11 @@ Here's an example of chaining filters and writing into and out of variables to o
     Format "The temp in {city} is {temp}."
     Html.Wrap p weather-data
 
-    # <p class="weather-data">The temp in Sioux Falls is 37.</p>
+The first command gets an XML document. Since the second command sends the results to a variable named "city," the active text remains the original full XML document which is then still available to the third command.
+
+The result of this is:
+
+    <p class="weather-data">The temp in Sioux Falls is 37.</p>
 
 Variables are volatile -- writing to the same variable multiple times simply resets the value each time.
 
@@ -89,7 +93,7 @@ This command is now available as:
 
     Text.Left 10
 
-In this case, we're trusting that this will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, you're gonna want to validate and error check this before doing anything.
+In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
 
 You can map the same filter to multiple command names, then use that name inside the method to do different things.
 
@@ -146,5 +150,4 @@ I don't have an answer for that (hell, we may have crossed that line already).  
 
 Happy filtering.
 
-Deane Barker
-January 2015
+Deane Barker, January 2015
