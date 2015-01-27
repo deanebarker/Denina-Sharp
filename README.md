@@ -35,24 +35,26 @@ The pipeline remains "loaded" with commands, so we could just as easily do this 
 
     pipeline.Execute("BAZ");
 
-We'd get "FOOBAZ."
+We'd get "FOOBAZ."  We could pass a thousand different strings to the pipeline, and they would all come out with "FOO" prepended to them.
 
-"Prepend" is one example of several dozen pre-built commands. Some take arguments, some don't. It's up to the individual commands how many arguments they need, what order they need them in, and what they do with them (much like function calls in any programming language).
+"Prepend" is one example of several dozen pre-built filters. Some take arguments, some don't. It's up to the individual filter how many arguments it needs, what order it needs them in, and what it does with them during execution (much like function calls in any programming language).
 
-The pipeline doesn't technically have to start with text, as some commands can allow the pipeline to acquire text mid-stream.  For example, the command configuration to call the home page of Gadgetopia and extract the title looks like this:
+The pipeline doesn't technically have to even start with text, as some filters allow the pipeline to acquire text mid-stream.  For example, the command configuration to call the home page of Gadgetopia and extract the title looks like this:
 
     Http.Get gadgetopia.com
     Html.Extract //title
 
-In this case, the pipeline is simply invoked without arguments.
+Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. If the currently active text prior to that was anything, itsimply  gets over-written.
+
+In this case, the pipeline is invoked without arguments.
 
     pipeline.Execute();
 
-After the first filter executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the filter command executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the pipeline (it's what comes out "the other end" of the pipe).
+After the first filter executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the first filter executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the Execute method of the pipeline object (it's what comes out "the other end" of the pipe).
 
 Filters are grouped into categories (really, they should be called "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
 
-By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable stored for later use.  This does _not_ change the active text -- it remains unchanged.
+By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable which is stored for later use.  This does _not_ change the active text -- it remains unchanged.
 
 You can direct the result of an operation to a variable by using the "=>" operator and a variable name at the end of a statement.
 
@@ -64,9 +66,9 @@ Here's an example of chaining filters and writing into and out of variables to o
     Format "The temp in {city} is {temp}."
     Html.Wrap p weather-data
 
-The first command gets an XML document. Since the second command sends the results to a variable named "city," the active text remains the original full XML document which is then still available to the third command.
+The first command gets an XML document. Since the second command sends the results to a variable named "city," the active text remains the original full XML document which is then still available to the third command.  (Note that in this case, that XML document is going to be fully parsed twice from the string source, which may or may not work for your situation, performance-wise. Remember that filters only pass simple text, not more complex objects.)
 
-The result of this is:
+The result of this pipeline is:
 
     <p class="weather-data">The temp in Sioux Falls is 37.</p>
 
@@ -93,9 +95,11 @@ This command is now available as:
 
     Text.Left 10
 
-In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
+(If your category and command name are identical to another one, the last one in wins. This means you can "over-write" previous filters by registering new ones that take their place.)
 
-You can map the same filter to multiple command names, then use that name inside the method to do different things.
+In this case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.  (And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.)
+
+You can map the same filter to multiple command names, then use that name inside the method to change execution.
 
     [TextFilters("Text")]
     public static class TextFilters
@@ -127,7 +131,7 @@ This filter will map to both of these commands:
 This repo contains three projects.
 
 1. The source to create a DLL named "BlendInteractive.TextFilterPipeline.dll"
-2. A test project with moderate unit test coverage
+2. A test project with moderate unit test coverage (needs to be better)
 3. A WinForms testing app which provides a GUI to run and test filters.
 
 On build, the DLL, a supporting DLL (HtmlAgilityPack), and the WinForms EXE are copied into the "Binaries" folder. The WinForms tester should run directly from there.
@@ -138,7 +142,7 @@ This started out as a simple project to allow editors to include the contents of
 
 That CMS provides "blocks," which are reusable content elements.  I wrote a simple block into which a editor could specify the path to a file on the file system. The block would read the contents of the file and dump it into the page.  It was essentially a server-side file include for content editors.
 
-Then I got to thinking that some files might need to have newlines replaced with BR tags, and how would I specify that?  And what if the file wasn't local?  How would I specify a remote file?  And what if it was XML -- could I specify a transform?
+Then I got to thinking (always dangerous) that some files might need to have newlines replaced with BR tags, and how would I specify that?  And what if the file wasn't local?  How would I specify a remote file?  And what if it was XML -- could I specify a transform?
 
 And the idea of a text filter pipeline was born.  To support this, I needed to come up with language constructs, and that's when I started parsing commands. And then I found I could enable some really neat functionality by tweaking and tuning and making small changes.
 
