@@ -69,7 +69,11 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 if (method.GetCustomAttributes(typeof(TextFilterAttribute), true).Any())
                 {
                     string name = ((TextFilterAttribute)method.GetCustomAttributes(typeof(TextFilterAttribute), true).First()).Name;
-                    commandMethods.Add(String.Concat(category.ToLower(), ".", name.ToLower()), method);
+
+                    var fullyQualifiedFilterName = String.Concat(category.ToLower(), ".", name.ToLower());
+
+                    commandMethods.Remove(fullyQualifiedFilterName);    // Remove it if it exists already                  
+                    commandMethods.Add(fullyQualifiedFilterName, method);
                 }
             }
         }

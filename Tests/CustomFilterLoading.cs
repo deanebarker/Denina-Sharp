@@ -1,4 +1,5 @@
-﻿using BlendInteractive.TextFilterPipeline.Core;
+﻿using System;
+using BlendInteractive.TextFilterPipeline.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tests.Utility;
 
@@ -27,6 +28,27 @@ namespace Tests
             var pipeline = new TextFilterPipeline();
             pipeline.AddCommand("something.MyMethod");
             Assert.AreEqual("MyMethod", pipeline.Execute());
+        }
+
+        [TestMethod]
+        public void OverwriteExistingFilter()
+        {
+            var pipeline = new TextFilterPipeline("Append BAR");
+            Assert.AreEqual("FOOBAR", pipeline.Execute("FOO"));
+
+            TextFilterPipeline.AddType(typeof (OverwriteFilterTestClass));  // This should overwrite Core.Append
+
+            Assert.AreEqual("FOOBAZ", pipeline.Execute("FOO"));
+        }
+    }
+
+    [TextFilters("Core")]
+    internal static class OverwriteFilterTestClass
+    {
+        [TextFilter("Append")]
+        public static string Append(string input, TextFilterCommand command)
+        {
+            return String.Concat(input, "BAZ");
         }
     }
 }
