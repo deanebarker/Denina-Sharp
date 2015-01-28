@@ -1,14 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Web.UI;
+using BlendInteractive.TextFilterPipeline.Core.Documentation;
 using HtmlAgilityPack;
 
 namespace BlendInteractive.TextFilterPipeline.Core.Filters
 {
-    [TextFilters("HTML")]
+    [TextFilters("HTML", "Creating and manipulating HTML strings.")]
     public static class Html
     {
-        [TextFilter("Extract")]
+        [TextFilter("Extract", "Extracts an element from an HTML string. (Relies on the HtmlAgilityPack.dll assembly, which must be available.)")]
+        [ArgumentMeta(1, "Path", true, "The XPath(-ish) to the element, based on HtmlAgilityPack's language standard.")]
         public static string Extract(string input, TextFilterCommand command)
         {
             var doc = new HtmlDocument();
@@ -19,7 +21,10 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             return node != null ? node.InnerHtml : String.Empty;
         }
 
-        [TextFilter("Wrap")]
+        [TextFilter("Wrap", "Wraps the input string in a specified HTML tag with optional class and/or ID.")]
+        [ArgumentMeta(1, "Tag Name", true, "The name of the HTML tag in which to wrap the content.")]
+        [ArgumentMeta(2, "Class", false, "If provided, the tag will use this as a \"class\" attribute.")]
+        [ArgumentMeta(3, "ID", false, "If provided, the tag will use this as an \"id\" attribute.")]
         public static string WrapInTag(string input, TextFilterCommand command)
         {
             var stringWriter = new StringWriter();

@@ -1,12 +1,14 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
+using BlendInteractive.TextFilterPipeline.Core.Documentation;
 
 namespace BlendInteractive.TextFilterPipeline.Core.Filters
 {
-    [TextFilters("JSON")]
+    [TextFilters("JSON", "Working with JSON data.")]
     public static class Json
     {
-        [TextFilter("ExtractFromJson")]
+        [TextFilter("ExtractFromJson", "Retieves the valud at a defined \"path\" into the JSON object.")]
+        [ArgumentMeta(1, "Path", true, "A dot-delimited representation of the path into the object. Each property is defined by a segment. Numeric values prepended by a tilde (\"~1\") are interpreted as the index of an array. Example: \"person.~2.name.first\".")]
         public static string ExtractFromJson(string input, TextFilterCommand command)
         {
             var jobject = (JToken) JObject.Parse(input);

@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Net;
+using BlendInteractive.TextFilterPipeline.Core.Documentation;
 
 namespace BlendInteractive.TextFilterPipeline.Core.Filters
 {
-    [TextFilters("HTTP")]
+    [TextFilters("HTTP", "Working with resources over HTTP.")]
     public static class Http
     {
-        [TextFilter("Get")]
+        [TextFilter("Get", "Makes an HTTP GET request and returns the result.")]
+        [ArgumentMeta(1, "URL", false, "The URL to request. If not provided, the input string is assumed to be a URL.")]
         public static string Get(string input, TextFilterCommand command)
         {
             string url = command.CommandArgs.ContainsKey(0) ? command.CommandArgs[0] : input;

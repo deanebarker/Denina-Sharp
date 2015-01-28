@@ -2,13 +2,15 @@
 using System.IO;
 using System.Xml;
 using System.Xml.Xsl;
+using BlendInteractive.TextFilterPipeline.Core.Documentation;
 
 namespace BlendInteractive.TextFilterPipeline.Core.Filters
 {
-    [TextFilters("XML")]
+    [TextFilters("XML", "Working with XML strings.")]
     public class Xml
     {
-        [TextFilter("Extract")]
+        [TextFilter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
+        [ArgumentMeta(1, "XPath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
         public static string ExtractFromXml(string input, TextFilterCommand command)
         {
             var doc = new XmlDocument();
@@ -19,7 +21,8 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             return node != null ? node.Value : String.Empty;
         }
 
-        [TextFilter("TransformXmlFromVariable")]
+        [TextFilter("TransformXmlFromVariable", "Transforms an XML document against an XSL stylesheet")]
+        [ArgumentMeta(1, "XSLT", true, "The raw XSLT to transform the input string.")]
         public static string TransformXml(string input, TextFilterCommand command)
         {
             var arguments = new XsltArgumentList();
