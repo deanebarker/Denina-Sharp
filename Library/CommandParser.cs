@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,11 +13,13 @@ namespace BlendInteractive.TextFilterPipeline.Core
     {
         private const string COMMENT_PREFIX = "#";
         private const string VARIABLE_DELIMITER = "=>";
+        private const string VARIABLE_PREFIX = "$";
+        private static readonly string COMMAND_DELIMITER = Environment.NewLine;
         
         public static IEnumerable<TextFilterCommand> ParseCommandString(string commandString)
         {
             var commands = new List<TextFilterCommand>();
-            foreach (var line in commandString.Trim().Split(Environment.NewLine.ToCharArray()).Select(s => s.Trim()))
+            foreach (var line in commandString.Trim().Split(COMMAND_DELIMITER.ToCharArray()).Select(s => s.Trim()))
             {
                 if (String.IsNullOrWhiteSpace(line) || line.Trim().StartsWith(COMMENT_PREFIX))
                 {
@@ -68,6 +71,16 @@ namespace BlendInteractive.TextFilterPipeline.Core
             }
 
             return tokens;
+        }
+
+        internal static bool IsVariableName(string p)
+        {
+            return p.StartsWith(VARIABLE_PREFIX);
+        }
+
+        internal static string StripVariablePrefix(string p)
+        {
+            return p.TrimStart(VARIABLE_PREFIX.ToCharArray());
         }
     }
 }
