@@ -10,7 +10,6 @@ namespace BlendInteractive.TextFilterPipeline.Core
         
         private const string WRITE_TO_VARIABLE_COMMAND = "writeto";
         private const string READ_FROM_VARIABLE_COMMAND = "readfrom";
-        private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
         
         static TextFilterPipeline()
         {
@@ -46,9 +45,10 @@ namespace BlendInteractive.TextFilterPipeline.Core
         }
 
         private readonly Dictionary<string, object> variables = new Dictionary<string, object>();
-        public Dictionary<string, object> Variables
+        public ReadOnlyDictionary<string, object> Variables
         {
-            get { return variables; }
+            get { return new ReadOnlyDictionary<string, object>(variables); }
+        }
         }
 
         public static void AddType(Type type)
