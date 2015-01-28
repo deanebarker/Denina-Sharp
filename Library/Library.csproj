@@ -49,12 +49,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
+    <Compile Include="Documentor.cs" />
     <Compile Include="Filters\FileSystem.cs" />
     <Compile Include="Filters\Html.cs" />
     <Compile Include="Filters\Http.cs" />
     <Compile Include="Filters\Json.cs" />
     <Compile Include="Filters\Url.cs" />
     <Compile Include="Filters\Xml.cs" />
+    <Compile Include="Documentation\ArgumentMeta.cs" />
     <Compile Include="TextFiltersAttribute.cs" />
     <Compile Include="Filters\Core.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
