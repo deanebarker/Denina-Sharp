@@ -1,4 +1,5 @@
-﻿using BlendInteractive.TextFilterPipeline.Core;
+﻿using System.IO;
+using BlendInteractive.TextFilterPipeline.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -6,6 +7,14 @@ namespace Tests
     [TestClass]
     public class CoreFilterTests
     {
+        [TestMethod]
+        public void WriteHelp()
+        {
+            //Note: This is not a test. I'm just cheating by writing out the HTML help every time I run the tests.
+            File.WriteAllText("help.html", Documentor.Generate());
+        }
+
+
         [TestMethod]
         public void Replace()
         {

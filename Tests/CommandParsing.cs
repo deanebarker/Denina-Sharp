@@ -24,6 +24,15 @@ namespace Tests
         }
 
         [TestMethod]
+        public void AddCommandInConstructor()
+        {
+            var pipeline = new TextFilterPipeline("Prepend FOO");
+
+            Assert.AreEqual(1, pipeline.Commands.Count);
+            Assert.AreEqual("Prepend", pipeline.Commands.First().CommandName);
+        }
+
+        [TestMethod]
         public void AddCommandByObject()
         {
             var command = new TextFilterCommand();

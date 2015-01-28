@@ -1,5 +1,6 @@
 ﻿using System;
 using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.TextFilterPipeline.Core.Filters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tests.Utility;
 
@@ -39,6 +40,9 @@ namespace Tests
             TextFilterPipeline.AddType(typeof (OverwriteFilterTestClass));  // This should overwrite Core.Append
 
             Assert.AreEqual("FOOBAZ", pipeline.Execute("FOO"));
+
+            // Now add the old filter back, or else another test fails...
+            TextFilterPipeline.AddType(typeof(Core));
         }
     }
 
