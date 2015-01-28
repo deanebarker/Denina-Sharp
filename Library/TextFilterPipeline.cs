@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Web.UI;
 
 namespace BlendInteractive.TextFilterPipeline.Core
 {
@@ -72,6 +75,10 @@ namespace BlendInteractive.TextFilterPipeline.Core
 
         public static void AddType(string category, Type type)
         {
+            // This is just to keep a "catalog" of types to make it easier for the documentor to iterate over them
+            Types.Remove(category);
+            Types.Add(category, type);
+
             foreach (MethodInfo method in type.GetMethods())
             {
                 if (method.GetCustomAttributes(typeof(TextFilterAttribute), true).Any())
@@ -106,14 +113,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 if (command.NormalizedCommandName == WRITE_TO_VARIABLE_COMMAND)
                 {
                     string variableName = command.CommandArgs.First().Value;
-
-                    if (variables.ContainsKey(variableName))
-                    {
-                        variables.Remove(variableName);
-                    }
-
-                    variables.Add(variableName, input);
-
+                    SetVariable(variableName, input);
                     continue;
                 }
 
@@ -159,8 +159,11 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 // Set a pipeline reference
                 command.Pipeline = this;
 
+                // Resolve any arguments that are actually variable names
+                command.ResolveArguments();
+
                 // Execute
-                MethodInfo method = CommandMethods[command.NormalizedCommandName];
+                var method = CommandMethods[command.NormalizedCommandName];
                 try
                 {
                     // This is where we make the method call
@@ -168,7 +171,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
 
                     if (!String.IsNullOrWhiteSpace(command.VariableName))
                     {
-                        WriteToVariable(command.VariableName, result);
+                        SetVariable(command.VariableName, result);
                     }
                     else
                     {
@@ -191,15 +194,16 @@ namespace BlendInteractive.TextFilterPipeline.Core
             return input;
         }
 
-        public void WriteToVariable(string key, string value)
-        {
-            variables.Remove(key);
-            variables.Add(key, value);
-        }
-
         public object GetVariable(string key)
         {
             return variables[key];
+        }
+
+        public void SetVariable(string key, object value)
+        {
+            key = CommandParser.StripVariablePrefix(key);
+            variables.Remove(key);
+            variables.Add(key, value);
         }
 
         public void AddCommand(TextFilterCommand command)
@@ -221,6 +225,8 @@ namespace BlendInteractive.TextFilterPipeline.Core
             };
             commands.Add(command);
         }
+
+        
 
     }
 }
