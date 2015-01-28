@@ -11,18 +11,13 @@ namespace BlendInteractive.TextFilterPipeline.Core
         private const string WRITE_TO_VARIABLE_COMMAND = "writeto";
         private const string READ_FROM_VARIABLE_COMMAND = "readfrom";
         
+        private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
+        public static readonly Dictionary<string, Type> Types = new Dictionary<string, Type>();    // This is just to keep them handy for the documentor
+
         static TextFilterPipeline()
         {
-            // Iterate all the classes in this assembly
-            foreach (Type thisType in Assembly.GetExecutingAssembly().GetTypes())
-            {
-                // Does this assembly have the TextFilters attribute?
-                if (thisType.GetCustomAttributes(typeof (TextFiltersAttribute), true).Any())
-                {
-                    // Process It
-                    AddType(thisType);
-                }
-            }
+            // Add this assembly to initialze the filters
+             AddAssembly(Assembly.GetExecutingAssembly());
         }
 
         public TextFilterPipeline(string commandString = null)
@@ -49,13 +44,26 @@ namespace BlendInteractive.TextFilterPipeline.Core
         {
             get { return new ReadOnlyDictionary<string, object>(variables); }
         }
+
+        public static void AddAssembly(Assembly assembly)
+        {
+            // Iterate all the classes in this assembly
+            foreach (Type thisType in assembly.GetTypes())
+            {
+                // Does this assembly have the TextFilters attribute?
+                if (thisType.GetCustomAttributes(typeof(TextFiltersAttribute), true).Any())
+                {
+                    // Process It
+                    AddType(thisType);
+                }
+            }
         }
 
         public static void AddType(Type type)
         {
             if (!type.GetCustomAttributes(typeof (TextFiltersAttribute), true).Any())
             {
-                throw new Exception("Type does not have a TextFilters attribute. In this case, you mist pass a category name into AddType.");
+                throw new Exception("Type does not have a TextFilters attribute. In this case, you must pass a category name into AddType.");
             }
 
             var category = ((TextFiltersAttribute) type.GetCustomAttributes(typeof (TextFiltersAttribute), true).First()).Category;
