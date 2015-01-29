@@ -2,7 +2,42 @@
 
 (Note: be sure to read the "History and Context" section at the end for more information about why this project was created, and what it means for you.)
 
-TFP is a pipeline processor for text, intended for editorial usage through configuration by simple text commands. A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
+TFP is a C# pipeline processor for text, intended for editorial usage through configuration by simple text commands. A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
+
+## The Basics
+
+Pretend we want to add our name to some text and then format that for HTML. We can create these commands:
+
+    Prepend "My name is: "
+    Append "."
+    Html.Wrap p
+
+What this says, in order, is:
+
+1. Put the text "My name is: " before the input (what we pass into the pipeline)
+2. Put a period after the input
+3. Wrap the result in P tag
+
+Now, if we pass "Deane" to the pipeline, it comes out:
+
+    <p>My name is Deane.</p>
+
+If we immediately passed "Annie" to the pipeline, we'd get...
+
+    <p>My name is Annie.</p>
+
+Additionally, some pipeline commands can obtain text in-process.  For instance, if we wanted to format and output the contents of a file on the file system, we could do something like this:
+
+    File.Read my-file.txt
+    Replace foo bar
+    Format "The contents of the file are: {0}."
+    Html.Wrap p
+
+That would read in the contents of "my-file.txt," replace the string "foo" with "bar," drop the result into the middle of a sentence, and again wrap it in a P tag.
+
+In this case we don't pass anything into the pipeline -- it obtains text to work with in the first step.
+
+## The Details
 
 The filters are linear and sequential.  Text is passed "down the line," and is usually modified during each step, coming out the other end in a different form than when it started.
 
