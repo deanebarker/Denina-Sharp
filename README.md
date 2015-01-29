@@ -4,6 +4,8 @@
 
 TFP is a C# pipeline processor for text, intended for editorial usage through configuration by simple text commands. A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
 
+The filters are linear and sequential.  Text is passed "down the line," and is usually modified during each step, coming out the other end in a different form than when it started.
+
 ## The Basics
 
 Pretend we want to add our name to some text and then format that for HTML. We can create these commands:
@@ -49,17 +51,13 @@ There are two programming "levels" to this library.
 * There's the C# level, which instatiates the pipeline, passes data to it, and does something with the result.
 * Then there's the filter configuration level, which sets up the filters and tells them what to do.  This level requires knowledge of (1) the format for calling filters and passing arguments, and (2) the filters that are available and what information they need.
 
-The first level is intended for C# developers.  The second level is intended for non-developers -- mainly content editors that need to obtain and modify text-based content for publication, without the asssitance of a developer.
+The first level is intended for C# developers.  The second level is intended for non-developers -- mainly content editors that need to obtain and modify text-based content for publication, without the assistance of a developer.
 
-## The C#
+## The C\#
 
-The filters are linear and sequential.  Text is passed "down the line," and is usually modified during each step, coming out the other end in a different form than when it started.
+(Note: The words "command" and "filter" get used interchangably in this document. Technically, a "command" is an object that invokes and configures a "filter," which is a method. In practice, I'll go back and forth between the terms indiscriminately. Sorry.)
 
-Say we have the string "BAR" and we'd like to prepend FOO to it.  We create a pipeline, and add a command to invoke the "Prepend" filter, passing it "FOO" as the first argument.
-
-(The words "command" and "filter" get used interchangably in this document. Technically, a "command" is an object that invokes and configures a "filter," which is a method. In practice, I'll go back and forth between the terms indiscriminately. Sorry.)
-
-Here's the C#:
+Here's the C# to instantiate the pipeline and add a command, the long way.
 
     var pipeline = new TextFilterPipeline();
     pipeline.AddCommand(
@@ -88,7 +86,7 @@ We'd get "FOOBAZ."  We could pass a thousand different strings to the pipeline, 
 
 "Prepend" is one example of several dozen pre-built filters. Some take arguments, some don't. It's up to the individual filter how many arguments it needs, what order it needs them in, and what it does with them during execution (much like function calls in any programming language).
 
-Commands can be passed in _en masse_, separated by line breaks.  Each line is parsed as a separate command.
+Commands can be passed in _en masse_, separated by line breaks (note that command parsing is broken out to its own class, and could easily be re-implemented, if you wanted to do something different).  Each line is parsed as a separate command.
 
     var pipeline = new TextFilterPipeline(thousandsAndThousandsOfCommands);
 
@@ -102,17 +100,17 @@ In our example above, after the first filter (Http.Get) executes, the active tex
 
 Filters are grouped into categories (think "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
 
-By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable which is stored for later use.  This does _not_ change the active text -- it remains unchanged.
-
 ## Variables
 
-You can direct the result of an operation to a variable by using the "=>" operator and a variable name at the end of a statement.
+By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable which is stored for later use.  This does _not_ change the active text -- it remains unchanged.
+
+You can direct the result of an operation to a variable by using the "=>" operator and a variable name at the end of a statement.  Variable names start with a dollar sign ("$").
 
 Here's an example of chaining filters and writing into and out of variables to obtain and format the temperature in Sioux Falls:
 
     Http.Get http://api.openweathermap.org/data/2.5/weather?q=Sioux+Falls&mode=xml&units=imperial
-    Xml.Extract //city/@name => city
-    Xml.Extract //temperature/@value => temp
+    Xml.Extract //city/@name => $city
+    Xml.Extract //temperature/@value => $temp
     Format "The temp in {city} is {temp}."
     Html.Wrap p weather-data
 
@@ -125,6 +123,16 @@ The result of this pipeline is:
     <p class="weather-data">The temp in Sioux Falls is 37.</p>
 
 Variables are volatile -- writing to the same variable multiple times simply resets the value each time.
+
+Trying to retrieve a variable before it exists will result in an error.  To initialize variables to avoid this, use InitVar:
+
+    InitVar $myVar $myOtherVar
+
+To manually set a variable value, use SetVar.
+
+    SetVar $name Deane
+
+This sets the value of "$name" to "Deane."
 
 ## Extending Filters
 
