@@ -50,7 +50,7 @@ Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in
 
 There are two programming "levels" to this library.
 
-* There's the C# level, which instatiates the pipeline, passes data to it, and does something with the result. This tends to be fairly static -- it will be implemented once in a way to make it available for editors (those using a CMS, for example -- this was the original intent; see "History and Context" at the end of this document).
+* There's the C# level, which instantiates the pipeline, passes data to it, and does something with the result. This tends to be fairly static -- it will be implemented once, in a way to make it available for editors (those using a CMS, for example -- this was the original intent; see "History and Context" at the end of this document).
 * Then there's the filter configuration level, which involves setting up the filters and telling them what to do.  This level requires (1) knowing the format for calling filters and passing arguments; and (2) knowing what filters are available, what information they need, and what results they will return.
 
 The first level is intended for C# developers.  The second level is intended for non-developers -- primarily content editors that need to obtain and modify text-based content for publication, without the assistance of a developer.
@@ -126,17 +126,19 @@ The result of this pipeline is:
 
 Variables are volatile -- writing to the same variable multiple times simply resets the value each time.
 
-Trying to retrieve a variable before it exists will result in an error.  To initialize variables to avoid this, use InitVar:
+Attempting to retrieve a variable before it exists will result in an error.  Initialize variables to avoid this using InitVar:
 
     InitVar $myVar $myOtherVar
+
+This sets both $myVar and $myOtherVar to empty strings.
 
 To manually set a variable value, use SetVar.
 
     SetVar $name Deane
 
-This sets the value of $name to "Deane."
+This sets the value of $name to "Deane".
 
-## Extending Filters
+## Writing Filters
 
 Filters are pluggable. Simply write a static class and method, like this:
 
@@ -155,16 +157,16 @@ Then register this with the pipeline:
 
     TextFilterPipeline.AddType(typeof(TextFilters));
 
-After registering, our command is now available as:
+After registering, your command is now available as:
 
     Text.Left 10
 
-You register an entire type at a time, not individual methods; only methods with the "TextFilter" attribute will actually get added. You can even do entire assemblies, if all your filters are in a separate DLL:
+You register entire types, not individual methods -- only methods with the "TextFilter" attribute will actually get added. You can even register entire assemblies, if all your filters are in a separate DLL:
 
     var myAssembly = Assembly.LoadFile(@"C:\MyFilters.dll");
     TextFilterPipeline.AddAssembly(myAssembly);
 
-That will find all the types marked with the "TextFilters" attribute, and -- within those types -- find all methods with the "TextFilter" attribute.
+All the types in that assembly marked with the "TextFilters" attribute will be searched for methods with the "TextFilter" attribute.
 
 Note that the name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
 
