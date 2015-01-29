@@ -17,6 +17,7 @@ What this says, in order, is:
 1. Put the text "My name is: " before the input (what we pass into the pipeline)
 2. Put a period after the input
 3. Wrap the result in P tag
+4. (Implied) Return the result -- the pipeline returns the result of the last operation.
 
 Now, if we pass "Deane" to the pipeline, it comes out:
 
@@ -33,11 +34,24 @@ Additionally, some pipeline commands can obtain text in-process.  For instance, 
     Format "The contents of the file are: {0}."
     Html.Wrap p
 
-That would read in the contents of "my-file.txt," replace the string "foo" with "bar," drop the result into the middle of a sentence, and again wrap it in a P tag.
+That would read in the contents of "my-file.txt," replace the string "foo" with "bar," drop the result into the middle of a sentence, and again wrap it in a P tag.  In this case we don't pass anything into the pipeline -- it obtains text to work with in the first step.
 
-In this case we don't pass anything into the pipeline -- it obtains text to work with in the first step.
+Filters are grouped into categories which do different things.  For example, the "HTTP" category can make web requests, and the "HTML" category can manipulate HTML documents.  Combine them, and you can do things like this:
 
-## The Details
+    Http.Get gadgetopia.com
+    Html.Extract //title
+    Format "The title of this web page is {0}."
+
+Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. 
+
+There are two programming "levels" to this library.
+
+* There's the C# level, which instatiates the pipeline, passes data to it, and does something with the result.
+* Then there's the filter configuration level, which sets up the filters and tells them what to do.  This level requires knowledge of (1) the format for calling filters and passing arguments, and (2) the filters that are available and what information they need.
+
+The first level is intended for C# developers.  The second level is intended for non-developers -- mainly content editors that need to obtain and modify text-based content for publication, without the asssitance of a developer.
+
+## The C#
 
 The filters are linear and sequential.  Text is passed "down the line," and is usually modified during each step, coming out the other end in a different form than when it started.
 
@@ -78,17 +92,10 @@ Commands can be passed in _en masse_, separated by line breaks.  Each line is pa
 
     var pipeline = new TextFilterPipeline(thousandsAndThousandsOfCommands);
 
-The pipeline doesn't technically have to even start with text, as some filters allow the pipeline to acquire text mid-stream.  For example, the command configuration to call the home page of Gadgetopia and extract the title looks like this:
-
-    Http.Get gadgetopia.com
-    Html.Extract //title
-
-Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. If the currently active text prior to that was anything, it gets over-written.
-
-In this case, the pipeline is invoked without arguments.
+The pipeline doesn't technically have to even start with text, as some filters allow the pipeline to acquire text mid-stream. In these cases,  the pipeline is invoked without arguments.
 
     pipeline.Execute();
-
+    
 How a filter "treats" the active text is up to the filter. _The active text becomes whatever the filter returns._  It can return some derivation of the input text (such as with "Prepend," from above), or it can return something completely new without regard to the active text it took in. It can even use the active text to configure itself and then return something else. (Example: if invoked without arguments, Http.Get assumes the active text is the URL it should use. It retrieves the HTML at that URL, and returns the result.)
 
 In our example above, after the first filter (Http.Get) executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the second filter (Html.Extract) executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the Execute method of the pipeline object (it's what comes out "the other end" of the pipe).
@@ -96,6 +103,8 @@ In our example above, after the first filter (Http.Get) executes, the active tex
 Filters are grouped into categories (think "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
 
 By default, a filter changes the active text and passes it to the next filter. However, the result of a filter can be instead redirected into variable which is stored for later use.  This does _not_ change the active text -- it remains unchanged.
+
+## Variables
 
 You can direct the result of an operation to a variable by using the "=>" operator and a variable name at the end of a statement.
 
@@ -116,6 +125,8 @@ The result of this pipeline is:
     <p class="weather-data">The temp in Sioux Falls is 37.</p>
 
 Variables are volatile -- writing to the same variable multiple times simply resets the value each time.
+
+## Extending Filters
 
 Filters are pluggable. Simply write a static class and method, like this:
 
