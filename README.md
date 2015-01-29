@@ -46,14 +46,16 @@ Filters are grouped into categories which do different things.  For example, the
 
 Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. 
 
+(See "Variables" below for a more extensive and practical example of working over HTTP.)
+
 There are two programming "levels" to this library.
 
-* There's the C# level, which instatiates the pipeline, passes data to it, and does something with the result.
-* Then there's the filter configuration level, which sets up the filters and tells them what to do.  This level requires knowledge of (1) the format for calling filters and passing arguments, and (2) the filters that are available and what information they need.
+* There's the C# level, which instatiates the pipeline, passes data to it, and does something with the result. This tends to be fairly static -- it will be implemented once in a way to make it available for editors (those using a CMS, for example -- this was the original intent; see "History and Context" at the end of this document).
+* Then there's the filter configuration level, which involves setting up the filters and telling them what to do.  This level requires (1) knowing the format for calling filters and passing arguments; and (2) knowing what filters are available, what information they need, and what results they will return.
 
-The first level is intended for C# developers.  The second level is intended for non-developers -- mainly content editors that need to obtain and modify text-based content for publication, without the assistance of a developer.
+The first level is intended for C# developers.  The second level is intended for non-developers -- primarily content editors that need to obtain and modify text-based content for publication, without the assistance of a developer.
 
-## The C\#
+## The <span>C#</span>
 
 (Note: The words "command" and "filter" get used interchangably in this document. Technically, a "command" is an object that invokes and configures a "filter," which is a method. In practice, I'll go back and forth between the terms indiscriminately. Sorry.)
 
