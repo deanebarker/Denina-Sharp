@@ -8,7 +8,7 @@ The filters are linear and sequential.  Text is passed "down the line," and is u
 
 ## The Basics
 
-Pretend we want to add our name to some text and then format that for HTML. We can create these commands:
+Pretend for a moment that we want to add our name to some text and then format that for HTML. We can create these commands:
 
     Prepend "My name is: "
     Append "."
@@ -44,7 +44,7 @@ Filters are grouped into categories which do different things.  For example, the
     Html.Extract //title
     Format "The title of this web page is {0}."
 
-Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns it. 
+Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns the HTML. Html.Extract uses an external library to reach into the HTML and grab a value.  Format, as we saw before, wraps this value within other text.
 
 (See "Variables" below for a more extensive and practical example of working over HTTP.)
 
@@ -116,7 +116,7 @@ Here's an example of chaining filters and writing into and out of variables to o
     Format "The temp in {city} is {temp}."
     Html.Wrap p weather-data
 
-The first command gets an XML document. Since the second command sends the results to a variable named "city," the active text remains the original full XML document which is then still available to the third command.
+The first command gets an XML document. Since the second command sends the results to a variable named $city, the active text remains the original full XML document which is then still available to the third command.
 
 (Note that in this case, that XML document is going to be fully parsed twice from the string source, which may or may not work for your situation, performance-wise. Remember that filters only pass simple text, not more complex objects.)
 
@@ -134,7 +134,7 @@ To manually set a variable value, use SetVar.
 
     SetVar $name Deane
 
-This sets the value of "$name" to "Deane."
+This sets the value of $name to "Deane."
 
 ## Extending Filters
 
@@ -155,11 +155,18 @@ Then register this with the pipeline:
 
     TextFilterPipeline.AddType(typeof(TextFilters));
 
-This command is now available as:
+After registering, our command is now available as:
 
     Text.Left 10
 
-The name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
+You register an entire type at a time, not individual methods; only methods with the "TextFilter" attribute will actually get added. You can even do entire assemblies, if all your filters are in a separate DLL:
+
+    var myAssembly = Assembly.LoadFile(@"C:\MyFilters.dll");
+    TextFilterPipeline.AddAssembly(myAssembly);
+
+That will find all the types marked with the "TextFilters" attribute, and -- within those types -- find all methods with the "TextFilter" attribute.
+
+Note that the name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
 
 If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.  New filters are loaded statically, so they're globally available to all executions of the pipeline.
 
