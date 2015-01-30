@@ -156,18 +156,13 @@ This sets the value of $name to "Deane".
 
 ## Writing Filters
 
-Filters are pluggable. Simply write a static class and method, like this:
+Filters are pluggable. Simply write a method, like this:
 
-    [TextFilters("Text")]
-    public static class TextFilters
-    {
-      [TextFilter("Left")]
       public static string Left(string input, TextFilterCommand command)
       {
         var length = int.Parse(command.CommandArgs[0]);
         return input.Substring(0, length);
       }
-    }
 
 The method needs to take in two arguments:
 
@@ -176,15 +171,32 @@ The method needs to take in two arguments:
 
 The method does whatever it wants to the input string, and returns the result as another string.  The method doesn't need to worry about writing into or out of variables -- those actions are handled by the pipeline itself.
 
-Once written, register this class with the pipeline:
+Then register the MethodInfo object with the pipeline, telling it the category and name of the filter.
 
-    TextFilterPipeline.AddType(typeof(TextFilters));
+	var method = typeOf(MyClass).GetMethod("Left");
+    TextFilterPipeline.AddMethod(method, "Text", "Left");
 
 After registering, your command is now available as:
 
     Text.Left 10
 
-You register entire types/classes, not individual methods -- only methods with the "TextFilter" attribute will actually get added. You can even register entire assemblies at a time, if all your filters are in a separate DLL:
+The category and name arguments are optional. If you include the TextFilter attribute on method declaration, you don't have to pass that in:
+
+    [TextFilter("Left")]
+
+Alternately, you can register an entire type full of methods:
+
+    TextFilterPipeline.AddType(typeof(MyFilters), "Text")
+
+That will search the type for all methods with a TextFilter attribute.  Like with methods, you can identify the category with an a TextFilters (note the plural) attribute on the class, and you don't have to pass the category name in:
+
+    [TextFilters("Text")]
+
+Then register like this:
+
+    TextFilterPipeline.AddType(typeof(MyFilters)
+
+Finally, you can even register entire assemblies at a time, if all your filters are in a separate DLL:
 
     var myAssembly = Assembly.LoadFile(@"C:\MyFilters.dll");
     TextFilterPipeline.AddAssembly(myAssembly);
