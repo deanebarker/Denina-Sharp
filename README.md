@@ -17,19 +17,29 @@ Pretend for a moment that we want to add our name to some text and then format t
 What this says, in order, is:
 
 1. Put the text "My name is: " before the input (what we pass into the pipeline)
-2. Put a period after the input
-3. Wrap the result in P tag
-4. (Implied) Return the result -- the pipeline returns the result of the last operation.
+2. Put a period after the result of #1
+3. Wrap the result of #2 in P tag
+4. Return the result of #3 (this step is implied -- the pipeline always returns the result of the last operation)
 
-Now, if we pass "Deane" to the pipeline, it comes out:
+Notice that each step expands or builds on the result of the previous step. The input that goes into #1 gets passed down the pipe and altered, step after step.
+
+If we pass "Deane" to the pipeline, it comes out:
 
     <p>My name is Deane.</p>
 
-If we immediately passed "Annie" to the pipeline, we'd get...
+If we pass "Annie" to the same pipeline, we'd get...
 
     <p>My name is Annie.</p>
 
-Additionally, some pipeline commands can obtain text in-process.  For instance, if we wanted to format and output the contents of a file on the file system, we could do something like this:
+Once the pipeline is configured, it stands ready for us to "throw" what ever we like down it.  We could pass the entire text of "War and Peace down this same pipeline and it would come out.
+
+    <p>My name is Well, Prince, so Genoa and Lucca are now ...</p>
+
+This is the traditional usage of a pipeline -- we have some text "in hand," and want to process it.
+
+However, it isn't always necessary for us to start with some actual text. Perhaps we don't have text, but we have the _means to get some text_, like the path to a file or a URL.
+
+Using this, some pipeline commands can obtain text in-process.  For instance, if we wanted to format and output the contents of a file on the file system, we could do something like this:
 
     File.Read my-file.txt
     Replace foo bar
