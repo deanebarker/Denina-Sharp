@@ -1,15 +1,15 @@
 ﻿using System;
+using BlendInteractive.Denina.Core.Documentation;
 using Newtonsoft.Json.Linq;
-using BlendInteractive.TextFilterPipeline.Core.Documentation;
 
-namespace BlendInteractive.TextFilterPipeline.Core.Filters
+namespace BlendInteractive.Denina.Core.Filters
 {
-    [TextFilters("JSON", "Working with JSON data.")]
+    [Filters("JSON", "Working with JSON data.")]
     public static class Json
     {
-        [TextFilter("ExtractFromJson", "Retieves the valud at a defined \"path\" into the JSON object.")]
+        [Filter("ExtractFromJson", "Retieves the valud at a defined \"path\" into the JSON object.")]
         [ArgumentMeta(1, "Path", true, "A dot-delimited representation of the path into the object. Each property is defined by a segment. Numeric values prepended by a tilde (\"~1\") are interpreted as the index of an array. Example: \"person.~2.name.first\".")]
-        public static string ExtractFromJson(string input, TextFilterCommand command)
+        public static string ExtractFromJson(string input, PipelineCommand command)
         {
             var jobject = (JToken) JObject.Parse(input);
 

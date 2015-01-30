@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.Denina.Core;
 
 namespace UI
 {
@@ -21,7 +21,7 @@ namespace UI
             {
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
-                var pipeline = new TextFilterPipeline();
+                var pipeline = new Pipeline();
                 pipeline.AddCommand(PipelineCommands.Text);
                 long parseTime = stopWatch.ElapsedMilliseconds;
                 PipelineResults.Text = pipeline.Execute(InputTextbox.Text);

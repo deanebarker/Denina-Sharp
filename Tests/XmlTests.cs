@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -17,7 +17,7 @@ namespace Tests
         {
             // This test relies on controlled XSLT/XML files in the "Utility" folder
 
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("File.Read utility/data.xml => $xml");
             pipeline.AddCommand("File.Read utility/transform.xslt => $xsl");
             pipeline.AddCommand("Xml.TransformXml $xsl $xml => $result");

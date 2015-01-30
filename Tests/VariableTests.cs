@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq;
-using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -11,7 +11,7 @@ namespace Tests
         [TestMethod]
         public void WriteToVariable()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("WriteTo $Name");
             pipeline.Execute("Deane");
 
@@ -21,7 +21,7 @@ namespace Tests
         [TestMethod]
         public void ReadFromVariable()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("WriteTo $Name"); // Writes original input to the variable "Name"
             pipeline.AddCommand("Text.ReplaceAll Annie"); // Resets input to "Annie"
 
@@ -36,7 +36,7 @@ namespace Tests
         [TestMethod]
         public void ReadNonExistentVariableWithDefault()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
 
             try
             {
@@ -55,7 +55,7 @@ namespace Tests
         [TestMethod]
         public void WritingIntoImplicitVariable()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("Text.Append \" married Deane.\" => $myVar");
             var result = pipeline.Execute("Annie");
 
@@ -68,7 +68,7 @@ namespace Tests
         {
             var input = "Deane";
             
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("WriteTo $myVar");   // Write the input to a variable
             pipeline.AddCommand("Text.Prepend $myVar");  // Prepend that variable onto the input
             var result = pipeline.Execute(input);
@@ -83,7 +83,7 @@ namespace Tests
             var input = "Deane";
             var variableName = "myVar";
 
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("WriteTo " + variableName);
             pipeline.AddCommand("WriteTo $" + variableName);    // The prefix should be removed. This should write the same place as the first command.
             var result = pipeline.Execute(input);
@@ -100,7 +100,7 @@ namespace Tests
             var secondInput = "Annie";
             var variableName = "$myVar";
 
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("=> " + variableName);          // This puts the input into the variable
             Assert.AreEqual(input, pipeline.Execute(input));
             Assert.AreEqual(input, pipeline.GetVariable(variableName));

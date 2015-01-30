@@ -1,25 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
-using System.Net.Mime;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Web.UI;
 
-namespace BlendInteractive.TextFilterPipeline.Core
+namespace BlendInteractive.Denina.Core
 {
-    public static class CommandParser
+    public static class PipelineCommandParser
     {
         private const string COMMENT_PREFIX = "#";
         private const string PIPE_TOKEN = "=>";
         private const string VARIABLE_PREFIX = "$";
         private static readonly string COMMAND_DELIMITER = Environment.NewLine;
-        
-        public static IEnumerable<TextFilterCommand> ParseCommandString(string commandString)
+
+        public static IEnumerable<PipelineCommand> ParseCommandString(string commandString)
         {
-            var commands = new List<TextFilterCommand>();
+            var commands = new List<PipelineCommand>();
             foreach (var line in commandString.Trim().Split(COMMAND_DELIMITER.ToCharArray()).Select(s => s.Trim()))
             {
                 // Is this a comment, or is it empty?
@@ -31,12 +26,12 @@ namespace BlendInteractive.TextFilterPipeline.Core
 
                 var tokens = new TokenList(line);
 
-                var command = new TextFilterCommand();
+                var command = new PipelineCommand();
 
                 // $myVar =>
                 if (tokens.Last == PIPE_TOKEN && IsVariableName(tokens.First) && tokens.Count == 2)
                 {
-                    command.CommandName = TextFilterPipeline.READ_FROM_VARIABLE_COMMAND;
+                    command.CommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
                     command.OutputVariable = tokens.First;
                     commands.Add(command);
                     continue;
@@ -45,25 +40,25 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 // => $myVar
                 if (tokens.First == PIPE_TOKEN && IsVariableName(tokens.Last) && tokens.Count == 2)
                 {
-                    command.CommandName = TextFilterPipeline.WRITE_TO_VARIABLE_COMMAND;
+                    command.CommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
                     command.OutputVariable = tokens.Last;
                     commands.Add(command);
                     continue;
                 }
 
                 // WriteTo $myVar
-                if (TextFilterCommand.EnsureCategoryName(tokens.First.ToLower()) == TextFilterPipeline.WRITE_TO_VARIABLE_COMMAND && IsVariableName(tokens.Second))
+                if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.WRITE_TO_VARIABLE_COMMAND && IsVariableName(tokens.Second))
                 {
-                    command.CommandName = TextFilterPipeline.WRITE_TO_VARIABLE_COMMAND;
+                    command.CommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
                     command.OutputVariable = tokens.Second;
                     commands.Add(command);
                     continue;
                 }
 
                 // ReadFrom $myVar
-                if (TextFilterCommand.EnsureCategoryName(tokens.First.ToLower()) == TextFilterPipeline.READ_FROM_VARIABLE_COMMAND && IsVariableName(tokens.Second))
+                if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.READ_FROM_VARIABLE_COMMAND && IsVariableName(tokens.Second))
                 {
-                    command.CommandName = TextFilterPipeline.READ_FROM_VARIABLE_COMMAND;
+                    command.CommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
                     command.OutputVariable = tokens.Second;
                     commands.Add(command);
                     continue;
@@ -73,12 +68,12 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 if (tokens.Count > 2 && tokens.SecondToLast == PIPE_TOKEN && IsVariableName(tokens.Last))
                 {
                     command.OutputVariable = tokens.Last();
-                    
+
                     // Now, remove the last two items from the tokens and continue like normal...
                     tokens.RemoveFromEnd(2);
                 }
 
-               // $myVar => DoSomething
+                // $myVar => DoSomething
                 if (tokens.Count > 2 && tokens.Second == PIPE_TOKEN && IsVariableName(tokens.First))
                 {
                     command.InputVariable = tokens.First();
@@ -87,8 +82,8 @@ namespace BlendInteractive.TextFilterPipeline.Core
                     tokens.RemoveFromStart(2);
                 }
 
-				// $myVar => DoSomething SomeArgument => $myVar
-				// This situation will be handled by this point and the related tokens removed so that all that remains is (1) DoSomething, and (2) SomeArgument. From here, the command is parsed normally.
+                // $myVar => DoSomething SomeArgument => $myVar
+                // This situation will be handled by this point and the related tokens removed so that all that remains is (1) DoSomething, and (2) SomeArgument. From here, the command is parsed normally.
 
                 // The first token is the command name...
                 command.CommandName = tokens.First();
@@ -122,11 +117,11 @@ namespace BlendInteractive.TextFilterPipeline.Core
     {
         public TokenList(string input)
         {
-           var rx = new Regex(@"(?<="")[^""]+(?="")|[^\s""]\S*");
-            for (Match match = rx.Match(input); match.Success; match = match.NextMatch())
+            var rx = new Regex(@"(?<="")[^""]+(?="")|[^\s""]\S*");
+            for (var match = rx.Match(input); match.Success; match = match.NextMatch())
             {
                 Add(match.ToString());
-            }           
+            }
         }
 
         public string First
@@ -161,49 +156,40 @@ namespace BlendInteractive.TextFilterPipeline.Core
 
         public string SecondToLast
         {
-            get
-            {
-                if (this.Count == 1)
-                {
-                    return null;
-                }
-
-                return this.Skip(this.Count - 2).First();
-            }
+            get { return Count == 1 ? null : this.Skip(Count - 2).First(); } 
         }
 
         public void RemoveFromEnd(int count)
         {
-            if (count >= this.Count)
+            if (count >= Count)
             {
-                this.Clear();
+                Clear();
             }
 
-
-            for(var index = 0; index < count; index++)
+            for (var index = 0; index < count; index++)
             {
-                this.RemoveAt(this.Count - 1);
+                RemoveAt(Count - 1);
             }
         }
 
 
         public void RemoveFromStart(int count)
         {
-            if (count >= this.Count)
+            if (count >= Count)
             {
-                this.Clear();
+                Clear();
             }
 
 
             for (var index = 0; index < count; index++)
             {
-                this.RemoveAt(0);
+                RemoveAt(0);
             }
         }
 
         private string GetValue(int index)
         {
-            return this.Count > index ? this[index] : null;
+            return Count > index ? this[index] : null;
         }
     }
 }

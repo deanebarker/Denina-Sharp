@@ -1,16 +1,16 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using BlendInteractive.TextFilterPipeline.Core.Documentation;
+using BlendInteractive.Denina.Core.Documentation;
 
-namespace BlendInteractive.TextFilterPipeline.Core.Filters
+namespace BlendInteractive.Denina.Core.Filters
 {
-    [TextFilters("File", "Working with files on the file system.")]
+    [Filters("File", "Working with files on the file system.")]
     public class FileSystem
     {
-        [TextFilter("Read", "Reads the content of a file on the file system.")]
+        [Filter("Read", "Reads the content of a file on the file system.")]
         [ArgumentMeta(1, "Path", true, "The path to the file, relative to AppDomain.CurrentDomain.BaseDirectory. This value should not start with a leading slash as Path.Combine will interpret that as \"root.\"")]
-        public static string Read(string input, TextFilterCommand command)
+        public static string Read(string input, PipelineCommand command)
         {
             string fullPath = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,

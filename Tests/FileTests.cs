@@ -1,5 +1,5 @@
 ﻿using System;
-using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -10,7 +10,7 @@ namespace Tests
         [TestMethod]
         public void ReadContentFromFile()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("file.Read Utility/text.txt");
             string result = pipeline.Execute(String.Empty);
 

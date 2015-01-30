@@ -3,16 +3,16 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 using System.Xml.Xsl;
-using BlendInteractive.TextFilterPipeline.Core.Documentation;
+using BlendInteractive.Denina.Core.Documentation;
 
-namespace BlendInteractive.TextFilterPipeline.Core.Filters
+namespace BlendInteractive.Denina.Core.Filters
 {
-    [TextFilters("XML", "Working with XML strings.")]
+    [Filters("XML", "Working with XML strings.")]
     public class Xml
     {
-        [TextFilter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
+        [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
         [ArgumentMeta(1, "XPath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
-        public static string ExtractFromXml(string input, TextFilterCommand command)
+        public static string ExtractFromXml(string input, PipelineCommand command)
         {
             var doc = new XmlDocument();
             doc.LoadXml(input);
@@ -22,14 +22,14 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             return node != null ? node.Value : String.Empty;
         }
 
-        [TextFilter("TransformXml", "Transforms an XML document against an XSL stylesheet")]
+        [Filter("TransformXml", "Transforms an XML document against an XSL stylesheet")]
         [ArgumentMeta(1, "XSLT", true, "The raw XSLT to transform the input string.")]
         [ArgumentMeta(2, "XML", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
-        public static string TransformXml(string input, TextFilterCommand command)
+        public static string TransformXml(string input, PipelineCommand command)
         {
-            var xml = String.Empty;
-            var xsl = command.CommandArgs.First().Value;
-            
+            string xml = String.Empty;
+            string xsl = command.CommandArgs.First().Value;
+
             // If there are two arguments, assume the second is XML
             if (command.CommandArgs.Count == 2)
             {
@@ -40,7 +40,7 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
                 // Otherwise, the XML is the input
                 xml = input;
             }
-            
+
             // Form the XML doc from the input
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(xml);

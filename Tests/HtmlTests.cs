@@ -1,4 +1,4 @@
-﻿using BlendInteractive.TextFilterPipeline.Core;
+﻿using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -9,7 +9,7 @@ namespace Tests
         [TestMethod]
         public void Wrap()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("html.Wrap p theClass theId");
             string result = pipeline.Execute("Deane");
 

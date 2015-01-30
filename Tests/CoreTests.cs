@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -17,7 +17,7 @@ namespace Tests
         [TestMethod]
         public void InitVar()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("InitVar $Deane $Annie");
             pipeline.AddCommand("ReadFrom $Deane");
             pipeline.AddCommand("ReadFrom $Annie");
@@ -30,7 +30,7 @@ namespace Tests
         [TestMethod]
         public void SetVar()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("SetVar $Deane Awesome");
             pipeline.AddCommand("ReadFrom $Deane");
             var result = pipeline.Execute();

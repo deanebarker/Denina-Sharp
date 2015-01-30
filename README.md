@@ -1,8 +1,8 @@
-# Text Filtering Pipeline
+# Denina: A Text Processing Pipeline
 
-(Note: be sure to read the "History and Context" section at the end for more information about why this project was created, and what it means for you.)
+Denina is a simple text processing language which allows a non-technical editor to configure and execute sequential C# methods on text. Editors can use Denina to construct and execute text processing pipelines.
 
-TFP is a C# pipeline processor for text, intended for editorial usage through configuration by simple text commands. A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
+A pipeline is a series of filters, processed in sequential order.  In most cases, the output from one filter is the input to the filter immediately following it (this is the "active text").
 
 The filters are linear and sequential.  Text is passed "down the line," and is usually modified during each step, coming out the other end in a different form than when it started.
 
@@ -249,6 +249,16 @@ This repo contains three projects.
 3. A WinForms testing app which provides a GUI to run and test filters.
 
 On build, the DLL, a supporting DLL (HtmlAgilityPack), and the WinForms EXE are copied into the "Binaries" folder. The WinForms tester should run directly from there.
+
+## The Name
+
+This project is named for one of my most demanding content editors I've ever done work for.
+
+Mike Denina ("duh-nee-nah"; also, not his real first name) was a content manager on an EPiServer installation, and he wanted as much technical editorial power as I would allow him to have. Mike was a gifted content manager, and, although he was always working toward benevolent ends, there wasn't a knob he didn't want to turn, or a switch he didn't want to flip.
+
+During the conception and initial development of this project, Mike Denina was my use case -- he was the persona in my head while I was putting this all together.
+
+Denina is named in his honor.
 
 ## History and Context
 

@@ -1,20 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace BlendInteractive.TextFilterPipeline.Core.Documentation
+namespace BlendInteractive.Denina.Core.Documentation
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public class ArgumentMetaAttribute : Attribute
     {
-        public int Ordinal { get; set; }
-        public string Name { get; set; }
-        public bool Required { get; set; }
-        public string Description { get; set; }
-
         public ArgumentMetaAttribute(int order, string name, bool required, string description)
         {
             Name = name;
@@ -22,7 +12,10 @@ namespace BlendInteractive.TextFilterPipeline.Core.Documentation
             Required = required;
             Description = description;
         }
-    }
 
-    
+        public int Ordinal { get; private set; }
+        public string Name { get; private set; }
+        public bool Required { get; private set; }
+        public string Description { get; private set; }
+    }
 }

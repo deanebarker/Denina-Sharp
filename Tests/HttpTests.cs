@@ -1,4 +1,4 @@
-﻿using BlendInteractive.TextFilterPipeline.Core;
+﻿using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -9,7 +9,7 @@ namespace Tests
         [TestMethod]
         public void GetFromArgument()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get http://gadgetopia.com/");
             string result = pipeline.Execute("");
 
@@ -19,7 +19,7 @@ namespace Tests
         [TestMethod]
         public void GetFromInput()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get");
             string result = pipeline.Execute("http://gadgetopia.com/");
 

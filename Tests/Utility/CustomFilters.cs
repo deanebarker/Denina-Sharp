@@ -1,12 +1,13 @@
-﻿using BlendInteractive.TextFilterPipeline.Core;
+﻿using BlendInteractive.Denina.Core;
+using BlendInteractive.Denina.Core.Documentation;
 
 namespace Tests.Utility
 {
-    [TextFilters("custom")]
+    [Filters("custom")]
     public static class CustomFilters
     {
-        [TextFilter("MyMethod")]
-        public static string MyMethod(string input, TextFilterCommand command)
+        [Filter("MyMethod")]
+        public static string MyMethod(string input, PipelineCommand command)
         {
             return "MyMethod";
         }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using BlendInteractive.TextFilterPipeline.Core;
+using BlendInteractive.Denina.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -14,7 +14,7 @@ namespace Tests
         [TestMethod]
         public void Replace()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("Text.Replace Deane Annie");
             string result = pipeline.Execute("Deane was here.");
 
@@ -25,7 +25,7 @@ namespace Tests
         [TestMethod]
         public void ReplaceAll()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("Text.ReplaceAll deane");
             string result = pipeline.Execute("Annie was here.");
 
@@ -35,7 +35,7 @@ namespace Tests
         [TestMethod]
         public void Format()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("Text.Format \"{0} was here.\"");
             string result = pipeline.Execute("Deane");
 
@@ -45,7 +45,7 @@ namespace Tests
         [TestMethod]
         public void FormatFromVariables()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("WriteTo $Name");
             pipeline.AddCommand("Text.Format \"{Name} was here.\"");
             string result = pipeline.Execute("Deane");
@@ -56,7 +56,7 @@ namespace Tests
         [TestMethod]
         public void Append()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("Text.Append Deane");
             string result = pipeline.Execute("I am ");
 
@@ -66,7 +66,7 @@ namespace Tests
         [TestMethod]
         public void Prepend()
         {
-            var pipeline = new TextFilterPipeline();
+            var pipeline = new Pipeline();
             pipeline.AddCommand("Text.Prepend Deane");
             string result = pipeline.Execute(" was here.");
 
