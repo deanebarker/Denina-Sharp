@@ -31,7 +31,7 @@ If we pass "Annie" to the same pipeline, we'd get...
 
     <p>My name is Annie.</p>
 
-Once the pipeline is configured, it stands ready for us to "throw" what ever we like down it.  We could pass the entire text of "War and Peace down this same pipeline and it would come out.
+Once the pipeline is configured, it stands ready for us to "throw" what ever we like down it.  We could pass the entire text of "War and Peace" down this same pipeline and it would come out.
 
     <p>My name is Well, Prince, so Genoa and Lucca are now ...</p>
 
@@ -90,7 +90,15 @@ Clearly, this is way too verbose.  So commands can be added by simple text strin
 
 The result will be "FOOBAR".
 
-The pipeline remains "loaded" with commands, so we could just as easily do this immediately after:
+We can shorten it even more by passed commands into the constructor:
+
+    var pipeline = new TextFilterPipeline("Prepend FOO");
+
+In fact, commands can be passed in _en masse_, separated by line breaks (note that command parsing is broken out to its own class, and could easily be re-implemented, if you wanted to do something different).  Each line is parsed as a separate command.
+
+    var pipeline = new TextFilterPipeline(thousandsAndThousandsOfCommands);
+
+The pipeline remains "loaded" with commands even after execution, so we could just as easily do this immediately after:
 
     pipeline.Execute("BAZ");
 
@@ -98,11 +106,7 @@ We'd get "FOOBAZ."  We could pass a thousand different strings to the pipeline, 
 
 "Prepend" is one example of several dozen pre-built filters. Some take arguments, some don't. It's up to the individual filter how many arguments it needs, what order it needs them in, and what it does with them during execution (much like function calls in any programming language).
 
-Commands can be passed in _en masse_, separated by line breaks (note that command parsing is broken out to its own class, and could easily be re-implemented, if you wanted to do something different).  Each line is parsed as a separate command.
-
-    var pipeline = new TextFilterPipeline(thousandsAndThousandsOfCommands);
-
-The pipeline doesn't technically have to even start with text, as some filters allow the pipeline to acquire text mid-stream. In these cases,  the pipeline is invoked without arguments.
+The pipeline doesn't have to start with text, as some filters allow the pipeline to acquire text mid-stream. In these cases, the pipeline is invoked without arguments.
 
     pipeline.Execute();
     
@@ -134,7 +138,7 @@ The result of this pipeline is:
 
     <p class="weather-data">The temp in Sioux Falls is 37.</p>
 
-Variables are volatile -- writing to the same variable multiple times simply resets the value each time.
+Variables are mutable -- writing to the same variable multiple times simply resets the value each time.
 
 Attempting to retrieve a variable before it exists will result in an error.  Initialize variables to avoid this using InitVar:
 
@@ -166,7 +170,7 @@ Filters are pluggable. Simply write a static class and method, like this:
 The method needs to take in two arguments:
 
 1. **String:** this is the input; what is passed to the filter
-2. **TextFilterCommand:** this is an object representation of the line of text used to call the filter. On it are properties to get the command name and the arguments.
+2. **TextFilterCommand:** this is an object representation of the line of text used to call the filter. On it are properties to access the command name and the arguments.
 
 The method does whatever it wants to the input string, and returns the result as another string.  The method doesn't need to worry about writing into or out of variables -- those actions are handled by the pipeline itself.
 
