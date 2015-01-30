@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     [TestClass]
-    public class FileSystemFilterTests
+    public class FileTests
     {
         [TestMethod]
         public void ReadContentFromFile()

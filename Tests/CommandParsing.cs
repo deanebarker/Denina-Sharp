@@ -18,7 +18,7 @@ namespace Tests
             command.CommandArgs.Add("2", "b");
 
             Assert.AreEqual("Replace", command.CommandName);
-            Assert.AreEqual("replace", command.NormalizedCommandName);
+            Assert.AreEqual("core.replace", command.NormalizedCommandName);
             Assert.AreEqual("a", command.CommandArgs.First().Value);
             Assert.AreEqual("b", command.CommandArgs.Last().Value);
         }

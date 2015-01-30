@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Xsl;
 using BlendInteractive.TextFilterPipeline.Core.Documentation;
@@ -21,21 +22,36 @@ namespace BlendInteractive.TextFilterPipeline.Core.Filters
             return node != null ? node.Value : String.Empty;
         }
 
-        [TextFilter("TransformXmlFromVariable", "Transforms an XML document against an XSL stylesheet")]
+        [TextFilter("TransformXml", "Transforms an XML document against an XSL stylesheet")]
         [ArgumentMeta(1, "XSLT", true, "The raw XSLT to transform the input string.")]
+        [ArgumentMeta(2, "XML", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
         public static string TransformXml(string input, TextFilterCommand command)
         {
-            var arguments = new XsltArgumentList();
+            var xml = String.Empty;
+            var xsl = command.CommandArgs.First().Value;
             
-            // We're going to do this transform using the templae as XSL
+            // If there are two arguments, assume the second is XML
+            if (command.CommandArgs.Count == 2)
+            {
+                xml = command.CommandArgs[1];
+            }
+            else
+            {
+                // Otherwise, the XML is the input
+                xml = input;
+            }
+            
+            // Form the XML doc from the input
             var xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(input);
+            xmlDoc.LoadXml(xml);
 
+            // Form the XSL from the first argument
             var transform = new XslCompiledTransform();
-            transform.Load(XmlReader.Create(new StringReader(command.Pipeline.GetVariable(command.CommandArgs[0]).ToString())));
+            transform.Load(XmlReader.Create(new StringReader(xsl)));
 
+            // Do the transform (we're passing in an empty XsltArgumentList as a placeholder, in case we want to do something with it later...)
             var writer = new StringWriter();
-            transform.Transform(xmlDoc, arguments, writer);
+            transform.Transform(xmlDoc, new XsltArgumentList(), writer);
             return writer.ToString();
         }
     }

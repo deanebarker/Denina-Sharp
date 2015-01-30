@@ -23,7 +23,7 @@ namespace Tests
         [TestMethod]
         public void LoadCustomFiltersFromTypeWithCategoryName()
         {
-            TextFilterPipeline.AddType("something", typeof (CustomFilters));
+            TextFilterPipeline.AddType(typeof (CustomFilters), "something");
             Assert.IsTrue(TextFilterPipeline.CommandMethods.ContainsKey("something.mymethod"));
 
             var pipeline = new TextFilterPipeline();
@@ -34,7 +34,7 @@ namespace Tests
         [TestMethod]
         public void OverwriteExistingFilter()
         {
-            var pipeline = new TextFilterPipeline("Append BAR");
+            var pipeline = new TextFilterPipeline("Text.Append BAR");
             Assert.AreEqual("FOOBAR", pipeline.Execute("FOO"));
 
             TextFilterPipeline.AddType(typeof (OverwriteFilterTestClass));  // This should overwrite Core.Append
@@ -44,9 +44,48 @@ namespace Tests
             // Now add the old filter back, or else another test fails...
             TextFilterPipeline.AddType(typeof(Core));
         }
+
+        [TestMethod]
+        public void LoadNakedMethod()
+        {
+            TextFilterPipeline.AddMethod(GetType().GetMethod("DoSomething"), "Deane", "DoSomething");
+            
+            Assert.IsTrue(TextFilterPipeline.CommandMethods.ContainsKey("deane.dosomething"));
+
+            var pipeline = new TextFilterPipeline();
+            pipeline.AddCommand("Deane.DoSomething");
+
+            Assert.AreEqual("It worked!", pipeline.Execute());
+        }
+
+        [TestMethod]
+        public void LoadMethod()
+        {
+            TextFilterPipeline.AddMethod(GetType().GetMethod("DoSomethingElse"), "Deane");
+
+            Assert.IsTrue(TextFilterPipeline.CommandMethods.ContainsKey("deane.dosomethingelse"));
+
+            var pipeline = new TextFilterPipeline();
+            pipeline.AddCommand("Deane.DoSomethingElse");
+
+            Assert.AreEqual("It worked!", pipeline.Execute());           
+        }
+
+
+        public static string DoSomething(string input, TextFilterCommand command)
+        {
+            return "It worked!";
+        }
+
+        [TextFilter("DoSomethingElse")]
+        public static string DoSomethingElse(string input, TextFilterCommand command)
+        {
+            return "It worked!";
+        }
+    
     }
 
-    [TextFilters("Core")]
+    [TextFilters("Text")]
     internal static class OverwriteFilterTestClass
     {
         [TextFilter("Append")]
@@ -55,4 +94,6 @@ namespace Tests
             return String.Concat(input, "BAZ");
         }
     }
+
+
 }

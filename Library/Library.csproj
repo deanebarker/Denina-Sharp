@@ -49,11 +49,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandParser.cs" />
+    <Compile Include="Documentation\DoNotResolveVariablesAttribute.cs" />
     <Compile Include="Documentor.cs" />
     <Compile Include="Filters\FileSystem.cs" />
     <Compile Include="Filters\Html.cs" />
     <Compile Include="Filters\Http.cs" />
     <Compile Include="Filters\Json.cs" />
+    <Compile Include="Filters\Text.cs" />
     <Compile Include="Filters\Url.cs" />
     <Compile Include="Filters\Xml.cs" />
     <Compile Include="Documentation\ArgumentMeta.cs" />
@@ -63,6 +65,7 @@
     <Compile Include="TextFilterAttribute.cs" />
     <Compile Include="TextFilterCommand.cs" />
     <Compile Include="TextFilterPipeline.cs" />
+    <Compile Include="TfpException.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

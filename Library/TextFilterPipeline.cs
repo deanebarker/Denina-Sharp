@@ -5,41 +5,39 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Web.UI;
+using Newtonsoft.Json.Converters;
 
 namespace BlendInteractive.TextFilterPipeline.Core
 {
     public class TextFilterPipeline
     {
+        public const string GLOBAL_VARIABLE_NAME = "__global";
+        public const string WRITE_TO_VARIABLE_COMMAND = "core.writeto";
+        public const string READ_FROM_VARIABLE_COMMAND = "core.readfrom";
         
-        private const string WRITE_TO_VARIABLE_COMMAND = "writeto";
-        private const string READ_FROM_VARIABLE_COMMAND = "readfrom";
-        
-        private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
         public static readonly Dictionary<string, Type> Types = new Dictionary<string, Type>();    // This is just to keep them handy for the documentor
-
-        static TextFilterPipeline()
-        {
-            // Add this assembly to initialze the filters
-             AddAssembly(Assembly.GetExecutingAssembly());
-        }
 
         public TextFilterPipeline(string commandString = null)
         {
+            // Add this assembly to initialze the filters
+            AddAssembly(Assembly.GetExecutingAssembly());
+
             if (!String.IsNullOrWhiteSpace(commandString))
             {
                 AddCommand(commandString);
             }
         }
 
-        public static Dictionary<string, MethodInfo> CommandMethods
+        private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
+        public static ReadOnlyDictionary<string, MethodInfo> CommandMethods
         {
-            get { return commandMethods; }
+            get { return new ReadOnlyDictionary<string, MethodInfo>(commandMethods); }
         }
         
         private readonly List<TextFilterCommand> commands = new List<TextFilterCommand>();
-        public List<TextFilterCommand> Commands
+        public ReadOnlyCollection<TextFilterCommand> Commands
         {
-            get { return commands; }
+            get { return commands.AsReadOnly(); }
         }
 
         private readonly Dictionary<string, object> variables = new Dictionary<string, object>();
@@ -51,7 +49,7 @@ namespace BlendInteractive.TextFilterPipeline.Core
         public static void AddAssembly(Assembly assembly)
         {
             // Iterate all the classes in this assembly
-            foreach (Type thisType in assembly.GetTypes())
+            foreach (var thisType in assembly.GetTypes())
             {
                 // Does this assembly have the TextFilters attribute?
                 if (thisType.GetCustomAttributes(typeof(TextFiltersAttribute), true).Any())
@@ -62,101 +60,68 @@ namespace BlendInteractive.TextFilterPipeline.Core
             }
         }
 
-        public static void AddType(Type type)
+        public static void AddType(Type type, string category = null)
         {
-            if (!type.GetCustomAttributes(typeof (TextFiltersAttribute), true).Any())
+            if (category == null)
             {
-                throw new Exception("Type does not have a TextFilters attribute. In this case, you must pass a category name into AddType.");
+                if (!type.GetCustomAttributes(typeof (TextFiltersAttribute), true).Any())
+                {
+                    throw new Exception("Type does not have a TextFilters attribute. In this case, you must pass a category name into AddType.");
+                }
+                category = ((TextFiltersAttribute) type.GetCustomAttributes(typeof (TextFiltersAttribute), true).First()).Category;
+
             }
 
-            var category = ((TextFiltersAttribute) type.GetCustomAttributes(typeof (TextFiltersAttribute), true).First()).Category;
-            AddType(category, type);
+            foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (TextFilterAttribute), true).Any()))
+            {
+                var name = ((TextFilterAttribute)method.GetCustomAttributes(typeof(TextFilterAttribute), true).First()).Name;
+                AddMethod(method, category, name);
+            }
         }
 
-        public static void AddType(string category, Type type)
+        public static void AddMethod(MethodInfo method, string category, string name = null)
         {
-            // This is just to keep a "catalog" of types to make it easier for the documentor to iterate over them
-            Types.Remove(category);
-            Types.Add(category, type);
-
-            foreach (MethodInfo method in type.GetMethods())
+            if (name == null)
             {
-                if (method.GetCustomAttributes(typeof(TextFilterAttribute), true).Any())
-                {
-                    string name = ((TextFilterAttribute)method.GetCustomAttributes(typeof(TextFilterAttribute), true).First()).Name;
-
-                    var fullyQualifiedFilterName = String.Concat(category.ToLower(), ".", name.ToLower());
-
-                    commandMethods.Remove(fullyQualifiedFilterName);    // Remove it if it exists already                  
-                    commandMethods.Add(fullyQualifiedFilterName, method);
-                }
+                name = ((TextFilterAttribute)method.GetCustomAttributes(typeof(TextFilterAttribute), true).First()).Name;
             }
+            
+            var fullyQualifiedFilterName = String.Concat(category.ToLower(), ".", name.ToLower());
+
+            commandMethods.Remove(fullyQualifiedFilterName);    // Remove it if it exists already                  
+            commandMethods.Add(fullyQualifiedFilterName, method);            
         }
 
         public string Execute(string input = null)
         {
-            // It's perfectly valid to call it without passing anything in. This assumes that a command will acquire text somehow.
-            if (input == null)
-            {
-                input = String.Empty;
-            }
+            // We set the global variable to the incoming string. It will be modified and eventually returned from this variable slot.
+            SetVariable(GLOBAL_VARIABLE_NAME, input);
 
-            // If there's nothing to do, just send the same string back...
-            if (!commands.Any())
-            {
-                return input;
-            }
-
-            foreach (TextFilterCommand command in commands)
+            foreach (var command in commands)
             {
                 // Are we writing to a variable?
                 if (command.NormalizedCommandName == WRITE_TO_VARIABLE_COMMAND)
                 {
-                    string variableName = command.CommandArgs.First().Value;
-                    SetVariable(variableName, input);
+                    SetVariable(command.OutputVariable, input);
                     continue;
                 }
 
                 // Are we reading from a variable?
                 if (command.NormalizedCommandName == READ_FROM_VARIABLE_COMMAND)
                 {
-                    string variableName = command.CommandArgs.First().Value;
-
-                    if (variables.ContainsKey(variableName))
-                    {
-                        input = variables[variableName].ToString();
-                    }
-                    else
-                    {
-                        // Do we have a default argument as the second argument?
-                        if (command.CommandArgs.Count > 1)
-                        {
-                            // Yes, use it
-                            input = command.CommandArgs[1];
-                        }
-                        else
-                        {
-                            throw new Exception("Variable name \"" + variableName + "\" not found.");
-                        }
-                    }
-
+                    SetVariable(GLOBAL_VARIABLE_NAME, GetVariable(command.OutputVariable));
                     continue;
                 }
 
-
-                // If it doesn't contain a dot, then put it in the "core" category
-                if (!command.NormalizedCommandName.Contains("."))
-                {
-                    command.CommandName = String.Concat("core.", command.CommandName);
-                }
+                // Note that the WRITE_TO_VARIABLE_COMMAND and READ_FROM_VARIABLE_COMMAND commands will never actually be executed. This is why their methods are just empty shells...
 
                 // Do we have such a command?
                 if (!CommandMethods.ContainsKey(command.NormalizedCommandName))
                 {
-                    throw new Exception("No command method found for \"" + command.CommandName + "\"");
+                    throw new TfpException("No command method found for \"" + command.CommandName + "\"");
                 }
 
-                // Set a pipeline reference
+                // Set a pipeline reference which can be accessed inside the filter method
                 command.Pipeline = this;
 
                 // Resolve any arguments that are actually variable names
@@ -166,42 +131,46 @@ namespace BlendInteractive.TextFilterPipeline.Core
                 var method = CommandMethods[command.NormalizedCommandName];
                 try
                 {
-                    // This is where we make the method call
-                    var result = (string) method.Invoke(null, new object[] {input, command});
-
-                    if (!String.IsNullOrWhiteSpace(command.VariableName))
-                    {
-                        SetVariable(command.VariableName, result);
-                    }
-                    else
-                    {
-                        // If we're not writing to a variable, then we're changing the active text
-                        input = result;
-                    }
+                    // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
+                    SetVariable(
+                        command.OutputVariable,
+                        method.Invoke( null, new [] { GetVariable(command.InputVariable), command } )
+                    );
                 }
                 catch (Exception e)
                 {
-                    throw new Exception(String.Concat(
-                        method.Name,
-                        ". ",
+                    throw new TfpException(String.Concat(
+                        "Error in filter: \"",
+                        command.NormalizedCommandName,
+                        "\". ",
                         Environment.NewLine,
                         e.GetBaseException().Message,
                         Environment.NewLine,
                         e.GetBaseException().StackTrace));
                 }
+
+                // Move to the next command...
             }
 
-            return input;
+            // Return what's in the global variable            
+            return GetVariable(GLOBAL_VARIABLE_NAME).ToString();
         }
 
         public object GetVariable(string key)
         {
-            return variables[key];
+            key = CommandParser.NormalizeVariableName(key);
+
+            if (!variables.ContainsKey(key))
+            {
+                throw new TfpException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
+            }
+
+            return variables[CommandParser.NormalizeVariableName(key)];
         }
 
         public void SetVariable(string key, object value)
         {
-            key = CommandParser.StripVariablePrefix(key);
+            key = CommandParser.NormalizeVariableName(key);
             variables.Remove(key);
             variables.Add(key, value);
         }
@@ -225,8 +194,5 @@ namespace BlendInteractive.TextFilterPipeline.Core
             };
             commands.Add(command);
         }
-
-        
-
     }
 }

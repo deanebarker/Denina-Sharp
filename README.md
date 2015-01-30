@@ -48,7 +48,7 @@ Using this, some pipeline commands can obtain text in-process.  For instance, if
     Text.Format "The contents of the file are: {0}."
     Html.Wrap p
 
-That would read in the contents of "my-file.txt," replace the string "foo" with "bar," drop the result into the middle of a sentence, and again wrap it in a P tag.  In this case we don't pass anything into the pipeline -- it obtains text to work with in the first step.
+That would read in the contents of "my-file.txt," replace the string "foo" with "bar," drop the result into the middle of a sentence, and again wrap it in a P tag.  In this case we don't pass anything into the pipeline -- it obtains text to work with in the first step.  (If we did pass something in, it would simply get discarded and replace in that first step.)
 
 Filters are grouped into categories which do different things.  For example, the "HTTP" category can make web requests, and the "HTML" category can manipulate HTML documents.  Combine them, and you can do things like this:
 
@@ -56,7 +56,7 @@ Filters are grouped into categories which do different things.  For example, the
     Html.Extract //title
     Text.Format "The title of this web page is {0}."
 
-Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns the HTML. Html.Extract uses an external library to reach into the HTML and grab a value.  Format, as we saw before, wraps this value within other text.
+Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns the HTML. Html.Extract uses an external library to reach into the HTML and grab a value.  Text.Format, as we saw before, wraps this value within other text.
 
 (See "Variables" below for a more extensive and practical example of working over HTTP.)
 
@@ -69,7 +69,7 @@ The first level is intended for C# developers.  The second level is intended for
 
 ## The <span>C#</span>
 
-(Note: The words "command" and "filter" get used interchangably in this document. Technically, a "command" is an object that invokes and configures a "filter," which is a method. In practice, I'll go back and forth between the terms indiscriminately. Sorry.)
+(Note: The words "command" and "filter" get used interchangeably in this document. Technically, a "command" is an object that invokes and configures a "filter," which is a method. In practice, I'll go back and forth between the terms indiscriminately. Sorry.)
 
 Here's the C# to instantiate the pipeline and add a command, the long way.
 
@@ -112,7 +112,7 @@ The pipeline doesn't have to start with text, as some filters allow the pipeline
 
     pipeline.Execute();
     
-How a filter "treats" the active text is up to the filter. _The active text becomes whatever the filter returns._  It can return some derivation of the input text (such as with "Prepend," from above), or it can return something completely new without regard to the active text it took in. It can even use the active text to configure itself and then return something else. (Example: if invoked without arguments, Http.Get assumes the active text is the URL it should use. It retrieves the HTML at that URL, and returns the result.)
+How a filter "treats" the active text is up to the filter. _The active text becomes whatever the filter returns._  It can return some derivation of the input text (such as with "Text.Prepend," from above), or it can return something completely new without regard to the active text it took in. It can even use the active text to configure itself and then return something else. (Example: if invoked without arguments, Http.Get assumes the active text is the URL it should use. It retrieves the HTML at that URL, and returns the result.)
 
 In our example above, after the first filter (Http.Get) executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the second filter (Html.Extract) executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the Execute method of the pipeline object (it's what comes out "the other end" of the pipe).
 
