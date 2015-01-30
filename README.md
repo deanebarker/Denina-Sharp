@@ -153,7 +153,14 @@ Filters are pluggable. Simply write a static class and method, like this:
       }
     }
 
-Then register this with the pipeline:
+The method needs to take in two arguments:
+
+1. **String:** this is the input; what is passed to the filter
+2. **TextFilterCommand:** this is an object representation of the line of text used to call the filter. On it are properties to get the command name and the arguments.
+
+The method does whatever it wants to the input string, and returns the result as another string.  The method doesn't need to worry about writing into or out of variables -- those actions are handled by the pipeline itself.
+
+Once written, register this class with the pipeline:
 
     TextFilterPipeline.AddType(typeof(TextFilters));
 
@@ -161,12 +168,12 @@ After registering, your command is now available as:
 
     Text.Left 10
 
-You register entire types, not individual methods -- only methods with the "TextFilter" attribute will actually get added. You can even register entire assemblies, if all your filters are in a separate DLL:
+You register entire types/classes, not individual methods -- only methods with the "TextFilter" attribute will actually get added. You can even register entire assemblies at a time, if all your filters are in a separate DLL:
 
     var myAssembly = Assembly.LoadFile(@"C:\MyFilters.dll");
     TextFilterPipeline.AddAssembly(myAssembly);
 
-All the types in that assembly marked with the "TextFilters" attribute will be searched for methods with the "TextFilter" attribute.
+All the types in that assembly marked with the "TextFilters" attribute will be searched for methods with the "TextFilter" attribute.  (In fact, when the TextFilterPipeline class first initializes, it loads its built-in filters by simply passing the currently executing assembly to AddAssembly.)
 
 Note that the name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
 
