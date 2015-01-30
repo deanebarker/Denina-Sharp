@@ -73,9 +73,9 @@ The first level is intended for C# developers.  The second level is intended for
 
 Here's the C# to instantiate the pipeline and add a command, the long way.
 
-    var pipeline = new TextFilterPipeline();
+    var pipeline = new Pipeline();
     pipeline.AddCommand(
-       new TextFilterCommand()
+       new PipelineCommand()
        {
          CommandName = "Text.Prepend",
          CommandArgs = new Dictionary<object,string>() { { 1,"FOO" } }
@@ -86,7 +86,7 @@ Here's the C# to instantiate the pipeline and add a command, the long way.
 
 Clearly, this is way too verbose.  So commands can be added by simple text strings.  The strings are tokenized on whitespace. The first token is the command name, the subsequent tokens are arguments. (Any arguments which contain whitespace need to be in quotes.)
 
-    var pipeline = new TextFilterPipeline();
+    var pipeline = new Pipeline();
     pipeline.AddCommand("Text.Prepend FOO");  //Note: this can also be passed into the constructor
     var result = pipeline.Execute("BAR");
 
@@ -94,11 +94,11 @@ The result will be "FOOBAR".
 
 We can shorten it even more by passed commands into the constructor:
 
-    var pipeline = new TextFilterPipeline("Text.Prepend FOO");
+    var pipeline = new Pipeline("Text.Prepend FOO");
 
 In fact, commands can be passed in _en masse_, separated by line breaks (note that command parsing is broken out to its own class, and could easily be re-implemented, if you wanted to do something different).  Each line is parsed as a separate command.
 
-    var pipeline = new TextFilterPipeline(thousandsAndThousandsOfCommands);
+    var pipeline = new Pipeline(thousandsAndThousandsOfCommands);
 
 The pipeline remains "loaded" with commands even after execution, so we could just as easily do this immediately after:
 
@@ -116,7 +116,7 @@ How a filter "treats" the active text is up to the filter. _The active text beco
 
 In our example above, after the first filter (Http.Get) executes, the active text is _all_ the HTML from the home page of Gadgetopia.  After the second filter (Html.Extract) executes, the active text is just the contents of the "title" tag.  The active text after the last filter executes is what is returned by the Execute method of the pipeline object (it's what comes out "the other end" of the pipe).
 
-Filters are grouped into categories (think "namespaces").  Any command without a "dot" is assumed to map to "Core" category.
+Filters are grouped into categories (think namespaces).  Any command without a "dot" is assumed to map to "Core" category.
 
 ## Variables
 
@@ -158,7 +158,7 @@ This sets the value of $name to "Deane".
 
 Filters are pluggable. Simply write a method, like this:
 
-      public static string Left(string input, TextFilterCommand command)
+      public static string Left(string input, PipelineCommand command)
       {
         var length = int.Parse(command.CommandArgs[0]);
         return input.Substring(0, length);
@@ -167,41 +167,41 @@ Filters are pluggable. Simply write a method, like this:
 The method needs to take in two arguments:
 
 1. **String:** this is the input; what is passed to the filter
-2. **TextFilterCommand:** this is an object representation of the line of text used to call the filter. On it are properties to access the command name and the arguments.
+2. **PipelineCommand:** this is an object representation of the line of text used to call the filter. On it are properties to access the command name and the arguments.
 
 The method does whatever it wants to the input string, and returns the result as another string.  The method doesn't need to worry about writing into or out of variables -- those actions are handled by the pipeline itself.
 
 Then register the MethodInfo object with the pipeline, telling it the category and name of the filter.
 
 	var method = typeOf(MyClass).GetMethod("Left");
-    TextFilterPipeline.AddMethod(method, "Text", "Left");
+    Pipeline.AddMethod(method, "Text", "Left");
 
 After registering, your command is now available as:
 
     Text.Left 10
 
-The category and name arguments are optional. If you include the TextFilter attribute on method declaration, you don't have to pass that in:
+The category and name arguments are optional. If you include the Filter attribute on method declaration, you don't have to pass that in:
 
     [TextFilter("Left")]
 
 Alternately, you can register an entire type full of methods:
 
-    TextFilterPipeline.AddType(typeof(MyFilters), "Text")
+    Pipeline.AddType(typeof(MyFilters), "Text")
 
-That will search the type for all methods with a TextFilter attribute.  Like with methods, you can identify the category with an a TextFilters (note the plural) attribute on the class, and you don't have to pass the category name in:
+That will search the type for all methods with a Filter attribute.  Like with methods, you can identify the category with an a Filters (note the plural) attribute on the class, and you don't have to pass the category name in:
 
     [TextFilters("Text")]
 
 Then register like this:
 
-    TextFilterPipeline.AddType(typeof(MyFilters)
+    Pipeline.AddType(typeof(MyFilters)
 
 Finally, you can even register entire assemblies at a time, if all your filters are in a separate DLL:
 
     var myAssembly = Assembly.LoadFile(@"C:\MyFilters.dll");
-    TextFilterPipeline.AddAssembly(myAssembly);
+    Pipeline.AddAssembly(myAssembly);
 
-All the types in that assembly marked with the "TextFilters" attribute will be searched for methods with the "TextFilter" attribute.  (In fact, when the TextFilterPipeline class first initializes, it loads its built-in filters by simply passing the currently executing assembly to AddAssembly.)
+All the types in that assembly marked with the Filters attribute will be searched for methods with the Filter attribute.  (In fact, when the Pipeline class first initializes, it loads its built-in filters by simply passing the currently executing assembly to AddAssembly.)
 
 Note that the name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
 
@@ -211,12 +211,12 @@ And what happens if there's an error condition?  Do you return the string unchan
 
 You can map the same filter to multiple command names, then use that name inside the method to change execution.
 
-    [TextFilters("Text")]
+    [Filters("Text")]
     public static class TextFilters
     {
-      [TextFilter("Left")]
-      [TextFilter("Right")]
-      public static string Left(string input, TextFilterCommand command)
+      [Filter("Left")]
+      [Filter("Right")]
+      public static string Left(string input, PipelineCommand command)
       {
         var length = int.Parse(command.CommandArgs[0]);
 
@@ -244,9 +244,9 @@ If your category and command name are identical to another one, the last one in 
 
 This repo contains three projects.
 
-1. The source to create a DLL named "BlendInteractive.TextFilterPipeline.dll"
-2. A test project with moderate unit test coverage (needs to be better)
-3. A WinForms testing app which provides a GUI to run and test filters.
+1. The source to create an assembly named "Denina.dll"
+2. A test project with moderate unit test coverage (needs to be better, clearly)
+3. A WinForms testing app (Denina.exe) which provides a GUI to create, execute, and test filters.
 
 On build, the DLL, a supporting DLL (HtmlAgilityPack), and the WinForms EXE are copied into the "Binaries" folder. The WinForms tester should run directly from there.
 
