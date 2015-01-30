@@ -8,15 +8,17 @@ The filters are linear and sequential.  Text is passed "down the line," and is u
 
 ## The Basics
 
-Pretend for a moment that we want to add our name to some text and then format that for HTML. We can create these commands:
+Pretend for a moment that we have our name in a text string ("Deane"). We want to add some other text to this, and then format that for HTML.
 
-    Prepend "My name is: "
-    Append "."
+To do this, we can create these commands:
+
+    Text.Prepend "My name is: "
+    Text.Append "."
     Html.Wrap p
 
 What this says, in order, is:
 
-1. Put the text "My name is: " before the input (what we pass into the pipeline)
+1. Put the text "My name is: " before the input (what we pass into the pipeline -- our name)
 2. Put a period after the result of #1
 3. Wrap the result of #2 in P tag
 4. Return the result of #3 (this step is implied -- the pipeline always returns the result of the last operation)
@@ -42,8 +44,8 @@ However, it isn't always necessary for us to start with some actual text. Perhap
 Using this, some pipeline commands can obtain text in-process.  For instance, if we wanted to format and output the contents of a file on the file system, we could do something like this:
 
     File.Read my-file.txt
-    Replace foo bar
-    Format "The contents of the file are: {0}."
+    Text.Replace foo bar
+    Text.Format "The contents of the file are: {0}."
     Html.Wrap p
 
 That would read in the contents of "my-file.txt," replace the string "foo" with "bar," drop the result into the middle of a sentence, and again wrap it in a P tag.  In this case we don't pass anything into the pipeline -- it obtains text to work with in the first step.
@@ -52,7 +54,7 @@ Filters are grouped into categories which do different things.  For example, the
 
     Http.Get gadgetopia.com
     Html.Extract //title
-    Format "The title of this web page is {0}."
+    Text.Format "The title of this web page is {0}."
 
 Http.Get makes a -- wait for it -- GET request over HTTP to the URL specified in the first argument and returns the HTML. Html.Extract uses an external library to reach into the HTML and grab a value.  Format, as we saw before, wraps this value within other text.
 
@@ -75,7 +77,7 @@ Here's the C# to instantiate the pipeline and add a command, the long way.
     pipeline.AddCommand(
        new TextFilterCommand()
        {
-         CommandName = "Prepend",
+         CommandName = "Text.Prepend",
          CommandArgs = new Dictionary<object,string>() { { 1,"FOO" } }
        }
       );
@@ -85,14 +87,14 @@ Here's the C# to instantiate the pipeline and add a command, the long way.
 Clearly, this is way too verbose.  So commands can be added by simple text strings.  The strings are tokenized on whitespace. The first token is the command name, the subsequent tokens are arguments. (Any arguments which contain whitespace need to be in quotes.)
 
     var pipeline = new TextFilterPipeline();
-    pipeline.AddCommand("Prepend FOO");  //Note: this can also be passed into the constructor
+    pipeline.AddCommand("Text.Prepend FOO");  //Note: this can also be passed into the constructor
     var result = pipeline.Execute("BAR");
 
 The result will be "FOOBAR".
 
 We can shorten it even more by passed commands into the constructor:
 
-    var pipeline = new TextFilterPipeline("Prepend FOO");
+    var pipeline = new TextFilterPipeline("Text.Prepend FOO");
 
 In fact, commands can be passed in _en masse_, separated by line breaks (note that command parsing is broken out to its own class, and could easily be re-implemented, if you wanted to do something different).  Each line is parsed as a separate command.
 
@@ -127,7 +129,7 @@ Here's an example of chaining filters and writing into and out of variables to o
     Http.Get http://api.openweathermap.org/data/2.5/weather?q=Sioux+Falls&mode=xml&units=imperial
     Xml.Extract //city/@name => $city
     Xml.Extract //temperature/@value => $temp
-    Format "The temp in {city} is {temp}."
+    Text.Format "The temp in {city} is {temp}."
     Html.Wrap p weather-data
 
 The first command gets an XML document. Since the second command sends the results to a variable named $city, the active text remains the original full XML document which is then still available to the third command.
@@ -191,8 +193,6 @@ All the types in that assembly marked with the "TextFilters" attribute will be s
 
 Note that the name of the underlying C# method is irrelevant.  The filter maps to the combination of the category name ("Text," in this case) and filter ("Left"), both supplied by the attributes. While it would make sense to call the method the same name as the filter, this isn't required.
 
-If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.  New filters are loaded statically, so they're globally available to all executions of the pipeline.
-
 In the example above case, we're trusting that this filter will be called with (1) at least one argument (any extra arguments are simply ignored), (2) that the argument will parse to an Int32, and (3) that the numeric value isn't longer than the active text.  Clearly, _you're gonna want to validate and error check this inside your filter before doing anything_.
 
 And what happens if there's an error condition?  Do you return the string unchanged?  Do you throw an exception?  That's up to you, but there is no user interaction during pipeline execution, so error conditions are problematic.
@@ -225,6 +225,8 @@ This filter will map to both of these commands:
     Text.Right 10
 
 Note that this is true even though the method name ("Left") did not change.
+
+If your category and command name are identical to another one, the last one in wins. This means you can "hide" previous filters by registering new ones that take their place.  New filters are loaded statically, so they're globally available to all executions of the pipeline.
 
 ## Contents
 
