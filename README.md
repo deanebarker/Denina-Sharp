@@ -84,10 +84,12 @@ Here's the C# to instantiate the pipeline and add a command, the long way.
     var result = pipeline.Execute("BAR");
     // Result contains "FOOBAR"
 
-Clearly, this is way too verbose.  So commands can be added by simple text strings.  The strings are tokenized on whitespace. The first token is the command name, the subsequent tokens are arguments. (Any arguments which contain whitespace need to be in quotes.)
+Clearly, this is _way_ too verbose, and it provides no simplified proxy through which an editor might work with Denina within their CMS.
+
+To make it more concise and editor-friendly, commands can be added via simple text strings.  The strings are tokenized on whitespace. The first token is the command name, the subsequent tokens are arguments. (Any arguments which contain whitespace need to be in quotes.)
 
     var pipeline = new Pipeline();
-    pipeline.AddCommand("Text.Prepend FOO");  //Note: this can also be passed into the constructor
+    pipeline.AddCommand("Text.Prepend FOO"); be passed into the constructor
     var result = pipeline.Execute("BAR");
 
 The result will be "FOOBAR".
