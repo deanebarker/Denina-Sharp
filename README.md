@@ -156,6 +156,17 @@ To manually set a variable value, use SetVar.
 
 This sets the value of $name to "Deane".
 
+Finally, the pipeline can be "pre-primed" with variables prior to execution, from the C# instantiation code.  For example:
+
+    var pipeline = new Pipeline();
+    pipeline.SetVariable("searchQuery", Request.Querystring["q"]);
+
+In this case, $searchQuery will be available to commands, like this:
+
+    Text.Format "SELECT * FROM Something WHERE myField = '{searchQuery}'"
+
+Obviously, the basic rules of input sanitizing still apply -- you're going to want to sanitize the value in C# before setting it.
+
 ## Writing Filters
 
 Filters are pluggable. Simply write a method, like this:
