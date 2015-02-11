@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using BlendInteractive.Denina.Core.Documentation;
 
 namespace BlendInteractive.Denina.Core
 {
-    public class Pipeline
+    public partial class Pipeline
     {
         public const string GLOBAL_VARIABLE_NAME = "__global";
         public const string WRITE_TO_VARIABLE_COMMAND = "core.writeto";
