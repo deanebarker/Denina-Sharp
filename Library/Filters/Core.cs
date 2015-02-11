@@ -43,7 +43,7 @@ namespace BlendInteractive.Denina.Core.Filters
                 value = command.CommandArgs[1];
             }
 
-            command.Pipeline.SetVariable(command.CommandArgs.First().Value, value);
+            command.Pipeline.SafeSetVariable(command.CommandArgs.First().Value, value);
 
             return input;
         }
@@ -55,9 +55,21 @@ namespace BlendInteractive.Denina.Core.Filters
         {
             foreach (var commandArg in command.CommandArgs)
             {
-                command.Pipeline.SetVariable(commandArg.Value, String.Empty);
+                command.Pipeline.SafeSetVariable(commandArg.Value, String.Empty);
             }
             return input;
+        }
+
+        [Filter("Now", "Returns the current date and time, formatted by an optional format string.")]
+        [ArgumentMeta(1, "Format String", false, "The C# time format string with which to format the results.")]
+        public static string Now(string input, PipelineCommand command)
+        {
+            var formatString = "f";
+            if (command.CommandArgs.Count == 1)
+            {
+                formatString = command.CommandArgs.First().ToString();
+            }
+            return DateTime.Now.ToString(formatString);
         }
     }
 }

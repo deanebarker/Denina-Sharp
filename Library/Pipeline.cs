@@ -17,9 +17,12 @@ namespace BlendInteractive.Denina.Core
 
         private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
 
+        private Stopwatch timer = new Stopwatch();
+
         private readonly List<PipelineCommand> commands = new List<PipelineCommand>();
 
-        private readonly Dictionary<string, object> variables = new Dictionary<string, object>();
+        private Dictionary<string, PipelineVariable> variables = new Dictionary<string, PipelineVariable>();
+        private static Dictionary<string, PipelineVariable> globalVariables = new Dictionary<string, PipelineVariable>();
 
         public Pipeline(string commandString = null)
         {
@@ -42,11 +45,18 @@ namespace BlendInteractive.Denina.Core
             get { return commands.AsReadOnly(); }
         }
 
-        public ReadOnlyDictionary<string, object> Variables
+        public ReadOnlyDictionary<string, PipelineVariable> Variables
         {
-            get { return new ReadOnlyDictionary<string, object>(variables); }
+            get { return new ReadOnlyDictionary<string, PipelineVariable>(variables); }
         }
 
+
+        public static ReadOnlyDictionary<string, PipelineVariable> GlobalVariables
+        {
+            get { return new ReadOnlyDictionary<string, PipelineVariable>(globalVariables); }
+        }
+
+        
         public static void AddAssembly(Assembly assembly)
         {
             // Iterate all the classes in this assembly
@@ -131,11 +141,17 @@ namespace BlendInteractive.Denina.Core
                 var method = CommandMethods[command.NormalizedCommandName];
                 try
                 {
+                    timer.Reset();
+                    timer.Start();
+
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
-                    SetVariable(
+                    // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
+                    SafeSetVariable(
                         command.OutputVariable,
                         method.Invoke(null, new[] {GetVariable(command.InputVariable), command})
                         );
+
+                    command.ElapsedTime = timer.ElapsedMilliseconds;
                 }
                 catch (Exception e)
                 {
@@ -156,23 +172,86 @@ namespace BlendInteractive.Denina.Core
             return GetVariable(GLOBAL_VARIABLE_NAME).ToString();
         }
 
-        public object GetVariable(string key)
+        public bool IsSet(string key)
+        {
+            return variables.ContainsKey(key);
+        }
+
+        public static bool IsSetGlobally(string key)
+        {
+            return globalVariables.ContainsKey(key);
+        }
+
+        public object GetVariable(string key, bool checkGlobal = false)
         {
             key = PipelineCommandParser.NormalizeVariableName(key);
 
             if (!variables.ContainsKey(key))
             {
-                throw new TfpException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
+                if (checkGlobal)
+                {
+                    if (IsSetGlobally(key))
+                    {
+                        return GetGlobalVariable(key);
+                    }
+                }
+
+                throw new DeninaException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
             }
 
-            return variables[PipelineCommandParser.NormalizeVariableName(key)];
+            return variables[PipelineCommandParser.NormalizeVariableName(key)].Value;
         }
 
-        public void SetVariable(string key, object value)
+        public static object GetGlobalVariable(string key)
+        {
+            key = PipelineCommandParser.NormalizeVariableName(key);
+
+            if (!globalVariables.ContainsKey(key))
+            {
+                throw new DeninaException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
+            }
+
+            return globalVariables[PipelineCommandParser.NormalizeVariableName(key)].Value;           
+        }
+
+        public void SetVariable(string key, object value, bool readOnly = false)
         {
             key = PipelineCommandParser.NormalizeVariableName(key);
             variables.Remove(key);
-            variables.Add(key, value);
+            variables.Add(
+                key,
+                new PipelineVariable(
+                    key,
+                    value,
+                    readOnly
+                    )
+            );
+        }
+
+        public static void SetGlobalVariable(string key, object value, bool readOnly = false)
+        {
+            key = PipelineCommandParser.NormalizeVariableName(key);
+            globalVariables.Remove(key);
+            globalVariables.Add(
+                key,
+                new PipelineVariable(
+                    key,
+                    value,
+                    readOnly
+                    )
+            );
+        }
+
+        // This will refuse to set variables flagged as read-only
+        public void SafeSetVariable(string key, object value, bool readOnly = false)
+        {
+            // Do we have a variable with the same name that's readonly?
+            if (variables.Any(v => v.Value.Name == key && v.Value.ReadOnly))
+            {
+                throw new DeninaException(String.Format("Attempt to reset value of read-only variable \"{0}\"", key));
+            }
+
+            SetVariable(key, value, readOnly);
         }
 
         public void AddCommand(PipelineCommand command)
