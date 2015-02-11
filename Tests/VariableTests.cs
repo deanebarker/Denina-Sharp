@@ -15,7 +15,7 @@ namespace Tests
             pipeline.AddCommand("WriteTo $Name");
             pipeline.Execute("Deane");
 
-            Assert.AreEqual("Deane", pipeline.Variables["Name"]);
+            Assert.AreEqual("Deane", pipeline.GetVariable("Name"));
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace Tests
             var result = pipeline.Execute("Annie");
 
             Assert.AreEqual(result, "Annie");   // The input text should be unchanged
-            Assert.AreEqual(pipeline.Variables["myVar"], "Annie married Deane.");
+            Assert.AreEqual(pipeline.GetVariable("myVar"), "Annie married Deane.");
         }
 
         [TestMethod]
