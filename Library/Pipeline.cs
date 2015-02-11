@@ -118,7 +118,7 @@ namespace BlendInteractive.Denina.Core
                 // Do we have such a command?
                 if (!CommandMethods.ContainsKey(command.NormalizedCommandName))
                 {
-                    throw new TfpException("No command method found for \"" + command.CommandName + "\"");
+                    throw new DeninaException("No command method found for \"" + command.CommandName + "\"");
                 }
 
                 // Set a pipeline reference which can be accessed inside the filter method
@@ -139,7 +139,7 @@ namespace BlendInteractive.Denina.Core
                 }
                 catch (Exception e)
                 {
-                    throw new TfpException(String.Concat(
+                    throw new DeninaException(String.Concat(
                         "Error in filter: \"",
                         command.NormalizedCommandName,
                         "\". ",

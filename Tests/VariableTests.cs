@@ -44,7 +44,7 @@ namespace Tests
                 pipeline.Execute();
                 Assert.Fail("Test should have failed in the line above and gone to the \"catch\" block...");
             }
-            catch (TfpException e)
+            catch (DeninaException e)
             {
                 // This is the passing block...
                 Assert.IsTrue(e.Message.StartsWith("Attempt to access non-existent variable"));
@@ -113,5 +113,28 @@ namespace Tests
             Assert.AreEqual(input, pipeline.Execute(input));
 
         }
+
+        [TestMethod]
+        public void ResettingReadOnlyVariable()
+        {
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("Name", "Deane", true); // This is read-only
+            pipeline.AddCommand("SetVar Name Annie"); // This will attempt to reset that variable
+
+            try
+            {
+                pipeline.Execute();
+                Assert.Fail("Should not have gotten here...");
+            }
+            catch (DeninaException e)
+            {
+                Assert.IsTrue(e.Message.Contains("Attempt to reset value"));
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("This should have thrown a DeninaException, not a generic Exception.");
+            }
+        }
+
     }
 }
