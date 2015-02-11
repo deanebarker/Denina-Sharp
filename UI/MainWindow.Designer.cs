@@ -100,7 +100,6 @@ namespace UI
             this.Controls.Add(this.PipelineCommands);
             this.Name = "MainWindow";
             this.Text = "Text Filter Pipeline Tester";
-            this.Load += new System.EventHandler(this.MainWindow_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 

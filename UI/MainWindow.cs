@@ -36,9 +36,5 @@ namespace UI
                 PipelineResults.BackColor = Color.FromName("LightPink");
             }
         }
-
-        private void MainWindow_Load(object sender, EventArgs e)
-        {
-        }
     }
 }
