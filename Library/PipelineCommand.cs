@@ -24,6 +24,8 @@ namespace BlendInteractive.Denina.Core
         public Dictionary<object, string> CommandArgs { get; set; }
         public string OutputVariable { get; set; }
         public string InputVariable { get; set; }
+        public string OriginalText { get; set; }
+        public long ElapsedTime { get; set; }
 
         public string DefaultArgument
         {

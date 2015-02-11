@@ -27,6 +27,7 @@ namespace BlendInteractive.Denina.Core
                 var tokens = new TokenList(line);
 
                 var command = new PipelineCommand();
+                command.OriginalText = line;
 
                 // $myVar =>
                 if (tokens.Last == PIPE_TOKEN && IsVariableName(tokens.First) && tokens.Count == 2)
