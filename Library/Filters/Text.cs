@@ -55,7 +55,7 @@ namespace BlendInteractive.Denina.Core.Filters
 
             foreach (var variable in command.Pipeline.Variables)
             {
-                template = template.Replace(String.Concat("{", variable.Key, "}"), variable.Value.ToString());
+                template = template.Replace(String.Concat("{", variable.Key, "}"), Convert.ToString(variable.Value));
             }
 
             // Escape any remaining {string} patterns, because these will break String.Format...
