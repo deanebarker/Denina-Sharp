@@ -1,7 +1,5 @@
 # Denina Sharp: Denina in <span>C#</span>
 
-
-
 Denina is a simple text processing language which allows a non-technical editor to configure and execute sequential C# methods on text.
 
 [Learn more about Denina](http://denina.org)
@@ -156,7 +154,7 @@ If your category and command name are identical to another one, the last one in 
 
 This repo contains three projects.
 
-1. The source to create an assembly named "Denina.dll"
+1. The source to create an assembly named "DeninaSharp.dll"
 2. A test project with moderate unit test coverage (needs to be better, clearly)
 3. A WinForms testing app (Denina.exe) which provides a GUI to create, execute, and test filters.
 
