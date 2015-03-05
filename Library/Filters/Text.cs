@@ -91,7 +91,7 @@ namespace DeninaSharp.Core.Filters
         public static string FormatLines(string input, PipelineCommand command)
         {
             var returnString = new StringBuilder();
-            foreach (var line in input.Split(Environment.NewLine.ToCharArray()))
+            foreach (var line in input.Split(new [] { Environment.NewLine }, StringSplitOptions.None))
             {
                 returnString.AppendFormat(command.CommandArgs.First().Value, line);
             }

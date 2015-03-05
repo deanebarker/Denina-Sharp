@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime;
 using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -80,6 +81,23 @@ namespace Tests
 
             result = pipeline.Execute("Annie");
             Assert.AreEqual(String.Empty, result);
+        }
+
+        [TestMethod]
+        public void FormatLines()
+        {
+            var input = new[]
+            {
+                "Deane",
+                "Barker"
+            };
+
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("Text.FormatLines ({0})");
+            var result = pipeline.Execute(String.Join(Environment.NewLine, input));
+
+            Assert.AreEqual(result, "(Deane)(Barker)");
+
         }
     }
 }
