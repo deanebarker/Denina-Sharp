@@ -1,0 +1,336 @@
+﻿<div class="denina-category" id="denina-category-text" xmlns:denina="http://denina">
+  <h1>Text</h1>
+  <p>For working with text.</p>
+  <div class="denina-filter" id="denina-filter-append">
+    <h2>Append</h2>
+    <p>Appends a string to the input string.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Suffix</td>
+        <td>true</td>
+        <td>The string to append to the input string.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.Append " Bond"</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-extractregex">
+    <h2>ExtractRegex</h2>
+    <p>Extracts a substring based on a supplied regex.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Pattern</td>
+        <td>true</td>
+        <td>A regex string pattern. It will require an extraction expression.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.ExtractRegex a(..)s</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>me</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-format">
+    <h2>Format</h2>
+    <p>Performs simple token replacement of variables and the active text.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Format String</td>
+        <td>true</td>
+        <td>A format string suitable for usage in String.Format. The input string will replace the {0} token. Variable values will replace {variableName} tokens.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.Format "My name is {0}."</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>My name is James Bond.</code></td>
+      </tr>
+    </table>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>SetVar Name "James Bond"<br>Text.Format "My name is {Name}"</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>My name is James Bond.</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-formatlines">
+    <h2>FormatLines</h2>
+    <p>Performs a template formatting operation on every line in a string and concatenates the result.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Format String</td>
+        <td>true</td>
+        <td>A format string suitable for usage in String.Format. Each line will replace the {0} token.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond<br>Ernst Blofeld</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.FormatLines &lt;li&gt;{0}&lt;/li&gt;</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>&lt;li&gt;James Bond&lt;/li&gt;&lt;li&gt;Ernst Blofeld&lt;/li&gt;</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-prepend">
+    <h2>Prepend</h2>
+    <p>Prepends a string to the input string.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Prefix</td>
+        <td>true</td>
+        <td>The string to prepend to the input string.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.Append "James "</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-replace">
+    <h2>Replace</h2>
+    <p>Finds and replaces one string with another.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>New String</td>
+        <td>false</td>
+        <td>The new string. If this argument is not provided, String.Empty will be used (so, the Old String will simply be removed.)</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Old String</td>
+        <td>true</td>
+        <td>The string to be replaced.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.Replace "James "</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>Bond</code></td>
+      </tr>
+    </table>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Text.Replace James "Bond. James"</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>Bond. James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-replaceall">
+    <h2>ReplaceAll</h2>
+    <p>Completely replaces the input string.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>New String</td>
+        <td>false</td>
+        <td>The new string. After this filter executes, the active text will be set to this value. If no argument is provided, String.Empty is used, effectively clearing the active text.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td>Any</td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>ReplaceAll "James Bond"</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td>Any</td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>ReplaceAll</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>None</td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-trim">
+    <h2>Trim</h2>
+    <p>Trims whitespace from the ends of the input string.</p>
+  </div>
+</div>

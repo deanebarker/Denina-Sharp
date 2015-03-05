@@ -1,0 +1,13 @@
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\Documentor.exe.config
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\Documentor.exe
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\Documentor.pdb
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\DeninaSharp.dll
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\HtmlAgilityPack.dll
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\Newtonsoft.Json.dll
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\DeninaSharp.pdb
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\Newtonsoft.Json.xml
+C:\Data\Code\DeninaSharp\Documentor\obj\Debug\Documentor.csprojResolveAssemblyReference.cache
+C:\Data\Code\DeninaSharp\Documentor\obj\Debug\Documentor.exe
+C:\Data\Code\DeninaSharp\Documentor\obj\Debug\Documentor.pdb
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\category.xslt
+C:\Data\Code\DeninaSharp\Documentor\bin\Debug\home.xslt

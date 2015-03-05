@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public static class PipelineCommandParser
     {

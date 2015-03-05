@@ -1,4 +1,4 @@
-﻿using BlendInteractive.Denina.Core;
+﻿using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests

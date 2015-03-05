@@ -3,12 +3,14 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web.UI.WebControls.WebParts;
 using System.Xml;
 using System.Xml.Xsl;
 using BlendInteractive.Denina.Core.Documentation;
-using BlendInteractive.Denina.Core.Filters;
+using DeninaSharp.Core.Documentation;
+using DeninaSharp.Core.Filters;
 
-namespace BlendInteractive.Denina.Core.Filters
+namespace DeninaSharp.Core.Filters
 {
     [Filters("XML", "Working with XML strings.")]
     public class Xml
@@ -17,6 +19,7 @@ namespace BlendInteractive.Denina.Core.Filters
 
         [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
         [ArgumentMeta(1, "XPath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
+        [CodeSample("<person><name>James Bond</name></person>", "Xml.Extract //name", "James Bond")]
         public static string ExtractFromXml(string input, PipelineCommand command)
         {
             var doc = new XmlDocument();
@@ -27,9 +30,22 @@ namespace BlendInteractive.Denina.Core.Filters
             return node != null ? node.Value : String.Empty;
         }
 
-        [Filter("TransformXml", "Transforms an XML document against an XSL stylesheet")]
+        [Filter("Transform", "Transforms an XML document against an XSL stylesheet")]
         [ArgumentMeta(1, "XSLT", true, "The raw XSLT to transform the input string.")]
         [ArgumentMeta(2, "XML", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
+        [CodeSample(
+            "",
+            @"File.Read xml-file.xml => $xml
+            File.Read xslt-file.xslt => $xslt
+            Xml.Transform $xslt $xml",
+            "(The transformed XML)"
+            )]
+        [CodeSample(
+            "(An XML string)",
+            @"File.Read xslt-file.xslt => $xslt
+            Xml.Transform $xslt",
+            "(The transformed XML)"
+            )]
         public static string TransformXml(string input, PipelineCommand command)
         {
             var arguments = Pipeline.IsSetGlobally(XSLT_ARGUMENT_VARIABLE_NAME) ? (XsltArgumentList) Pipeline.GetGlobalVariable(XSLT_ARGUMENT_VARIABLE_NAME) : new XsltArgumentList();
@@ -69,7 +85,14 @@ namespace BlendInteractive.Denina.Core.Filters
             return writer.ToString().Replace("\u00A0", " ");    // This is a bit of a hack. We're replacing NO BREAK SPACE with a regular space. There has to be a way to fix this in the XSLT output.
         }
 
-        [Filter("FormatNodes")]
+        [Filter("FormatNodes", "Performs token replacement on each node of a specified XPAth and returns the concatenated result.")]
+        [ArgumentMeta(1, "XPath", true, "XPath to return a list of XML nodes.")]
+        [ArgumentMeta(2, "Template", true, "The template to apply to each node. XPath can be enclosed in brackets. These XPath expessions will be executed on the XML of that node and the resulting content will replace the token.")]
+        [CodeSample(
+            "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
+            "Xml.FormatNodes //row \"&lt;p&gt;Name: {name}&lt;/p&gt;\"",
+            "&lt;p&gt;Name: James&lt;/p&gt;&lt;p&gt;Name: Bond&lt;/p&gt;"
+            )]
         public static string FormatNodes(string input, PipelineCommand command)
         {
             var xmlDoc = new XmlDocument();
@@ -98,7 +121,7 @@ namespace BlendInteractive.Denina.Core.Filters
 
 }
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public partial class Pipeline
     {

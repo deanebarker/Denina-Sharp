@@ -1,0 +1,44 @@
+﻿<div class="denina-category" id="denina-category-json" xmlns:denina="http://denina">
+  <h1>JSON</h1>
+  <p>Working with JSON data.</p>
+  <div class="denina-filter" id="denina-filter-extract">
+    <h2>Extract</h2>
+    <p>Retieves the valud at a defined "path" into the JSON object.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Path</td>
+        <td>true</td>
+        <td>A dot-delimited representation of the path into the object. Each property is defined by a segment. Numeric values prepended by a tilde ("~1") are interpreted as the index of an array. Example: "person.~2.name.first".</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td>A JSON String</td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Json.Extract person.~1.name</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>The value of the "name" object of the second "person" object.</td>
+      </tr>
+    </table>
+  </div>
+</div>

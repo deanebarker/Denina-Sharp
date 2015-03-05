@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using BlendInteractive.Denina.Core.Documentation;
+using DeninaSharp.Core.Documentation;
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     [DebuggerDisplay("{NormalizedCommandName}")]
     public class PipelineCommand

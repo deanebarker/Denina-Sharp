@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BlendInteractive.Denina.Core.Documentation
+namespace DeninaSharp.Core.Documentation
 {
     public class DoNotResolveVariablesAttribute : Attribute
     {

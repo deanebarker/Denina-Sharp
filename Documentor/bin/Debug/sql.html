@@ -1,0 +1,64 @@
+﻿<div class="denina-category" id="denina-category-sql" xmlns:denina="http://denina">
+  <h1>SQL</h1>
+  <p>For working with SQL databases.</p>
+  <div class="denina-filter" id="denina-filter-getxml">
+    <h2>GetXml</h2>
+    <p>Executes SQL against the specified connection string and returns an XML recordset.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>SQL</td>
+        <td>false</td>
+        <td>The SQL to execute. If omitted, the input string will be used.</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Connection String Name</td>
+        <td>true</td>
+        <td>The name of a connection string key from the application configuration.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Sql.GetXml myConnectionString "SELECT * FROM TableName"</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>An XML string</td>
+      </tr>
+    </table>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>SELECT * FROM TableName</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Sql.GetXml myConnectionString</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>An XML string</td>
+      </tr>
+    </table>
+  </div>
+</div>

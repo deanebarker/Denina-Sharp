@@ -49,10 +49,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Documentation\CodeSampleAttribute.cs" />
     <Compile Include="Filters\Sql.cs" />
     <Compile Include="PipelineCommandParser.cs" />
     <Compile Include="Documentation\DoNotResolveVariablesAttribute.cs" />
-    <Compile Include="Documentor.cs" />
     <Compile Include="Filters\File.cs" />
     <Compile Include="Filters\Html.cs" />
     <Compile Include="Filters\Http.cs" />

@@ -5,17 +5,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BlendInteractive.Denina.Core.Documentation;
+using DeninaSharp.Core.Documentation;
 using System.Configuration;
-using BlendInteractive.Denina.Core.Filters;
+using DeninaSharp.Core.Filters;
 
-namespace BlendInteractive.Denina.Core.Filters
+namespace DeninaSharp.Core.Filters
 {
     [Filters("SQL", "For working with SQL databases.")]
     public class Sql
     {
         public static readonly string ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME = "__allowsqlconnections";
 
-        [Filter("GetXml")]
+        [Filter("GetXml", "Executes SQL against the specified connection string and returns an XML recordset.")]
+        [ArgumentMeta(1, "Connection String Name", true, "The name of a connection string key from the application configuration.")]
+        [ArgumentMeta(2, "SQL", false, "The SQL to execute. If omitted, the input string will be used.")]
+        [CodeSample("SELECT * FROM TableName", "Sql.GetXml myConnectionString", "(An XML string)")]
+        [CodeSample("", "Sql.GetXml myConnectionString \"SELECT * FROM TableName\"", "(An XML string)")]
         public static string GetXml(string input, PipelineCommand command)
         {
             var allowedConnectionStrings = Pipeline.GetGlobalVariable(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME).ToString();
@@ -38,7 +43,7 @@ namespace BlendInteractive.Denina.Core.Filters
     }
 }
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public partial class Pipeline
     {

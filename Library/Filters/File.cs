@@ -2,8 +2,9 @@
 using System.IO;
 using System.Linq;
 using BlendInteractive.Denina.Core.Documentation;
+using DeninaSharp.Core.Documentation;
 
-namespace BlendInteractive.Denina.Core.Filters
+namespace DeninaSharp.Core.Filters
 {
     [Filters("File", "Working with files on the file system.")]
     public class File
@@ -12,6 +13,7 @@ namespace BlendInteractive.Denina.Core.Filters
 
         [Filter("Read", "Reads the content of a file on the file system.")]
         [ArgumentMeta(1, "Path", true, "The path to the file, relative to AppDomain.CurrentDomain.BaseDirectory. This value should not start with a leading slash as Path.Combine will interpret that as \"root.\"")]
+        [CodeSample("", "File.Read my-file.txt", "(The contents of my-file.txt)")]
         public static string Read(string input, PipelineCommand command)
         {
             // The sandbox variable must be set...
@@ -37,13 +39,13 @@ namespace BlendInteractive.Denina.Core.Filters
     }
 }
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public partial class Pipeline
     {
         public static void SetFileSandbox(string value)
         {
-            SetGlobalVariable(BlendInteractive.Denina.Core.Filters.File.SANDBOX_VARIABLE_NAME, value, true);
+            SetGlobalVariable(DeninaSharp.Core.Filters.File.SANDBOX_VARIABLE_NAME, value, true);
         }
     }
 }

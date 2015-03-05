@@ -1,0 +1,275 @@
+﻿<div class="denina-category" id="denina-category-core" xmlns:denina="http://denina">
+  <h1>Core</h1>
+  <p>For working with the pipeline and its variables.</p>
+  <div class="denina-filter" id="denina-filter-appendvar">
+    <h2>AppendVar</h2>
+    <p>Appends to the value of a variable</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Variable Name</td>
+        <td>true</td>
+        <td>The name of the variable to which to append data.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Data</td>
+        <td>false</td>
+        <td>The value to append. If omitted, the input string will be appended.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>SetVar Name James<br>AppendVar Name " Bond"<br>ReadFrom Name</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-clear">
+    <h2>Clear</h2>
+    <p>Replaces the input text. (The same as ReplaceAll called with no arguments.)</p>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td>The contents of War and Peace...</td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Clear</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>Absolutely nothing.</td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-initvar">
+    <h2>InitVar</h2>
+    <p>Sets the value of a variable to an empty string. The variable can now be referenced without error.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Variable Name</td>
+        <td>true</td>
+        <td>The name of the variable to set. Multiple variables can be specified. All will be initialized.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>InitVar Name Address City State Zip</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>None. The named variables are all initialized to empty strings.</td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-now">
+    <h2>Now</h2>
+    <p>Returns the current date and time, formatted by an optional format string.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Format String</td>
+        <td>false</td>
+        <td>The C# time format string with which to format the results.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Now "ddd d MMM"</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>Wed 25 Feb</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-readfrom">
+    <h2>ReadFrom</h2>
+    <p>Sets the active text to the contents of a variable.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Variable Name</td>
+        <td>true</td>
+        <td>The name of the variable to be retrieved.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>SetVar Name "James Bond"<br>ReadFrom Name</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-setvar">
+    <h2>SetVar</h2>
+    <p>Sets the value of a variable to the value provided. Does not change the input string.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Variable Name</td>
+        <td>true</td>
+        <td>The name of the variable to set.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Value</td>
+        <td>false</td>
+        <td>The desired value. If not provided, the variable is set to an empty string (same as InitVar).</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>SetVar Name "James Bond"<br>ReadFrom Name</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-writeto">
+    <h2>WriteTo</h2>
+    <p>Writes the active text to the named variable.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Variable Name</td>
+        <td>true</td>
+        <td>The name of the variable to which to write the input string.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>WriteTo Name</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td>The variable "Name" now contains "James Bond".</td>
+      </tr>
+    </table>
+  </div>
+</div>

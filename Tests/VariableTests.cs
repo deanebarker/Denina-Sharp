@@ -1,7 +1,7 @@
-﻿using System;
-using System.Linq;
-using BlendInteractive.Denina.Core;
+﻿using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Linq;
 
 namespace Tests
 {
@@ -134,6 +134,18 @@ namespace Tests
             {
                 Assert.Fail("This should have thrown a DeninaException, not a generic Exception.");
             }
+        }
+
+        [TestMethod]
+        public void AppendingVariables()
+        {
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("SetVar Name Annie");
+            pipeline.AddCommand("AppendVar Name Deane");
+            var result = pipeline.Execute();
+
+            Assert.AreEqual("AnnieDeane", pipeline.GetVariable("Name"));
+
         }
 
     }

@@ -1,0 +1,119 @@
+﻿<div class="denina-category" id="denina-category-html" xmlns:denina="http://denina">
+  <h1>HTML</h1>
+  <p>Creating and manipulating HTML strings.</p>
+  <div class="denina-filter" id="denina-filter-extract">
+    <h2>Extract</h2>
+    <p>Extracts an element from an HTML string. (Relies on the HtmlAgilityPack.dll assembly, which must be available.)</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Path</td>
+        <td>true</td>
+        <td>The XPath(-ish) to the element, based on HtmlAgilityPack's language standard.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code><html>
+              <body>
+                <div id="a">James Bond</div>
+              </body>
+            </html></code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Html.Extract //div[@id='a']</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-linebreaks">
+    <h2>LineBreaks</h2>
+    <p>Replaces line breaks with the corresponding HTML tag.</p>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James<br>Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Html.LineBreaks</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>James&lt;br/&gt;Bond</code></td>
+      </tr>
+    </table>
+  </div>
+  <div class="denina-filter" id="denina-filter-wrap">
+    <h2>Wrap</h2>
+    <p>Wraps the input string in a specified HTML tag with optional class and/or ID.</p>
+    <h3>Arguments</h3>
+    <table class="denina-arguments">
+      <colgroup>
+        <col class="pos">
+        <col class="name">
+        <col class="req">
+        <col class="desc">
+      </colgroup>
+      <tr>
+        <th>Pos</th>
+        <th>Name</th>
+        <th>Required</th>
+        <th>Description</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Tag Name</td>
+        <td>true</td>
+        <td>The name of the HTML tag in which to wrap the content.</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Class</td>
+        <td>false</td>
+        <td>If provided, the tag will use this as a "class" attribute.</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>ID</td>
+        <td>false</td>
+        <td>If provided, the tag will use this as an "id" attribute.</td>
+      </tr>
+    </table>
+    <h3>Samples</h3>
+    <table class="denina-samples">
+      <tr class="input">
+        <th>Input</th>
+        <td><code>James Bond</code></td>
+      </tr>
+      <tr class="command">
+        <th>Command</th>
+        <td><code>Html.Wrap div spy agent</code></td>
+      </tr>
+      <tr class="output">
+        <th>Output</th>
+        <td><code>&lt;div id="spy" class="agent"&gt;James Bond&lt;/div&gt;</code></td>
+      </tr>
+    </table>
+  </div>
+</div>

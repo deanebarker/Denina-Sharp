@@ -5,7 +5,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public class PipelineVariable
     {

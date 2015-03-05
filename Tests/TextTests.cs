@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BlendInteractive.Denina.Core;
+using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -71,6 +67,19 @@ namespace Tests
             string result = pipeline.Execute(" was here.");
 
             Assert.AreEqual("Deane was here.", result);
+        }
+
+        [TestMethod]
+        public void ExtractRegex()
+        {
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("Text.ExtractRegex e(..)e");
+            
+            string result = pipeline.Execute("Deane");
+            Assert.AreEqual(result, "an");
+
+            result = pipeline.Execute("Annie");
+            Assert.AreEqual(String.Empty, result);
         }
     }
 }

@@ -1,5 +1,5 @@
-﻿using BlendInteractive.Denina.Core;
-using BlendInteractive.Denina.Core.Documentation;
+﻿using DeninaSharp.Core;
+using DeninaSharp.Core.Documentation;
 
 namespace Tests.Utility
 {

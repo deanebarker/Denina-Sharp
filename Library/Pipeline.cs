@@ -4,9 +4,9 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using BlendInteractive.Denina.Core.Documentation;
+using DeninaSharp.Core.Documentation;
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public partial class Pipeline
     {
@@ -200,7 +200,7 @@ namespace BlendInteractive.Denina.Core
                 throw new DeninaException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
             }
 
-            return variables[PipelineCommandParser.NormalizeVariableName(key)].Value;
+            return variables[PipelineCommandParser.NormalizeVariableName(key)].Value ?? String.Empty;
         }
 
         public static object GetGlobalVariable(string key)

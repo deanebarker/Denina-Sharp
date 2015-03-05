@@ -1,10 +1,17 @@
 ﻿using System;
+using System.Xml.Serialization;
 
-namespace BlendInteractive.Denina.Core.Documentation
+namespace DeninaSharp.Core.Documentation
 {
     [AttributeUsage(AttributeTargets.Class)]
+    [XmlRoot(ElementName = "categoryMeta")]
     public class FiltersAttribute : Attribute
     {
+        public FiltersAttribute()
+        {
+            // This only exists for serializing
+        }
+
         public FiltersAttribute(string category, string description = null)
         {
             Category = category;
@@ -14,7 +21,7 @@ namespace BlendInteractive.Denina.Core.Documentation
             }
         }
 
-        public string Category { get; private set; }
-        public string Description { get; private set; }
+        public string Category { get; set; }
+        public string Description { get; set; }
     }
 }

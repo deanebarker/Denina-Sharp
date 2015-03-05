@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
-using BlendInteractive.Denina.Core;
+using DeninaSharp.Core;
 
 namespace UI
 {

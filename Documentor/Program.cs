@@ -3,23 +3,31 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Web.UI;
+using System.Security.Policy;
+using System.Text;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Serialization;
+using System.Xml.Xsl;
 using BlendInteractive.Denina.Core.Documentation;
+using DeninaSharp.Core;
+using DeninaSharp.Core.Documentation;
 
-namespace BlendInteractive.Denina.Core
+namespace Documentor
 {
-    public static class Documentor
+    class Program
     {
         private const string template = @"
             <html>
                 <head>
                     <style>
                         body, td, th {{ font-family: 'Helvetica Neue', Helvetica; font-size: 16px; line-height: 1.6; }}
-                        td, th {{ border-bottom: solid 1px rgb(230,230,230); text-align: left; padding: 5px; padding-right: 15px;}}
+                        td, th {{ vertical-align: top; border-bottom: solid 1px rgb(230,230,230); text-align: left; padding: 5px; padding-right: 15px;}}
                         th {{ background-color: rgb(240,240,240); }}
                         table {{ border-collapse: collapse;}}
                         h3 {{ margin-top: 30px; margin-bottom: 3px; }}
                         h2 {{ margin-top: 40px; background-color: rgb(240,240,240); padding: 10px; width: 100%; }}
+                        h4 {{ margin-bottom: 5px; }}
                         p {{ margin: 0 0 1em 0; }}
                         div.filter-meta {{ margin-left: 0px; }}
                         .argument-name, .required {{ white-space: nowrap; vertical-align: top; }}
@@ -27,7 +35,10 @@ namespace BlendInteractive.Denina.Core
                         table {{ width: 100%; }}
                         h1 {{ padding-bottom: 0.3em; font-size: 2.25em; line-height: 1.2; border-bottom: 1px solid #eee; }}
                         body {{padding-bottom: 100px; }} 
-                        .top-link {{ display: block; margin-top: 20px; }}               
+                        .top-link {{ display: block; margin-top: 20px; }}  
+                        code {{ display: block; font-size: 13px; font-family: courier new; line-height: 18px; padding: 4px; background-color: rgb(80,80,80); color: white; }}     
+                        table.code-samples {{ margin-bottom: 1em; border-top: solid 1px rgb(230,230,230); }}        
+                        table.code-samples th {{ width: 100px; }}
                     </style>
                 </head>
                 <body>
@@ -36,8 +47,119 @@ namespace BlendInteractive.Denina.Core
             </html>
             ";
 
-        public static string Generate()
+        static void Main(string[] args)
         {
+            var stringWriter = new StringWriter();
+
+            var settings = new XmlWriterSettings()
+            {
+                Encoding = Encoding.Unicode,
+                OmitXmlDeclaration = true,
+                Indent = true
+            };
+                
+
+            var ns = new XmlSerializerNamespaces();
+            ns.Add("", "");
+
+            var xmlWriter = new XmlTextWriter(stringWriter);
+
+            xmlWriter.WriteStartDocument();
+            xmlWriter.WriteStartElement("root");
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                foreach (Type type in assembly.GetTypes().Where(t => t.GetCustomAttributes(typeof (FiltersAttribute), true).Any()))
+                {
+                    xmlWriter.WriteStartElement("category");
+
+                    var serializer1 = new XmlSerializer(typeof(FiltersAttribute));
+                    serializer1.Serialize(xmlWriter, type.GetCustomAttributes(typeof(FiltersAttribute), true).First(), ns);
+
+                    foreach (MethodInfo method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
+                    {
+                        xmlWriter.WriteStartElement("filter");
+                        
+                        var serializer2 = new XmlSerializer(typeof(FilterAttribute));
+                        serializer2.Serialize(xmlWriter, method.GetCustomAttributes(typeof(FilterAttribute), true).First(), ns);
+
+                        if (method.GetCustomAttributes(typeof (ArgumentMetaAttribute), true).Any())
+                        {
+
+                            xmlWriter.WriteStartElement("arguments");
+
+                            foreach (ArgumentMetaAttribute attribute in method.GetCustomAttributes(typeof (ArgumentMetaAttribute), true))
+                            {
+                                var serializer3 = new XmlSerializer(typeof (ArgumentMetaAttribute));
+                                serializer3.Serialize(xmlWriter, attribute, ns);
+                            }
+
+                            xmlWriter.WriteEndElement();
+                        }
+
+                        if (method.GetCustomAttributes(typeof(CodeSampleAttribute), true).Any())
+                        {
+
+                            xmlWriter.WriteStartElement("samples");
+
+                            foreach (CodeSampleAttribute attribute in method.GetCustomAttributes(typeof(CodeSampleAttribute), true))
+                            {
+                                var serializer3 = new XmlSerializer(typeof(CodeSampleAttribute));
+                                serializer3.Serialize(xmlWriter, attribute, ns);
+                            }
+
+                            xmlWriter.WriteEndElement();
+                        }
+
+                        xmlWriter.WriteEndElement();
+                    }
+
+                    xmlWriter.WriteEndElement();
+                }
+
+            }
+
+            xmlWriter.WriteEndElement();
+            xmlWriter.WriteEndDocument();
+
+
+            var xml = stringWriter.ToString();
+
+            var categoryXslt = new XslCompiledTransform();
+            categoryXslt.Load(XmlReader.Create(new StringReader(File.ReadAllText("category.xslt"))));
+
+            var homeXslt = new XslCompiledTransform();
+            homeXslt.Load(XmlReader.Create(new StringReader(File.ReadAllText("home.xslt"))));
+
+            var extenstionObject = new XsltExtensions();
+            var arguments = new XsltArgumentList();
+            arguments.AddExtensionObject("http://denina", extenstionObject);
+
+            var doc = new XmlDocument();
+            doc.LoadXml(xml);
+
+            var homeFile = File.OpenWrite("index.html");
+            homeXslt.Transform(XmlReader.Create(new StringReader(xml), new XmlReaderSettings()), arguments, homeFile);
+            homeFile.Close();
+
+            foreach(XmlElement category in doc.SelectNodes("//category"))
+            {
+                var fileName = extenstionObject.CleanFileName(category.SelectSingleNode("categoryMeta/Category").InnerText);
+
+                var categoryFile = File.OpenWrite(fileName + ".html");
+                categoryXslt.Transform(XmlReader.Create(new StringReader(category.OuterXml)), arguments, categoryFile);
+                categoryFile.Close();
+            }
+
+            //File.WriteAllText("doc.html", String.Format(template, writer.ToString()));
+
+        }
+        
+
+        /*static void Main2(string[] args)
+        {
+            
+
             var stringWriter = new StringWriter();
             var html = new HtmlTextWriter(stringWriter);
 
@@ -158,6 +280,6 @@ namespace BlendInteractive.Denina.Core
             }
 
             return String.Format(template, stringWriter);
-        }
+        }*/
     }
 }
