@@ -72,6 +72,22 @@ namespace Tests
             Assert.AreEqual("It worked!", pipeline.Execute());           
         }
 
+        [TestMethod]
+        public void TryToLoadDependency()
+        {
+            var pipeline = new Pipeline();
+
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("html.extract"));
+        }
+
+        [TestMethod]
+        public void TryToLoadBrokenDependency()
+        {
+            var pipeline = new Pipeline();
+
+            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("core.faketest"));
+        }
+
 
         public static string DoSomething(string input, PipelineCommand command)
         {

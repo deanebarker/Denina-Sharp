@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using BlendInteractive.Denina.Core.Documentation;
 using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core
@@ -92,6 +93,15 @@ namespace DeninaSharp.Core
 
         public static void AddMethod(MethodInfo method, string category, string name = null)
         {
+            // Check if it has any requirements
+            foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof (RequiresAttribute), true))
+            {
+                if (Type.GetType(dependency.TypeName) == null)
+                {
+                    return;
+                }
+            }
+
             if (name == null)
             {
                 name = ((FilterAttribute) method.GetCustomAttributes(typeof (FilterAttribute), true).First()).Name;

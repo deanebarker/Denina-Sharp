@@ -95,5 +95,14 @@ namespace DeninaSharp.Core.Filters
 
             return input;
         }
+
+        #if(DEBUG)
+        [Filter("FakeTest", "This is a fake test which requires a fake class, used to test dependency checking")]
+        [Requires("SomeFakeClass", "This class doesn't exist.")]
+        public static string FakeTest(string input, PipelineCommand command)
+        {
+            return input;
+        }
+        #endif
     }
 }

@@ -13,6 +13,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Extract", "Extracts an element from an HTML string. (Relies on the HtmlAgilityPack.dll assembly, which must be available.)")]
         [ArgumentMeta(1, "Path", true, "The XPath(-ish) to the element, based on HtmlAgilityPack's language standard.")]
         [CodeSample("<html><body><div id=\"a\">James Bond</div></body></html>", "Html.Extract //div[@id='a']", "James Bond")]
+        [Requires("HtmlAgilityPack.HtmlDocument, HtmlAgilityPack", "HtmlAgilityPack is an open-source HTML parsing library.")]
         public static string Extract(string input, PipelineCommand command)
         {
             var doc = new HtmlDocument();
