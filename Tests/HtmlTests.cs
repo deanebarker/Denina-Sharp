@@ -11,7 +11,7 @@ namespace Tests
         public void Wrap()
         {
             var pipeline = new Pipeline();
-            pipeline.AddCommand("html.Wrap p theClass theId");
+            pipeline.AddCommand("html.Wrap -tag:p -class:theClass -id:theId");
             string result = pipeline.Execute("Deane");
 
             Assert.AreEqual("<p class=\"theClass\" id=\"theId\">Deane</p>", result);

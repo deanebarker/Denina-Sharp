@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core;
+﻿using System.Runtime;
+using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,7 +61,7 @@ namespace Tests
         public void AddQuotedCommandsByString()
         {
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Replace Deane \"Annie was here\"");
+            pipeline.AddCommand("Replace -old:Deane -new:\"Annie was here\"");
 
             Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
             Assert.AreEqual("Deane", pipeline.Commands.First().CommandArgs.First().Value);
@@ -70,16 +71,17 @@ namespace Tests
         [TestMethod]
         public void AddMultipleCommandsByString()
         {
+            // These have to be flush with the left margin to void whitespace
             string commandString = @"
-                Replace a b
-                Replace c d
+Text.Replace -old:a -new:b
+Text.Replace -old:c -new:d
             ";
 
             var pipeline = new Pipeline();
             pipeline.AddCommand(commandString);
 
-            Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
-            Assert.AreEqual("Replace", pipeline.Commands[1].CommandName);
+            Assert.AreEqual("Text.Replace", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Text.Replace", pipeline.Commands[1].CommandName);
             Assert.AreEqual("b", pipeline.Commands.First().CommandArgs.Last().Value);
         }
 
@@ -87,8 +89,8 @@ namespace Tests
         public void AddCommandWithComment()
         {
             string commandString = @"
-                Replace a b
-                #Replace c d
+                Replace -old:a -new:b
+                #Replace -old:c -new:d
             ";
 
             var pipeline = new Pipeline();
@@ -113,6 +115,17 @@ namespace Tests
             pipeline.AddCommand(commandString);
 
             Assert.AreEqual(2, pipeline.Commands.Count);
+        }
+
+        [TestMethod]
+        public void AddingIdenticalArgumentKeys()
+        {
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("Text.Format -template:deane -template:barker -template:was -template:here -other:argument");
+
+            Assert.AreEqual(5, pipeline.Commands.First().CommandArgs.Count);
+            Assert.AreEqual("template.3", pipeline.Commands.First().CommandArgs.Skip(3).First().Key);
+            Assert.AreEqual(4, pipeline.Commands.First().GetMultiArgument("template").Count);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using DeninaSharp.Core;
+using DeninaSharp.Core.Filters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -7,17 +8,21 @@ namespace Tests
     [TestClass]
     public class XmlTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
+        }
+
         [TestMethod]
         public void TransformXml()
         {
             // This test relies on controlled XSLT/XML files in the "Utility" folder
-            Pipeline.SetFileSandbox(AppDomain.CurrentDomain.BaseDirectory);
+            var pipeline = GetPipeline();
+            pipeline.AddCommand("File.Read -file:utility/data.xml => $xml");
+            pipeline.AddCommand("File.Read -file:utility/transform.xslt => $xslt");
+            pipeline.AddCommand("Xml.Transform -xslt:$xslt -xml:$xml");
 
-            var pipeline = new Pipeline();
-            pipeline.AddCommand("File.Read utility/data.xml => $xml");
-            pipeline.AddCommand("File.Read utility/transform.xslt => $xsl");
-            pipeline.AddCommand("Xml.Transform $xsl $xml => $result");
-            pipeline.AddCommand("$result =>");
 
             var result = pipeline.Execute();
 
@@ -27,15 +32,30 @@ namespace Tests
         [TestMethod]
         public void FormatNodes()
         {
-            Pipeline.SetFileSandbox(AppDomain.CurrentDomain.BaseDirectory);
-
-
-            var pipeline = new Pipeline();
-            pipeline.AddCommand("File.Read utility/data.xml");
-            pipeline.AddCommand("Xml.FormatNodes //element \"Value: {.}\"");
+            var pipeline = GetPipeline();
+            pipeline.AddCommand("File.Read -file:utility/data.xml");
+            pipeline.AddCommand("Xml.FormatNodes -xpath://element -template:\"Value: {.}\"");
             var result = pipeline.Execute();
 
             Assert.AreEqual(result, "Value: Deane");
         }
+
+        [TestMethod]
+        public void CountNodes()
+        {
+
+            var pipeline = GetPipeline();
+            pipeline.AddCommand("File.Read -file:utility/data.xml");
+            pipeline.AddCommand("Xml.CountNodes -xpath://element");
+            
+            Assert.AreEqual(pipeline.Execute(), "1");
+        }
+
+        private Pipeline GetPipeline()
+        {
+            var pipeline = new Pipeline();
+            return pipeline;
+        }
+       
     }
 }
