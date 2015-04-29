@@ -16,10 +16,12 @@ namespace DeninaSharp.Core.Filters
         [Requires("HtmlAgilityPack.HtmlDocument, HtmlAgilityPack", "HtmlAgilityPack is an open-source HTML parsing library.")]
         public static string Extract(string input, PipelineCommand command)
         {
+            var xpath = command.GetArgument("xpath");
+
             var doc = new HtmlDocument();
             doc.LoadHtml(input);
 
-            HtmlNode node = doc.DocumentNode.SelectSingleNode(command.CommandArgs[0]);
+            HtmlNode node = doc.DocumentNode.SelectSingleNode(xpath);
 
             return node != null ? node.InnerHtml : String.Empty;
         }
@@ -35,18 +37,18 @@ namespace DeninaSharp.Core.Filters
             var tagBuilder = new HtmlTextWriter(stringWriter);
 
             // The second argument should be the class
-            if (command.CommandArgs.ContainsKey(1))
+            if (command.HasArgument("class"))
             {
-                tagBuilder.AddAttribute("class", command.CommandArgs[1]);
+                tagBuilder.AddAttribute("class", command.GetArgument("class"));
             }
 
             // The third argument should be the id
-            if (command.CommandArgs.ContainsKey(2))
+            if (command.HasArgument("id"))
             {
-                tagBuilder.AddAttribute("id", command.CommandArgs[2]);
+                tagBuilder.AddAttribute("id", command.GetArgument("id"));
             }
 
-            tagBuilder.RenderBeginTag(command.CommandArgs[0]);
+            tagBuilder.RenderBeginTag(command.GetArgument("tag"));
             tagBuilder.Write(input);
             tagBuilder.RenderEndTag();
 

@@ -27,6 +27,15 @@ namespace DeninaSharp.Core.Filters
             return String.Concat(command.DefaultArgument, input);
         }
 
+        [Filter("Concat", "Concatenates a series of arguments together.")]
+        [ArgumentMeta(1, "Value", true, "Any value (variable or literal). This argument may be repeated multiple times. All passed-in arguments will be concatenated.")]
+        [CodeSample("", "Text.Append James Bond was here", "JamesBondwashere")]
+        public static string Concat(string input, PipelineCommand command)
+        {
+            var arguments = command.CommandArgs.Select(a => a.Value);
+            return String.Join(String.Empty, arguments);
+        }
+
 
         [Filter("Replace", "Finds and replaces one string with another.")]
         [ArgumentMeta(1, "Old String", true, "The string to be replaced.")]
@@ -35,10 +44,13 @@ namespace DeninaSharp.Core.Filters
         [CodeSample("James Bond", "Text.Replace \"James \"", "Bond")]
         public static string Replace(string input, PipelineCommand command)
         {
-            // If they didn't pass in a second argument, then we're using String.Empty (so, less "replace" and more "remove"
-            string replaceWith = command.CommandArgs.Count > 1 ? command.CommandArgs[1] : String.Empty;
+            var oldValue = command.GetArgument("old");
+            var newValue = command.GetArgument("new", String.Empty);
 
-            return input.Replace(command.CommandArgs[0], replaceWith);
+            var respectCase = false;
+            Boolean.TryParse(command.GetArgument("case", "false"), out respectCase);
+
+            return respectCase ? input.Replace(oldValue, newValue) :  Regex.Replace(input, oldValue, newValue, RegexOptions.IgnoreCase);
         }
 
         [Filter("ReplaceAll", "Completely replaces the input string.")]
@@ -47,12 +59,12 @@ namespace DeninaSharp.Core.Filters
         [CodeSample("(Any)", "ReplaceAll", "(None)")]
         public static string ReplaceAll(string input, PipelineCommand command)
         {
+            // ReplaceAll with no arguments is essentially the same as Clear
             if (!command.CommandArgs.Any())
             {
                 return String.Empty;
             }
-
-            return command.DefaultArgument;
+            return command.GetArgument("text");
         }
 
         [Filter("Format", "Performs simple token replacement of variables and the active text.")]
@@ -65,8 +77,7 @@ namespace DeninaSharp.Core.Filters
             "My name is James Bond.")]
         public static string Format(string input, PipelineCommand command)
         {
-            string template = command.CommandArgs.ContainsKey(0) ? command.CommandArgs[0] : String.Empty;
-            template = command.CommandArgs.ContainsKey("template") && !String.IsNullOrWhiteSpace(command.CommandArgs["template"]) ? command.CommandArgs["template"] : template;
+            var template = command.GetArgument("template");
 
             foreach (var variable in command.Pipeline.Variables)
             {

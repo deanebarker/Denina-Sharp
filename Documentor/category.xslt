@@ -33,6 +33,7 @@
     <div class="denina-filter" id="denina-filter-{denina:CleanFileName(filterMeta/Name)}">
       <xsl:apply-templates select="filterMeta/Name"/>
       <xsl:apply-templates select="filterMeta/Description"/>
+      <xsl:apply-templates select="dependencies[dependency]"/>
       <xsl:apply-templates select="arguments"/>
       <xsl:apply-templates select="samples"/>
     </div>
@@ -76,6 +77,29 @@
     <xsl:apply-templates/>
   </xsl:template>
 
+  <!-- Dependencies -->
+  <xsl:template match="dependencies">
+    <h3>Dependencies</h3>
+    <table>
+      <tr>
+        <th>Type Name</th>
+        <th>Note</th>
+      </tr>
+      <xsl:apply-templates/>
+    </table>
+  </xsl:template>
+  
+  <xsl:template match="dependency">
+    <tr>
+      <td>
+        <xsl:value-of select="TypeName"/>
+      </td>
+      <td>
+        <xsl:value-of select="Note"/>
+      </td>
+    </tr>
+    <xsl:apply-templates/>
+  </xsl:template>
   
   <!-- Arguments -->
   <xsl:template match="argumentMeta">

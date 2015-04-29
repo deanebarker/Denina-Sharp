@@ -1,25 +1,29 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.Remoting;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.UI.WebControls.WebParts;
 using System.Xml;
 using System.Xml.Xsl;
+using BlendInteractive;
 using BlendInteractive.Denina.Core.Documentation;
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Filters;
+using DeninaSharp.Core.Utility;
 
 namespace DeninaSharp.Core.Filters
 {
     [Filters("XML", "Working with XML strings.")]
     public class Xml
     {
-        public static string XSLT_ARGUMENT_VARIABLE_NAME = "__xsltarguments";
+        public static string XSLT_ARGUMENT_VARIABLE_NAME = "Xml.Transform.XsltExtensionClass";
 
         [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
         [ArgumentMeta(1, "XPath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
-        [CodeSample("<person><name>James Bond</name></person>", "Xml.Extract //name", "James Bond")]
+        [CodeSample("&lt;person&gt;&lt;name&gt;James Bond&lt;/name&gt;&lt;/person&gt;", "Xml.Extract //name", "James Bond")]
         public static string ExtractFromXml(string input, PipelineCommand command)
         {
             var doc = new XmlDocument();
@@ -46,17 +50,46 @@ namespace DeninaSharp.Core.Filters
             Xml.Transform $xslt",
             "(The transformed XML)"
             )]
-        public static string TransformXml(string input, PipelineCommand command)
+        public static string Transform(string input, PipelineCommand command)
         {
-            var arguments = Pipeline.IsSetGlobally(XSLT_ARGUMENT_VARIABLE_NAME) ? (XsltArgumentList) Pipeline.GetGlobalVariable(XSLT_ARGUMENT_VARIABLE_NAME) : new XsltArgumentList();
-
             var xml = String.Empty;
-            var xsl = command.CommandArgs.First().Value;
+            var xsl = command.GetArgument("xslt");
+
+            // This adds an extension object for XSL transforms
+            var arguments = new XsltArgumentList();
+            arguments.AddExtensionObject("http://denina", new XsltExtensions());
+
+            // Do we want to pass in a custom extension object?
+            if (Pipeline.IsSetGlobally(XSLT_ARGUMENT_VARIABLE_NAME))
+            {
+                var namespaceName = "ext";
+                var className = Pipeline.GetGlobalVariable(XSLT_ARGUMENT_VARIABLE_NAME).ToString();
+
+                // If they want to specify a custom namespace via "=", split and reassign the namespace and class names.
+                if(className.Contains('='))
+                {
+                    namespaceName = className.Split('=').First();
+                    className = className.Split('=').Last();
+                }
+
+                // Try to get the object
+                ObjectHandle extensionObject;
+                try
+                {
+                    extensionObject = Activator.CreateInstance(className.Split(',').Last(), className.Split(',').First());
+                }
+                catch (Exception e)
+                {
+                    throw new DeninaException(String.Format("Unable to load XsltExtension object \"{0}\"", className), e);
+                }
+                
+                arguments.AddExtensionObject(String.Concat("http://", namespaceName), extensionObject.Unwrap());
+            }
 
             // If there are two arguments, assume the second is XML
-            if (command.CommandArgs.Count == 2)
+            if (command.HasArgument("xml"))
             {
-                xml = command.CommandArgs[1];
+                xml = command.GetArgument("xml");
             }
             else
             {
@@ -98,8 +131,8 @@ namespace DeninaSharp.Core.Filters
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(input);
 
-            var xpath = command.CommandArgs.First().Value;
-            var template = command.CommandArgs[1];
+            var xpath = command.GetArgument("xpath");
+            var template = command.GetArgument("template");
 
             var patterns = Regex.Matches(template, "{([^}]*)}").Cast<Match>().Select(m => m.Value).ToList();
 
@@ -117,17 +150,28 @@ namespace DeninaSharp.Core.Filters
 
             return output.ToString();
         }
-    }
 
-}
-
-namespace DeninaSharp.Core
-{
-    public partial class Pipeline
-    {
-        public static void AddXsltArgumentList(object argumentList)
+        [Filter("CountNodes", "Returns the number of matching nodes.")]
+        [ArgumentMeta(1, "XPath", true, "XPath to return a list of XML nodes.")]
+        [CodeSample(
+            "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
+            "Xml.CountNodes //name",
+            "2"
+            )]
+        public static string CountNodes(string input, PipelineCommand command)
         {
-            SetGlobalVariable(Xml.XSLT_ARGUMENT_VARIABLE_NAME, argumentList);
+            var xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(input);
+
+            var xpath = command.CommandArgs.First().Value;
+
+            if (xmlDoc.SelectNodes(xpath) == null)
+            {
+                return "0";
+            }
+
+            return xmlDoc.SelectNodes(xpath).Count.ToString();
         }
     }
+
 }

@@ -18,6 +18,7 @@ namespace DeninaSharp.Core
             CommandArgs = new Dictionary<object, string>();
             InputVariable = Pipeline.GLOBAL_VARIABLE_NAME;
             OutputVariable = Pipeline.GLOBAL_VARIABLE_NAME;
+            Label = Guid.NewGuid().ToString();  // This is a placeholder. In some instances, this will be reset.
         }
 
         public string CommandName { get; set; }
@@ -26,6 +27,8 @@ namespace DeninaSharp.Core
         public string InputVariable { get; set; }
         public string OriginalText { get; set; }
         public long ElapsedTime { get; set; }
+        public string Label { get; set; } // For now, this just exists to identify the "end" command
+        public string SendToLabel { get; set; }
 
         public string DefaultArgument
         {
@@ -63,9 +66,47 @@ namespace DeninaSharp.Core
             }
         }
 
+        public string GetArgument(int ordinal)
+        {
+            return CommandArgs[ordinal];
+        }
+
+        public string GetArgument(string key, string defaultValue = null)
+        {
+            if (CommandArgs.ContainsKey(key))
+            {
+                return CommandArgs[key];
+            }
+
+            if (defaultValue != null)
+            {
+                return defaultValue;
+            }
+
+            throw new DeninaException(String.Format("Attempt to access named argument \"{0}\" which was not provided.", key));
+        }
+
+        public List<string> GetMultiArgument(string key)
+        {
+            // Does the key exist at all?
+            if (!CommandArgs.ContainsKey(key))
+            {
+                return new List<string>();
+            }
+
+            return CommandArgs.Where(a => a.Key.ToString() == key || a.Key.ToString().StartsWith(String.Concat(key, "."))).Select(a => a.Value).ToList();
+        }
+
+        public bool HasArgument(object key)
+        {
+            return CommandArgs.ContainsKey(key);
+        }
+
         public static string EnsureCategoryName(string input)
         {
             return input.Contains(".") ? input : String.Concat(DEFAULT_CATEGORY_NAME, ".", input);
         }
+
+        
     }
 }

@@ -71,6 +71,12 @@ namespace Documentor
             {
                 foreach (Type type in assembly.GetTypes().Where(t => t.GetCustomAttributes(typeof (FiltersAttribute), true).Any()))
                 {
+                    // Don't write the test filters
+                    if (type.Name == "Test")
+                    {
+                        continue;
+                    }
+                    
                     xmlWriter.WriteStartElement("category");
 
                     var serializer1 = new XmlSerializer(typeof(FiltersAttribute));
@@ -91,6 +97,20 @@ namespace Documentor
                             foreach (ArgumentMetaAttribute attribute in method.GetCustomAttributes(typeof (ArgumentMetaAttribute), true))
                             {
                                 var serializer3 = new XmlSerializer(typeof (ArgumentMetaAttribute));
+                                serializer3.Serialize(xmlWriter, attribute, ns);
+                            }
+
+                            xmlWriter.WriteEndElement();
+                        }
+
+                        if (method.GetCustomAttributes(typeof(RequiresAttribute), true).Any())
+                        {
+
+                            xmlWriter.WriteStartElement("dependencies");
+
+                            foreach (RequiresAttribute attribute in method.GetCustomAttributes(typeof(RequiresAttribute), true))
+                            {
+                                var serializer3 = new XmlSerializer(typeof(RequiresAttribute));
                                 serializer3.Serialize(xmlWriter, attribute, ns);
                             }
 

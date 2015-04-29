@@ -34,9 +34,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\Bespin\WebSite\bin\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -49,9 +49,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\PipelineConfigVariable.cs" />
+    <Compile Include="Configuration\PipelineConfigVariables.cs" />
     <Compile Include="Documentation\CodeSampleAttribute.cs" />
     <Compile Include="Documentation\RequiresAttribute.cs" />
+    <Compile Include="Filters\If.cs" />
     <Compile Include="Filters\Sql.cs" />
+    <Compile Include="Filters\Test.cs" />
     <Compile Include="PipelineCommandParser.cs" />
     <Compile Include="Documentation\DoNotResolveVariablesAttribute.cs" />
     <Compile Include="Filters\File.cs" />
@@ -64,11 +68,14 @@
     <Compile Include="Documentation\ArgumentMetaAttribute.cs" />
     <Compile Include="Documentation\FiltersAttribute.cs" />
     <Compile Include="Filters\Core.cs" />
+    <Compile Include="Configuration\PipelineConfigSection.cs" />
     <Compile Include="PipelineVariable.cs" />
     <Compile Include="Documentation\FilterAttribute.cs" />
     <Compile Include="PipelineCommand.cs" />
     <Compile Include="Pipeline.cs" />
     <Compile Include="DeninaException.cs" />
+    <Compile Include="Utility\StringUtilities.cs" />
+    <Compile Include="Utility\XsltExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -81,8 +88,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)Binaries\$(TargetFileName)
-copy "$(TargetDir)HtmlAgilityPack.dll" "$(SolutionDir)Binaries\HtmlAgilityPack.dll"</PostBuildEvent>
+    <PostBuildEvent>REM copy "$(TargetPath)" "$(SolutionDir)Binaries\$(TargetFileName)
+REM copy "$(TargetDir)HtmlAgilityPack.dll" "$(SolutionDir)Binaries\HtmlAgilityPack.dll"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

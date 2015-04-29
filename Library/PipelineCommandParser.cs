@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace DeninaSharp.Core
@@ -15,7 +16,19 @@ namespace DeninaSharp.Core
         public static IEnumerable<PipelineCommand> ParseCommandString(string commandString)
         {
             var commands = new List<PipelineCommand>();
-            foreach (var line in commandString.Trim().Split(COMMAND_DELIMITER.ToCharArray()).Select(s => s.Trim()))
+
+            // If we have nothing, return an empty list of commands
+            if (String.IsNullOrWhiteSpace(commandString))
+            {
+                return commands;
+            }
+
+            var lines = Regex.Split(commandString, @"\n(?!-| )")
+                .Select(s => s.Replace(Environment.NewLine, " "))
+                .Where(s => !String.IsNullOrWhiteSpace(s))
+                .ToList();
+
+            foreach (var line in lines)
             {
                 // Is this a comment, or is it empty?
                 if (String.IsNullOrWhiteSpace(line) || line.Trim().StartsWith(COMMENT_PREFIX))
@@ -30,37 +43,37 @@ namespace DeninaSharp.Core
                 command.OriginalText = line;
 
                 // $myVar =>
-                if (tokens.Last == PIPE_TOKEN && IsVariableName(tokens.First) && tokens.Count == 2)
+                if (tokens.Last == PIPE_TOKEN && tokens.Count == 2)
                 {
                     command.CommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
-                    command.OutputVariable = tokens.First;
+                    command.OutputVariable = NormalizeVariableName(tokens.First);
                     commands.Add(command);
                     continue;
                 }
 
                 // => $myVar
-                if (tokens.First == PIPE_TOKEN && IsVariableName(tokens.Last) && tokens.Count == 2)
+                if (tokens.First == PIPE_TOKEN && tokens.Count == 2)
                 {
                     command.CommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
-                    command.OutputVariable = tokens.Last;
+                    command.OutputVariable = NormalizeVariableName(tokens.Last);
                     commands.Add(command);
                     continue;
                 }
 
                 // WriteTo $myVar
-                if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.WRITE_TO_VARIABLE_COMMAND && IsVariableName(tokens.Second))
+                if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.WRITE_TO_VARIABLE_COMMAND)
                 {
                     command.CommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
-                    command.OutputVariable = tokens.Second;
+                    command.OutputVariable = NormalizeVariableName(tokens.Second);
                     commands.Add(command);
                     continue;
                 }
 
                 // ReadFrom $myVar
-                if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.READ_FROM_VARIABLE_COMMAND && IsVariableName(tokens.Second))
+                if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.READ_FROM_VARIABLE_COMMAND)
                 {
                     command.CommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
-                    command.OutputVariable = tokens.Second;
+                    command.InputVariable = NormalizeVariableName(tokens.Second);
                     commands.Add(command);
                     continue;
                 }
@@ -68,7 +81,7 @@ namespace DeninaSharp.Core
                 // DoSomething SomeArgument => $myVar
                 if (tokens.Count > 2 && tokens.SecondToLast == PIPE_TOKEN && IsVariableName(tokens.Last))
                 {
-                    command.OutputVariable = tokens.Last();
+                    command.OutputVariable = NormalizeVariableName(tokens.Last());
 
                     // Now, remove the last two items from the tokens and continue like normal...
                     tokens.RemoveFromEnd(2);
@@ -77,7 +90,7 @@ namespace DeninaSharp.Core
                 // $myVar => DoSomething
                 if (tokens.Count > 2 && tokens.Second == PIPE_TOKEN && IsVariableName(tokens.First))
                 {
-                    command.InputVariable = tokens.First();
+                    command.InputVariable = NormalizeVariableName(tokens.First());
 
                     // Now, remove the last two items from the tokens and continue like normal...
                     tokens.RemoveFromStart(2);
@@ -93,7 +106,32 @@ namespace DeninaSharp.Core
                 var counter = 0;
                 foreach (var token in tokens.Skip(1))
                 {
-                    command.CommandArgs.Add(counter, token);
+                    var value = token;
+                    var key = counter.ToString();
+
+                    if (Regex.IsMatch(token, "-[^:]+:.*"))
+                    {
+                        key = value.Substring(0, token.IndexOf(':')).Trim('-');
+                        value = value.Substring(token.IndexOf(':') + 1);
+                    }
+
+                    if (command.CommandArgs.ContainsKey(key))
+                    {
+                        var multiVariableCounter = 1;
+                        while (true)
+                        {
+                            var tempKey = String.Concat(key, ".", multiVariableCounter);
+                            if (command.CommandArgs.ContainsKey(tempKey))
+                            {
+                                multiVariableCounter++;
+                                continue;
+                            }
+                            key = tempKey;
+                            break;
+                        }
+                    }
+
+                    command.CommandArgs.Add(key, value.Trim('"'));
                     counter++;
                 }
 
@@ -118,11 +156,34 @@ namespace DeninaSharp.Core
     {
         public TokenList(string input)
         {
-            var rx = new Regex(@"(?<="")[^""]+(?="")|[^\s""]\S*");
-            for (var match = rx.Match(input); match.Success; match = match.NextMatch())
+            var SPACE_PLACEHOLDER = "%%%%";
+
+            var quoted = false;
+            var modifiedText = new StringBuilder();
+            foreach (var character in input)
             {
-                Add(match.ToString());
+                // This this is a quote, toggle the quoted switch
+                if (character == '"')
+                {
+                    quoted = !quoted;
+                }
+
+                // If we're inside quotes and this is a space, add the placeholder, otherwise add the character
+                if (character == ' ' && quoted)
+                {
+                    modifiedText.Append(SPACE_PLACEHOLDER);
+                }
+                else
+                {
+                    modifiedText.Append(character);
+                }
             }
+
+            AddRange(
+                Regex.Split(modifiedText.ToString(), @"\s+")
+                    .Where(s => !String.IsNullOrWhiteSpace(s))
+                    .Select(s => s.Replace(SPACE_PLACEHOLDER, " "))
+                );
         }
 
         public string First

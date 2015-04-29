@@ -9,7 +9,7 @@ namespace DeninaSharp.Core.Filters
     [Filters("File", "Working with files on the file system.")]
     public class File
     {
-        public static readonly string SANDBOX_VARIABLE_NAME = "__filesystemsandbox";
+        public static readonly string SANDBOX_VARIABLE_NAME = "File.BaseIncludePath";
 
         [Filter("Read", "Reads the content of a file on the file system.")]
         [ArgumentMeta(1, "Path", true, "The path to the file, relative to AppDomain.CurrentDomain.BaseDirectory. This value should not start with a leading slash as Path.Combine will interpret that as \"root.\"")]
@@ -22,10 +22,14 @@ namespace DeninaSharp.Core.Filters
                 throw new DeninaException("File system sandbox variable has not been defined.");
             }
 
+            var file = command.GetArgument("file");
+
+            file = file.Replace("/", @"\\").TrimStart(@"\\".ToCharArray());
+
             string fullPath = Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 Pipeline.GetGlobalVariable(SANDBOX_VARIABLE_NAME).ToString(),
-                command.CommandArgs.First().Value.Replace("/", @"\\").TrimStart(@"\\".ToCharArray()));
+                file);
 
             if (!System.IO.File.Exists(fullPath))
             {
@@ -36,16 +40,5 @@ namespace DeninaSharp.Core.Filters
         }
 
 
-    }
-}
-
-namespace DeninaSharp.Core
-{
-    public partial class Pipeline
-    {
-        public static void SetFileSandbox(string value)
-        {
-            SetGlobalVariable(DeninaSharp.Core.Filters.File.SANDBOX_VARIABLE_NAME, value, true);
-        }
     }
 }

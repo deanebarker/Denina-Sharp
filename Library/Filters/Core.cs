@@ -43,13 +43,10 @@ namespace DeninaSharp.Core.Filters
         [DoNotResolveVariables]
         public static string SetVar(string input, PipelineCommand command)
         {
-            string value = String.Empty;
-            if (command.CommandArgs.Count > 1)
-            {
-                value = command.CommandArgs[1];
-            }
-
-            command.Pipeline.SafeSetVariable(command.CommandArgs.First().Value, value);
+            var variableName = command.GetArgument("var");
+            var value = command.GetArgument("value", String.Empty);
+            
+            command.Pipeline.SafeSetVariable(variableName, value);
 
             return input;
         }
@@ -60,9 +57,9 @@ namespace DeninaSharp.Core.Filters
         [CodeSample("", "InitVar Name Address City State Zip", "(None. The named variables are all initialized to empty strings.)")]
         public static string InitVar(string input, PipelineCommand command)
         {
-            foreach (var commandArg in command.CommandArgs)
+            foreach (var variableName in command.GetMultiArgument("var"))
             {
-                command.Pipeline.SafeSetVariable(commandArg.Value, String.Empty);
+                command.Pipeline.SafeSetVariable(variableName, String.Empty);
             }
             return input;
         }
@@ -75,7 +72,7 @@ namespace DeninaSharp.Core.Filters
             var formatString = "f";
             if (command.CommandArgs.Count == 1)
             {
-                formatString = command.CommandArgs.First().ToString();
+                formatString = command.GetArgument(0);
             }
             return DateTime.Now.ToString(formatString);
         }
@@ -86,23 +83,31 @@ namespace DeninaSharp.Core.Filters
         [CodeSample("", "SetVar Name James\nAppendVar Name \" Bond\"\nReadFrom Name", "James Bond")]
         public static string AppendVar(string input, PipelineCommand command)
         {
-            var value = input;
-            if (command.CommandArgs.Count > 1)
-            {
-                value = command.Pipeline.GetVariable(command.CommandArgs.First().Value).ToString();
-            }
-            command.Pipeline.SafeSetVariable(command.CommandArgs.First().Value, String.Concat(value, command.CommandArgs[1]));
+            // If they didn't provide a value, then use the input
+            var valueToAppend = command.GetArgument("value", input);
+            var variableName = command.GetArgument("var");
+
+            var oldValue = command.Pipeline.GetVariable(variableName);
+            var newValue = String.Concat(oldValue, valueToAppend);
+
+            command.Pipeline.SafeSetVariable(variableName, newValue);
 
             return input;
         }
 
-        #if(DEBUG)
-        [Filter("FakeTest", "This is a fake test which requires a fake class, used to test dependency checking")]
-        [Requires("SomeFakeClass", "This class doesn't exist.")]
-        public static string FakeTest(string input, PipelineCommand command)
+        [Filter("Label", "A placeholder filter for a label. Simply passes text through.")]
+        public static string Pass(string input, PipelineCommand command)
         {
             return input;
         }
-        #endif
+
+        [Filter("End", "Ends execution.")]
+        public static string End(string input, PipelineCommand command)
+        {
+            command.SendToLabel = "end";
+            return input;
+        }
+
+
     }
 }
