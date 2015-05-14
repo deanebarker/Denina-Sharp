@@ -55,20 +55,17 @@
     <h3>Arguments</h3>
     <table class="denina-arguments">
       <colgroup>
-        <col class="pos"/>
         <col class="name"/>
         <col class="req"/>
         <col class="desc"/>
       </colgroup>
       <tr>
-        <th>Pos</th>
         <th>Name</th>
         <th>Required</th>
         <th>Description</th>
       </tr>
-      <xsl:apply-templates>
-        <xsl:sort select="argumentMeta/Ordinal" data-type="number"/>
-      </xsl:apply-templates>
+      <xsl:apply-templates/>
+     
     </table>
   </xsl:template>
 
@@ -104,7 +101,6 @@
   <!-- Arguments -->
   <xsl:template match="argumentMeta">
     <tr>
-      <xsl:apply-templates select="Ordinal"/>
       <xsl:apply-templates select="Name"/>
       <xsl:apply-templates select="Required"/>
       <xsl:apply-templates select="Description"/>

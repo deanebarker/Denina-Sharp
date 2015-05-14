@@ -12,7 +12,7 @@ namespace DeninaSharp.Core.Filters
         public static readonly string SANDBOX_VARIABLE_NAME = "File.BaseIncludePath";
 
         [Filter("Read", "Reads the content of a file on the file system.")]
-        [ArgumentMeta(1, "Path", true, "The path to the file, relative to AppDomain.CurrentDomain.BaseDirectory. This value should not start with a leading slash as Path.Combine will interpret that as \"root.\"")]
+        [ArgumentMeta("file", true, "The path to the file, relative to AppDomain.CurrentDomain.BaseDirectory. This value should not start with a leading slash as Path.Combine will interpret that as \"root.\"")]
         [CodeSample("", "File.Read my-file.txt", "(The contents of my-file.txt)")]
         public static string Read(string input, PipelineCommand command)
         {

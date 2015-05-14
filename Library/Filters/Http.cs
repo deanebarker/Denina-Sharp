@@ -11,10 +11,11 @@ namespace DeninaSharp.Core.Filters
     public static class Http
     {
         public static readonly string ALLOWED_DOMAINS_VARIABLE_NAME = "Http.AllowedDomains";
+        public static readonly string ALL_DOMAINS_WILDCARD = "*";
 
 
         [Filter("Get", "Makes an HTTP GET request and returns the result.")]
-        [ArgumentMeta(1, "URL", false, "The URL to request. If not provided, the input string is assumed to be a URL.")]
+        [ArgumentMeta("url", false, "The URL to request. If not provided, the input string is assumed to be a URL.")]
         [CodeSample("", "Http.Get http://denina.org", "(The contents of the page at denina.org)")]
         [CodeSample("http://denina.org", "Http.Get", "(The contents of the page at denina.org)")]
         public static string Get(string input, PipelineCommand command)
@@ -37,11 +38,16 @@ namespace DeninaSharp.Core.Filters
                 throw new DeninaException("Invalid URL provided.", e);
             }
 
-            var allowedDomains = Pipeline.GetGlobalVariable(ALLOWED_DOMAINS_VARIABLE_NAME).ToString().Split(',').Select(s => s.Trim().ToLower()).ToList();
-
-            if (!allowedDomains.Contains(parsedUri.Host.ToLower()))
+            // If it's set to the wildcard, we can skip the check entirely
+            if (Pipeline.GetGlobalVariable(ALLOWED_DOMAINS_VARIABLE_NAME).ToString() != ALL_DOMAINS_WILDCARD)
             {
-                throw new DeninaException(String.Concat("Host not authorized: ", parsedUri.Host));
+
+                var allowedDomains = Pipeline.GetGlobalVariable(ALLOWED_DOMAINS_VARIABLE_NAME).ToString().Split(',').Select(s => s.Trim().ToLower()).ToList();
+
+                if (!allowedDomains.Contains(parsedUri.Host.ToLower()))
+                {
+                    throw new DeninaException(String.Concat("Host not authorized: ", parsedUri.Host));
+                }
             }
 
             var client = new WebClient();

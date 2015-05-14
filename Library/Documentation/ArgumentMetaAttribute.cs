@@ -12,15 +12,13 @@ namespace DeninaSharp.Core.Documentation
             // For serailizing
         }
 
-        public ArgumentMetaAttribute(int order, string name, bool required, string description)
+        public ArgumentMetaAttribute(string name, bool required, string description)
         {
             Name = name;
-            Ordinal = order;
             Required = required;
             Description = description;
         }
 
-        public int Ordinal { get; set; }
         public string Name { get; set; }
         public bool Required { get; set; }
         public string Description { get; set; }

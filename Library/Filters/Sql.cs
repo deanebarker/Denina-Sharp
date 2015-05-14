@@ -22,26 +22,28 @@ namespace DeninaSharp.Core.Filters
         public static readonly string ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME = "Sql.AllowedConnectionStrings";
 
         [Filter("GetXml", "Executes SQL against the specified connection string and returns an XML recordset.")]
-        [ArgumentMeta(1, "Connection String Name", true, "The name of a connection string key from the application configuration.")]
-        [ArgumentMeta(2, "SQL", false, "The SQL to execute. If omitted, the input string will be used.")]
+        [ArgumentMeta("connection", true, "The name of a connection string key from the application configuration.")]
+        [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
         [CodeSample("SELECT * FROM TableName", "Sql.GetXml myConnectionString", "(An XML string)")]
         [CodeSample("", "Sql.GetXml myConnectionString \"SELECT * FROM TableName\"", "(An XML string)")]
         public static string GetXml(string input, PipelineCommand command)
         {
-            var sql = input;
+            var sql = command.GetArgument("sql,proc", input);
             var connectionStringName = command.GetArgument("connection");
-
-            // If they passed in a SQL argument, use it
-            if (command.HasArgument("sql"))
-            {
-                sql = command.GetArgument("sql");
-            }
 
             IsValidConnectionStringName(connectionStringName);
 
             var sqlCommand = ConfigureCommand(connectionStringName, command);
-            
-            sqlCommand.CommandText = String.Concat(sql, " FOR XML PATH, ROOT('rows'), ELEMENTS XSINIL");
+
+            // If this isn't a stored proc, then we need to append the XML stuff to it.  If it is a stored proc, when we assume that's already there.
+            if (!command.HasArgument("proc"))
+            {
+                sqlCommand.CommandText = String.Concat(sql, " FOR XML PATH, ROOT('rows'), ELEMENTS XSINIL");
+            }
+            else
+            {
+                sqlCommand.CommandText = sql;
+            }
 
             var xml = "<rows/>";
             try
@@ -75,8 +77,8 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("GetTable", "Executes SQL against the specified connection string and returns an HTML table of the results.")]
-        [ArgumentMeta(1, "Connection String Name", true, "The name of a connection string key from the application configuration.")]
-        [ArgumentMeta(2, "SQL", false, "The SQL to execute. If omitted, the input string will be used.")]
+        [ArgumentMeta("connecton", true, "The name of a connection string key from the application configuration.")]
+        [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
         [CodeSample("SELECT * FROM TableName", "Sql.GetXml myConnectionString", "(An HTML table)")]
         [CodeSample("", "Sql.GetXml myConnectionString \"SELECT * FROM TableName\"", "(An HTML table)")]
         public static string GetTable(string input, PipelineCommand command)

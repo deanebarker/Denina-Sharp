@@ -245,13 +245,20 @@ namespace DeninaSharp.Core
                 }
                 catch (Exception e)
                 {
-                    // Since this was reflected, the "outer" exception is "an exception was thrown by the target of an invocation"
-                    // Hence, the "real" exception is the inner exception
-                    var exception = (DeninaException)e.InnerException;
+                    if (e.InnerException is DeninaException)
+                    {
+                        // Since this was reflected, the "outer" exception is "an exception was thrown by the target of an invocation"
+                        // Hence, the "real" exception is the inner exception
+                        var exception = (DeninaException) e.InnerException;
 
-                    exception.CurrentCommandText = command.OriginalText;
-                    exception.CurrentCommandName = command.NormalizedCommandName;
-                    throw exception;
+                        exception.CurrentCommandText = command.OriginalText;
+                        exception.CurrentCommandName = command.NormalizedCommandName;
+                        throw exception;
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
 
                 // Set the pointer to the next command

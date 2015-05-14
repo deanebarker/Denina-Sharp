@@ -73,9 +73,12 @@ namespace DeninaSharp.Core
 
         public string GetArgument(string key, string defaultValue = null)
         {
-            if (CommandArgs.ContainsKey(key))
+            foreach (var argName in key.Split(','))
             {
-                return CommandArgs[key];
+                if (CommandArgs.ContainsKey(argName))
+                {
+                    return CommandArgs[argName];
+                }
             }
 
             if (defaultValue != null)

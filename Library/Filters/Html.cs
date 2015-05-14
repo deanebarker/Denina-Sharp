@@ -11,7 +11,7 @@ namespace DeninaSharp.Core.Filters
     public static class Html
     {
         [Filter("Extract", "Extracts an element from an HTML string. (Relies on the HtmlAgilityPack.dll assembly, which must be available.)")]
-        [ArgumentMeta(1, "Path", true, "The XPath(-ish) to the element, based on HtmlAgilityPack's language standard.")]
+        [ArgumentMeta("xpath", true, "The XPath(-ish) to the element, based on HtmlAgilityPack's language standard.")]
         [CodeSample("<html><body><div id=\"a\">James Bond</div></body></html>", "Html.Extract //div[@id='a']", "James Bond")]
         [Requires("HtmlAgilityPack.HtmlDocument, HtmlAgilityPack", "HtmlAgilityPack is an open-source HTML parsing library.")]
         public static string Extract(string input, PipelineCommand command)
@@ -27,9 +27,9 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("Wrap", "Wraps the input string in a specified HTML tag with optional class and/or ID.")]
-        [ArgumentMeta(1, "Tag Name", true, "The name of the HTML tag in which to wrap the content.")]
-        [ArgumentMeta(2, "Class", false, "If provided, the tag will use this as a \"class\" attribute.")]
-        [ArgumentMeta(3, "ID", false, "If provided, the tag will use this as an \"id\" attribute.")]
+        [ArgumentMeta("tag", true, "The name of the HTML tag in which to wrap the content.")]
+        [ArgumentMeta("class", false, "If provided, the tag will use this as a \"class\" attribute.")]
+        [ArgumentMeta("id", false, "If provided, the tag will use this as an \"id\" attribute.")]
         [CodeSample("James Bond", "Html.Wrap div spy agent", "&lt;div id=\"spy\" class=\"agent\"&gt;James Bond&lt;/div&gt;")]
         public static string WrapInTag(string input, PipelineCommand command)
         {

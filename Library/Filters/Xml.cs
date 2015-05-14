@@ -22,21 +22,28 @@ namespace DeninaSharp.Core.Filters
         public static string XSLT_ARGUMENT_VARIABLE_NAME = "Xml.Transform.XsltExtensionClass";
 
         [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
-        [ArgumentMeta(1, "XPath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
+        [ArgumentMeta("xpath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
         [CodeSample("&lt;person&gt;&lt;name&gt;James Bond&lt;/name&gt;&lt;/person&gt;", "Xml.Extract //name", "James Bond")]
         public static string ExtractFromXml(string input, PipelineCommand command)
         {
             var doc = new XmlDocument();
             doc.LoadXml(input);
 
-            XmlNode node = doc.DocumentElement.SelectSingleNode(command.CommandArgs[0]);
+            var xpath = command.GetArgument("xpath");
 
-            return node != null ? node.Value : String.Empty;
+            var node = doc.DocumentElement.SelectSingleNode(xpath);
+
+            if (node == null)
+            {
+                return String.Empty;
+            }
+
+            return node is XmlElement ? node.InnerText : node.Value;
         }
 
         [Filter("Transform", "Transforms an XML document against an XSL stylesheet")]
-        [ArgumentMeta(1, "XSLT", true, "The raw XSLT to transform the input string.")]
-        [ArgumentMeta(2, "XML", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
+        [ArgumentMeta("xslt", true, "The raw XSLT to transform the input string.")]
+        [ArgumentMeta("xml", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
         [CodeSample(
             "",
             @"File.Read xml-file.xml => $xml
@@ -106,21 +113,47 @@ namespace DeninaSharp.Core.Filters
             };
             
             // Form the XML doc from the input
-            var xmlReader = XmlReader.Create(new StringReader(xml), settings);
+            XmlReader xmlReader;
+            try
+            {
+                xmlReader = XmlReader.Create(new StringReader(xml), settings);
+            }
+            catch (Exception e)
+            {
+                throw new DeninaException("Error parsing XML.", e);
+            }
 
             // Form the XSL from the first argument
-            var transform = new XslCompiledTransform();
-            transform.Load(XmlReader.Create(new StringReader(xsl), settings));
+            XslCompiledTransform transform;
+            try
+            {
+                transform = new XslCompiledTransform();
+                transform.Load(XmlReader.Create(new StringReader(xsl), settings));
+
+            }
+            catch (Exception e)
+            {
+                throw new DeninaException("Error parsing XSL.", e);
+            }
 
             // Do the transform (we're passing in an empty XsltArgumentList as a placeholder, in case we want to do something with it later...)
             var writer = new StringWriter();
-            transform.Transform(xmlReader, arguments, writer);
+
+            try
+            {
+                transform.Transform(xmlReader, arguments, writer);
+            }
+            catch (Exception e)
+            {
+                throw new DeninaException("Error performing XSLT transform.", e);
+            }
+            
             return writer.ToString().Replace("\u00A0", " ");    // This is a bit of a hack. We're replacing NO BREAK SPACE with a regular space. There has to be a way to fix this in the XSLT output.
         }
 
         [Filter("FormatNodes", "Performs token replacement on each node of a specified XPAth and returns the concatenated result.")]
-        [ArgumentMeta(1, "XPath", true, "XPath to return a list of XML nodes.")]
-        [ArgumentMeta(2, "Template", true, "The template to apply to each node. XPath can be enclosed in brackets. These XPath expessions will be executed on the XML of that node and the resulting content will replace the token.")]
+        [ArgumentMeta("xpath", true, "XPath to return a list of XML nodes.")]
+        [ArgumentMeta("template", true, "The template to apply to each node. XPath can be enclosed in brackets. These XPath expessions will be executed on the XML of that node and the resulting content will replace the token.")]
         [CodeSample(
             "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
             "Xml.FormatNodes //row \"&lt;p&gt;Name: {name}&lt;/p&gt;\"",
@@ -152,7 +185,7 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("CountNodes", "Returns the number of matching nodes.")]
-        [ArgumentMeta(1, "XPath", true, "XPath to return a list of XML nodes.")]
+        [ArgumentMeta("xpath", true, "XPath to return a list of XML nodes.")]
         [CodeSample(
             "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
             "Xml.CountNodes //name",
