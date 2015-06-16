@@ -5,6 +5,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using BlendInteractive.Denina.Core;
 using BlendInteractive.Denina.Core.Documentation;
 using DeninaSharp.Core.Configuration;
 using DeninaSharp.Core.Documentation;
@@ -34,6 +35,8 @@ namespace DeninaSharp.Core
         private Dictionary<string, PipelineVariable> variables = new Dictionary<string, PipelineVariable>();
         private static Dictionary<string, PipelineVariable> globalVariables = new Dictionary<string, PipelineVariable>();
 
+        public List<DebugEntry> DebugData { get; private set; }
+
         public Pipeline(string commandString = null)
         {
             // Add this assembly to initialze the filters
@@ -49,9 +52,11 @@ namespace DeninaSharp.Core
             {
                 foreach (PipelineConfigVariable configVariable in configSection.Variables)
                 {
-                    Pipeline.SetGlobalVariable(configVariable.Key, configVariable.Value, true);
+                    SetGlobalVariable(configVariable.Key, configVariable.Value, true);
                 }
             }
+
+            DebugData = new List<DebugEntry>();
         }
 
         public static ReadOnlyDictionary<string, MethodInfo> CommandMethods
@@ -134,6 +139,9 @@ namespace DeninaSharp.Core
 
         public string Execute(string input = null)
         {
+            // Clear the debug data
+            DebugData.Clear();
+
             // Add a pass-through command at the end just to hold a label called "end".
             if (commands.Any(c => c.Label == FINAL_COMMAND_LABEL))
             {
@@ -183,8 +191,7 @@ namespace DeninaSharp.Core
                     // Stick a fork in us, we're done
                     break;
                 }
-
-
+                
                 // Does the specified next command exist?
                 if (!commandQueue.ContainsKey(NextCommandLabel.ToLower()))
                 {
@@ -193,6 +200,9 @@ namespace DeninaSharp.Core
 
                 // Get the next command
                 var command = commandQueue[NextCommandLabel.ToLower()];
+
+                // Create the debug entry
+                var debugData = new DebugEntry(command);
 
                 // Are we writing to a variable?
                 if (command.NormalizedCommandName == WRITE_TO_VARIABLE_COMMAND)
@@ -247,7 +257,9 @@ namespace DeninaSharp.Core
 
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
                     // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
+                    debugData.InputValue = GetVariable(command.InputVariable).ToString();
                     var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command});
+                    debugData.OutputValue = output.ToString();
 
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
                     if (command.AppendToLast)
@@ -279,6 +291,8 @@ namespace DeninaSharp.Core
 
                 // Set the pointer to the next command
                 NextCommandLabel = command.SendToLabel;
+
+                DebugData.Add(debugData);
             }
 
             // Return what's in the global variable            

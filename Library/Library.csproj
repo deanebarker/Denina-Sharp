@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="Configuration\PipelineConfigVariable.cs" />
     <Compile Include="Configuration\PipelineConfigVariables.cs" />
+    <Compile Include="DebugEntry.cs" />
     <Compile Include="Documentation\CodeSampleAttribute.cs" />
     <Compile Include="Documentation\RequiresAttribute.cs" />
     <Compile Include="Filters\If.cs" />
