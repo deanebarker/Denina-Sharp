@@ -24,8 +24,8 @@ namespace DeninaSharp.Core.Filters
         [Filter("GetXml", "Executes SQL against the specified connection string and returns an XML recordset.")]
         [ArgumentMeta("connection", true, "The name of a connection string key from the application configuration.")]
         [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
-        [CodeSample("SELECT * FROM TableName", "Sql.GetXml myConnectionString", "(An XML string)")]
-        [CodeSample("", "Sql.GetXml myConnectionString \"SELECT * FROM TableName\"", "(An XML string)")]
+        [CodeSample("SELECT * FROM TableName", "Sql.GetXml -connection:myConnectionString", "(An XML string)")]
+        [CodeSample("", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\"", "(An XML string)")]
         public static string GetXml(string input, PipelineCommand command)
         {
             var sql = command.GetArgument("sql,proc", input);
@@ -79,8 +79,8 @@ namespace DeninaSharp.Core.Filters
         [Filter("GetTable", "Executes SQL against the specified connection string and returns an HTML table of the results.")]
         [ArgumentMeta("connecton", true, "The name of a connection string key from the application configuration.")]
         [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
-        [CodeSample("SELECT * FROM TableName", "Sql.GetXml myConnectionString", "(An HTML table)")]
-        [CodeSample("", "Sql.GetXml myConnectionString \"SELECT * FROM TableName\"", "(An HTML table)")]
+        [CodeSample("SELECT * FROM TableName", "Sql.GetXml -connection:myConnectionString", "(An HTML table)")]
+        [CodeSample("", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\"", "(An HTML table)")]
         public static string GetTable(string input, PipelineCommand command)
         {
             var sql = input;
@@ -111,9 +111,9 @@ namespace DeninaSharp.Core.Filters
             var html = new StringWriter();
             var writer = new HtmlTextWriter(html);
 
-            if (command.HasArgument("cssClass"))
+            if (command.HasArgument("class"))
             {
-                writer.AddAttribute("class", command.GetArgument("cssClass"));
+                writer.AddAttribute("class", command.GetArgument("class"));
             }
             
             writer.RenderBeginTag(HtmlTextWriterTag.Table);
@@ -144,7 +144,7 @@ namespace DeninaSharp.Core.Filters
 
                     for (int i = 0; i < reader.FieldCount; i++)
                     {
-                        var value = reader.IsDBNull(i) ? String.Empty : reader.GetString(i);
+                        var value = reader.IsDBNull(i) ? String.Empty : Convert.ToString(reader[i]);
                         var columnClass = reader.GetName(i).ToLower().Replace(" ", "-");
 
                         writer.AddAttribute("class", String.Concat("column-", columnClass));

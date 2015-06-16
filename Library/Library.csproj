@@ -30,6 +30,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AngleSharp, Version=0.8.4.40085, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\AngleSharp.0.8.4.1\lib\net45\AngleSharp.dll</HintPath>
+    </Reference>
     <Reference Include="HtmlAgilityPack, Version=1.4.6.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>.\HtmlAgilityPack.dll</HintPath>
@@ -81,15 +85,12 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="HtmlAgilityPack.dll" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>REM copy "$(TargetPath)" "$(SolutionDir)Binaries\$(TargetFileName)
-REM copy "$(TargetDir)HtmlAgilityPack.dll" "$(SolutionDir)Binaries\HtmlAgilityPack.dll"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "c:\Data\Code\DeninaSharp\Binaries\$(TargetFileName)
+rem copy "$(TargetDir)HtmlAgilityPack.dll" "c:\Data\Code\DeninaSharp\Binaries\Binaries\HtmlAgilityPack.dll"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

@@ -16,7 +16,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("Get", "Makes an HTTP GET request and returns the result.")]
         [ArgumentMeta("url", false, "The URL to request. If not provided, the input string is assumed to be a URL.")]
-        [CodeSample("", "Http.Get http://denina.org", "(The contents of the page at denina.org)")]
+        [CodeSample("", "Http.Get -url:http://denina.org", "(The contents of the page at denina.org)")]
         [CodeSample("http://denina.org", "Http.Get", "(The contents of the page at denina.org)")]
         public static string Get(string input, PipelineCommand command)
         {

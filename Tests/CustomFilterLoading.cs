@@ -85,7 +85,21 @@ namespace Tests
         {
             var pipeline = new Pipeline();
 
-            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("core.faketest"));
+            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("test.faketest"));
+
+            // Check that the correct exception text is thrown
+            try
+            {
+                pipeline.AddCommand("Test.FakeTest");
+                pipeline.Execute("");
+            }
+            catch (Exception e)
+            {
+                Assert.IsTrue(e.Message.Contains("dependency"));
+                return;
+            }
+
+            Assert.Fail("We shouldn't get here...");
         }
 
 

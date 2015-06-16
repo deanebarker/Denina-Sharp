@@ -39,7 +39,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("SetVar", "Sets the value of a variable to the value provided. Does not change the input string.")]
         [ArgumentMeta("var", true, "The name of the variable to set.")]
         [ArgumentMeta("value", false, "The desired value. If not provided, the variable is set to an empty string (same as InitVar).")]
-        [CodeSample("", "SetVar Name \"James Bond\"\nReadFrom Name", "James Bond")]
+        [CodeSample("", "SetVar -var:Name -value:\"James Bond\"\nReadFrom Name", "James Bond")]
         [DoNotResolveVariables]
         public static string SetVar(string input, PipelineCommand command)
         {
@@ -54,25 +54,28 @@ namespace DeninaSharp.Core.Filters
         [Filter("InitVar", "Sets the value of a variable to an empty string. The variable can now be referenced without error.")]
         [ArgumentMeta("var", true, "The name of the variable to set. Multiple variables can be specified. All will be initialized.")]
         [DoNotResolveVariables]
-        [CodeSample("", "InitVar Name Address City State Zip", "(None. The named variables are all initialized to empty strings.)")]
+        [CodeSample("", "InitVar -var:Name -var:Address -var:City -var:State -var:Zip", "(None. The named variables are all initialized to empty strings.)")]
         public static string InitVar(string input, PipelineCommand command)
         {
             foreach (var variableName in command.GetMultiArgument("var"))
             {
-                command.Pipeline.SafeSetVariable(variableName, String.Empty);
+                if (!command.Pipeline.Variables.ContainsKey(variableName))
+                {
+                    command.Pipeline.SafeSetVariable(variableName, String.Empty);
+                }
             }
             return input;
         }
 
         [Filter("Now", "Returns the current date and time, formatted by an optional format string.")]
         [ArgumentMeta("format", false, "The C# time format string with which to format the results.")]
-        [CodeSample("", "Now \"ddd d MMM\"", "Wed 25 Feb")]
+        [CodeSample("", "Now -format:\"ddd d MMM\"", "Wed 25 Feb")]
         public static string Now(string input, PipelineCommand command)
         {
             var formatString = "f";
             if (command.CommandArgs.Count == 1)
             {
-                formatString = command.GetArgument(0);
+                formatString = command.GetArgument("format");
             }
             return DateTime.Now.ToString(formatString);
         }
@@ -80,7 +83,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("AppendVar", "Appends to the value of a variable")]
         [ArgumentMeta("var", true, "The name of the variable to which to append data.")]
         [ArgumentMeta("value", false, "The value to append. If omitted, the input string will be appended.")]
-        [CodeSample("", "SetVar Name James\nAppendVar Name \" Bond\"\nReadFrom Name", "James Bond")]
+        [CodeSample("", "SetVar -var:Name -value:James\nAppendVar -var:Name -value:\" Bond\"\nReadFrom Name", "James Bond")]
         public static string AppendVar(string input, PipelineCommand command)
         {
             // If they didn't provide a value, then use the input

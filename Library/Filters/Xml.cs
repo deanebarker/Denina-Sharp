@@ -23,7 +23,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
         [ArgumentMeta("xpath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
-        [CodeSample("&lt;person&gt;&lt;name&gt;James Bond&lt;/name&gt;&lt;/person&gt;", "Xml.Extract //name", "James Bond")]
+        [CodeSample("&lt;person&gt;&lt;name&gt;James Bond&lt;/name&gt;&lt;/person&gt;", "Xml.Extract -xpath://name", "James Bond")]
         public static string ExtractFromXml(string input, PipelineCommand command)
         {
             var doc = new XmlDocument();
@@ -48,7 +48,7 @@ namespace DeninaSharp.Core.Filters
             "",
             @"File.Read xml-file.xml => $xml
             File.Read xslt-file.xslt => $xslt
-            Xml.Transform $xslt $xml",
+            Xml.Transform -xslt:$xslt -xml:$xml",
             "(The transformed XML)"
             )]
         [CodeSample(
@@ -156,7 +156,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("template", true, "The template to apply to each node. XPath can be enclosed in brackets. These XPath expessions will be executed on the XML of that node and the resulting content will replace the token.")]
         [CodeSample(
             "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
-            "Xml.FormatNodes //row \"&lt;p&gt;Name: {name}&lt;/p&gt;\"",
+            "Xml.FormatNodes -xpath://row -template:\"&lt;p&gt;Name: {name}&lt;/p&gt;\"",
             "&lt;p&gt;Name: James&lt;/p&gt;&lt;p&gt;Name: Bond&lt;/p&gt;"
             )]
         public static string FormatNodes(string input, PipelineCommand command)
@@ -175,7 +175,14 @@ namespace DeninaSharp.Core.Filters
                 var thisTemplate = String.Copy(template);
                 foreach (var pattern in patterns)
                 {
-                    var value = node.SelectSingleNode(pattern.Trim(new char[] {'}', '{'})).InnerXml;
+                    var result = node.SelectSingleNode(pattern.Trim(new char[] {'}', '{'}));
+
+                    var value = String.Empty;
+                    if (result != null)
+                    {
+                        value = result.InnerXml;
+                    }
+
                     thisTemplate = thisTemplate.Replace(pattern, value);
                 }
                 output.Append(thisTemplate);
@@ -188,7 +195,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("xpath", true, "XPath to return a list of XML nodes.")]
         [CodeSample(
             "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
-            "Xml.CountNodes //name",
+            "Xml.CountNodes -xpath://name",
             "2"
             )]
         public static string CountNodes(string input, PipelineCommand command)
@@ -196,7 +203,7 @@ namespace DeninaSharp.Core.Filters
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(input);
 
-            var xpath = command.CommandArgs.First().Value;
+            var xpath = command.GetArgument("xpath");
 
             if (xmlDoc.SelectNodes(xpath) == null)
             {

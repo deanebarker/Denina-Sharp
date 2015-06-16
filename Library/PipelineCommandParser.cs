@@ -39,8 +39,17 @@ namespace DeninaSharp.Core
 
                 var tokens = new TokenList(line);
 
-                var command = new PipelineCommand();
-                command.OriginalText = line;
+                var command = new PipelineCommand()
+                {
+                    OriginalText = line
+                };
+
+                // + 
+                if (tokens.First == "+")
+                {
+                    command.AppendToLast = true;
+                    tokens.RemoveFromStart(1);
+                }
 
                 // $myVar =>
                 if (tokens.Last == PIPE_TOKEN && tokens.Count == 2)

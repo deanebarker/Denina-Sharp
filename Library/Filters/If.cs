@@ -16,8 +16,8 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("label", true, "The label to find if the specified variable has no value.")]
         public static string NoVar(string input, PipelineCommand command)
         {
-            var varName = command.CommandArgs.First().Value;
-            var labelName = command.CommandArgs[1];
+            var varName = command.GetArgument("var");
+            var labelName = command.GetArgument("label");
 
             if (!command.Pipeline.IsSet(varName))
             {
@@ -31,9 +31,12 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("label", true, "The label to find if the input text is empty.")]
         public static string IsEmpty(string input, PipelineCommand command)
         {
-            if (String.IsNullOrWhiteSpace(input))
+            var value = command.GetArgument("value", input);
+            var label = command.GetArgument("label");
+
+            if (String.IsNullOrWhiteSpace(value))
             {
-                command.SendToLabel = command.DefaultArgument;
+                command.SendToLabel = label;
             }
 
             return input;

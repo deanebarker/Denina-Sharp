@@ -1,36 +1,43 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Web.UI;
+using AngleSharp.Parser.Html;
 using BlendInteractive.Denina.Core.Documentation;
 using DeninaSharp.Core.Documentation;
-using HtmlAgilityPack;
 
 namespace DeninaSharp.Core.Filters
 {
     [Filters("HTML", "Creating and manipulating HTML strings.")]
     public static class Html
     {
-        [Filter("Extract", "Extracts an element from an HTML string. (Relies on the HtmlAgilityPack.dll assembly, which must be available.)")]
-        [ArgumentMeta("xpath", true, "The XPath(-ish) to the element, based on HtmlAgilityPack's language standard.")]
-        [CodeSample("<html><body><div id=\"a\">James Bond</div></body></html>", "Html.Extract //div[@id='a']", "James Bond")]
-        [Requires("HtmlAgilityPack.HtmlDocument, HtmlAgilityPack", "HtmlAgilityPack is an open-source HTML parsing library.")]
+        [Filter("Extract", "Extracts an element from an HTML string.")]
+        [ArgumentMeta("path", true, "The AngleSharp selector (very CSS like).")]
+        [CodeSample("<html><body><div id=\"a\">James Bond</div></body></html>", "Html.Extract -path:div#a", "James Bond")]
+        [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
         public static string Extract(string input, PipelineCommand command)
         {
-            var xpath = command.GetArgument("xpath");
+            var doc = new HtmlParser(input).Parse();
+            var element = doc.QuerySelector(command.GetArgument("path"));
 
-            var doc = new HtmlDocument();
-            doc.LoadHtml(input);
+            return element == null ? String.Empty : element.InnerHtml;
+        }
 
-            HtmlNode node = doc.DocumentNode.SelectSingleNode(xpath);
-
-            return node != null ? node.InnerHtml : String.Empty;
+        [Filter("Strip", "Strips tags from the HTML string.)")]
+        [CodeSample("James <b>Bond</b>.", "Html.StripTags", "James Bond.")]
+        [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
+        public static string StripTags(string input, PipelineCommand command)
+        {
+            var doc = new HtmlParser(input).Parse();
+            return doc.DocumentElement.TextContent;
         }
 
         [Filter("Wrap", "Wraps the input string in a specified HTML tag with optional class and/or ID.")]
         [ArgumentMeta("tag", true, "The name of the HTML tag in which to wrap the content.")]
         [ArgumentMeta("class", false, "If provided, the tag will use this as a \"class\" attribute.")]
         [ArgumentMeta("id", false, "If provided, the tag will use this as an \"id\" attribute.")]
-        [CodeSample("James Bond", "Html.Wrap div spy agent", "&lt;div id=\"spy\" class=\"agent\"&gt;James Bond&lt;/div&gt;")]
+        [CodeSample("James Bond", "Html.Wrap -tag:div -class:spy -id:agent", "&lt;div id=\"spy\" class=\"agent\"&gt;James Bond&lt;/div&gt;")]
         public static string WrapInTag(string input, PipelineCommand command)
         {
             var stringWriter = new StringWriter();
@@ -61,5 +68,31 @@ namespace DeninaSharp.Core.Filters
         {
             return input.Replace(Environment.NewLine, "<br/>");
         }
+
+        [Filter("MakeTag", "Create a tag.")]
+        public static string MakeTag(string input, PipelineCommand command)
+        {
+            var namedArgs = new string[] {"tag", "content"};
+
+            var tagName = command.GetArgument("tag");
+            var contents = command.GetArgument("content", input);
+            var attributes = command.CommandArgs.Where(ca => !namedArgs.Contains(ca.Key));
+
+            var stringWriter = new StringWriter();
+            var tagBuilder = new HtmlTextWriter(stringWriter);
+           
+            foreach (var attribute in attributes)
+            {
+                tagBuilder.AddAttribute(attribute.Key.ToString(), attribute.Value);
+            }
+            tagBuilder.RenderBeginTag(tagName);
+            tagBuilder.WriteEncodedText(contents);
+            tagBuilder.RenderEndTag();
+
+            return stringWriter.ToString();
+
+        }
+
+
     }
 }

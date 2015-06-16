@@ -25,6 +25,7 @@ namespace DeninaSharp.Core
         public static readonly Dictionary<string, Type> Types = new Dictionary<string, Type>(); // This is just to keep them handy for the documentor
 
         private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
+        private static readonly Dictionary<string, string> hiddenCommandMethods = new Dictionary<string, string>();
 
         private Stopwatch timer = new Stopwatch();
 
@@ -108,21 +109,24 @@ namespace DeninaSharp.Core
 
         public static void AddMethod(MethodInfo method, string category, string name = null)
         {
+            var fullyQualifiedFilterName = String.Concat(category.ToLower(), ".", Convert.ToString(name).ToLower());
+
             // Check if it has any requirements
             foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof (RequiresAttribute), true))
             {
                 if (Type.GetType(dependency.TypeName) == null)
                 {
+                    // This dependency doesn't exist, so we're not going to load this command.
+                    // We're going to add this to the hidden commands dictionary, so we can give a more specific error message if this command is requested.
+                    hiddenCommandMethods.Add(fullyQualifiedFilterName, dependency.TypeName);
                     return;
                 }
             }
 
-            if (name == null)
+            if (String.IsNullOrWhiteSpace(name))
             {
                 name = ((FilterAttribute) method.GetCustomAttributes(typeof (FilterAttribute), true).First()).Name;
             }
-
-            var fullyQualifiedFilterName = String.Concat(category.ToLower(), ".", name.ToLower());
             
             commandMethods.Remove(fullyQualifiedFilterName); // Remove it if it exists already                  
             commandMethods.Add(fullyQualifiedFilterName, method);
@@ -220,7 +224,12 @@ namespace DeninaSharp.Core
                 // Do we a method for this command?
                 if (!CommandMethods.ContainsKey(command.NormalizedCommandName))
                 {
-                    throw new DeninaException("No command method found for \"" + command.CommandName + "\"");
+                    // This command doesn't exist. We're going to try to be helpful and let the user know if it's becaue of a missing dependency.
+                    var errorString = hiddenCommandMethods.ContainsKey(command.NormalizedCommandName)
+                        ? String.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", command.CommandName, hiddenCommandMethods[command.NormalizedCommandName])
+                        : String.Format(@"No command loaded for ""{0}""", command.CommandName);
+
+                    throw new DeninaException(errorString);
                 }
 
                 // Set a pipeline reference which can be accessed inside the filter method
@@ -239,6 +248,13 @@ namespace DeninaSharp.Core
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
                     // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
                     var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command});
+
+                    // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
+                    if (command.AppendToLast)
+                    {
+                        output = String.Concat(GetVariable(command.InputVariable), output);
+                    }
+
                     SafeSetVariable(command.OutputVariable, output);
 
                     command.ElapsedTime = timer.ElapsedMilliseconds;

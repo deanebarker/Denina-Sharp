@@ -5,3 +5,6 @@ Library/bin/
 Library/obj/
 UI/bin/
 UI/obj/
+Documentor/bin/
+Documentor/obj/
+GeneratedPackages/
