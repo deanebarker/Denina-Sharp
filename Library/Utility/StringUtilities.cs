@@ -9,7 +9,7 @@ using System.Web.UI;
 
 namespace DeninaSharp.Core.Utility
 {
-    class StringUtilities
+    public class StringUtilities
     {
         public static string Link(string input)
         {
