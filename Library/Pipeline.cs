@@ -119,7 +119,7 @@ namespace DeninaSharp.Core
             // Check if it has any requirements
             foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof (RequiresAttribute), true))
             {
-                if (Type.GetType(dependency.TypeName) == null)
+                if (Type.GetType(dependency.TypeName) == null && !hiddenCommandMethods.ContainsKey(fullyQualifiedFilterName))
                 {
                     // This dependency doesn't exist, so we're not going to load this command.
                     // We're going to add this to the hidden commands dictionary, so we can give a more specific error message if this command is requested.

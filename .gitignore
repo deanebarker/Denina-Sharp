@@ -8,3 +8,5 @@ UI/obj/
 Documentor/bin/
 Documentor/obj/
 GeneratedPackages/
+/Binaries/DeninaUI.exe
+*.suo
