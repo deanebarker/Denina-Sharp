@@ -1,0 +1,2 @@
+﻿File.Read xslt-file.xslt => $xslt
+Xml.Transform $xslt

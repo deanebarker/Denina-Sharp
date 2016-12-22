@@ -1,0 +1,3 @@
+﻿File.Read xml-file.xml => $xml
+File.Read xslt-file.xslt => $xslt
+Xml.Transform -xslt:$xslt -xml:$xml
