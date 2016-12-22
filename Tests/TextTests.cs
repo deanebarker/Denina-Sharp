@@ -58,7 +58,7 @@ namespace Tests
         public void Append()
         {
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Text.Append Deane");
+            pipeline.AddCommand("Text.Append -suffix:Deane");
             string result = pipeline.Execute("I am ");
 
             Assert.AreEqual("I am Deane", result);
@@ -68,7 +68,7 @@ namespace Tests
         public void Prepend()
         {
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Text.Prepend Deane");
+            pipeline.AddCommand("Text.Prepend -prefix:Deane");
             string result = pipeline.Execute(" was here.");
 
             Assert.AreEqual("Deane was here.", result);
@@ -78,7 +78,7 @@ namespace Tests
         public void ExtractRegex()
         {
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Text.ExtractRegex e(..)e");
+            pipeline.AddCommand("Text.ExtractRegex -pattern:e(..)e");
             
             string result = pipeline.Execute("Deane");
             Assert.AreEqual(result, "an");
@@ -97,7 +97,7 @@ namespace Tests
             };
 
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Text.FormatLines ({0})");
+            pipeline.AddCommand("Text.FormatLines -template:({0})");
             var result = pipeline.Execute(String.Join(Environment.NewLine, input));
 
             Assert.AreEqual(result, "(Deane)(Barker)");

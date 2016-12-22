@@ -50,5 +50,17 @@ namespace Tests
 
             Assert.AreEqual("Deane was here", result);
         }
+
+        [TestMethod]
+        public void SetAttribute()
+        {
+            var html = "<div id=\"james-bond\" data-number=\"006\"></div>";
+
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("Html.SetAttribute -path:div#james-bond -attribute:data-number -val:007");
+            var result = pipeline.Execute(html);
+
+            Assert.IsTrue(result.Contains("007"));
+        }
     }
 }

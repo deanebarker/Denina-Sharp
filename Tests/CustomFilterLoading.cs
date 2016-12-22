@@ -35,7 +35,7 @@ namespace Tests
         [TestMethod]
         public void OverwriteExistingFilter()
         {
-            var pipeline = new Pipeline("Text.Append BAR");
+            var pipeline = new Pipeline("Text.Append -suffix:BAR");
             Assert.AreEqual("FOOBAR", pipeline.Execute("FOO"));
 
             Pipeline.AddType(typeof (OverwriteFilterTestClass));  // This should overwrite Core.Append
@@ -83,14 +83,17 @@ namespace Tests
         [TestMethod]
         public void TryToLoadBrokenDependency()
         {
-            var pipeline = new Pipeline();
+            Pipeline.AddMethod(GetType().GetMethod("NeedsMissingDependency"), "Test");
 
-            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("test.faketest"));
+            var pipeline = new Pipeline();
+            
+
+            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("test.needsmissingdependency"));
 
             // Check that the correct exception text is thrown
             try
             {
-                pipeline.AddCommand("Test.FakeTest");
+                pipeline.AddCommand("test.needsmissingdependency");
                 pipeline.Execute("");
             }
             catch (Exception e)
@@ -113,7 +116,14 @@ namespace Tests
         {
             return "It worked!";
         }
-    
+
+        [Filter("FilterWithFakeDependency")]
+        [Requires("MissingType, MissingAssembly", "")]
+        public static string NeedsMissingDependency(string input, PipelineCommand command)
+        {
+            return "It worked!";
+        }
+
     }
 
     [Filters("Text")]

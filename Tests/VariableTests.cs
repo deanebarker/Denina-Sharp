@@ -53,7 +53,7 @@ namespace Tests
         public void WritingIntoImplicitVariable()
         {
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Text.Append \" married Deane.\" => $myVar");
+            pipeline.AddCommand("Text.Append -suffix:\" married Deane.\" => $myVar");
             var result = pipeline.Execute("Annie");
 
             Assert.AreEqual(result, "Annie");   // The input text should be unchanged
@@ -67,7 +67,7 @@ namespace Tests
             
             var pipeline = new Pipeline();
             pipeline.AddCommand("WriteTo $myVar");   // Write the input to a variable
-            pipeline.AddCommand("Text.Prepend $myVar");  // Prepend that variable onto the input
+            pipeline.AddCommand("Text.Prepend -prefix:$myVar");  // Prepend that variable onto the input
             var result = pipeline.Execute(input);
 
             Assert.AreEqual(String.Concat(input, input), result);   // Result should be the input twice

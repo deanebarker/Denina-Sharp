@@ -11,5 +11,13 @@ namespace Tests.Utility
         {
             return "MyMethod";
         }
+
+        [Filter("MyMethodWithDependencies")]
+        [Requires("SomeClassThatDoesntExist, SomeAssemblyThatDoesntExist", "")]
+        public static string MyMethodWithDependencies(string input, PipelineCommand command)
+        {
+            // This shouldn't load, because it will fail the dependency check
+            return "MyMethodWithDependencies";
+        }
     }
 }
