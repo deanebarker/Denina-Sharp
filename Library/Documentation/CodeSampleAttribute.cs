@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace BlendInteractive.Denina.Core.Documentation
+namespace DeninaSharp.Core.Documentation
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     [XmlRoot(ElementName = "codeSample")]

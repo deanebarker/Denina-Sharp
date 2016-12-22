@@ -56,7 +56,12 @@
     <Compile Include="Configuration\PipelineConfigVariable.cs" />
     <Compile Include="Configuration\PipelineConfigVariables.cs" />
     <Compile Include="DebugEntry.cs" />
+    <Compile Include="Documentation\ArgumentDoc.cs" />
+    <Compile Include="Documentation\CategoryDoc.cs" />
     <Compile Include="Documentation\CodeSampleAttribute.cs" />
+    <Compile Include="Documentation\CodeSampleDoc.cs" />
+    <Compile Include="Documentation\DependencyDoc.cs" />
+    <Compile Include="Documentation\FilterDoc.cs" />
     <Compile Include="Documentation\RequiresAttribute.cs" />
     <Compile Include="Filters\If.cs" />
     <Compile Include="Filters\Sql.cs" />
@@ -74,6 +79,7 @@
     <Compile Include="Documentation\FiltersAttribute.cs" />
     <Compile Include="Filters\Core.cs" />
     <Compile Include="Configuration\PipelineConfigSection.cs" />
+    <Compile Include="PipelineEventArgs.cs" />
     <Compile Include="PipelineVariable.cs" />
     <Compile Include="Documentation\FilterAttribute.cs" />
     <Compile Include="PipelineCommand.cs" />
@@ -83,10 +89,20 @@
     <Compile Include="Utility\XsltExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="DocResources\Xml\Transform\no-input.dna" />
+    <EmbeddedResource Include="DocResources\Xml\Transform\with-input.dna" />
+    <EmbeddedResource Include="DocResources\Xml\xml-count-format-nodes-input.xml" />
+    <EmbeddedResource Include="DocResources\Json\Extract\json-extract-input.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DocResources\Xml\Extract\extract-sample.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="DocResources\Html\Extract\html-extract-input.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
