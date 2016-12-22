@@ -1,14 +1,13 @@
-﻿using System;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Configuration;
+using DeninaSharp.Core.Documentation;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
-using BlendInteractive.Denina.Core;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Configuration;
-using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core
 {
@@ -28,6 +27,21 @@ namespace DeninaSharp.Core
         private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
         private static readonly Dictionary<string, string> hiddenCommandMethods = new Dictionary<string, string>();
 
+        public delegate void PipelineEventHandler(object o, PipelineEventArgs e);
+        public static event PipelineEventHandler PipelineComplete;
+
+        private static readonly Dictionary<string, FilterDoc> filterDoc = new Dictionary<string, FilterDoc>();
+        public static ReadOnlyDictionary<string, FilterDoc> FilterDoc
+        {
+            get { return new ReadOnlyDictionary<string, FilterDoc>(filterDoc); }
+        }
+
+        private static readonly Dictionary<string, CategoryDoc> categoryDoc = new Dictionary<string, CategoryDoc>();
+        public static ReadOnlyDictionary<string, CategoryDoc> CategoryDoc
+        {
+            get { return new ReadOnlyDictionary<string, CategoryDoc>(categoryDoc); }
+        }
+
         private Stopwatch timer = new Stopwatch();
 
         private readonly List<PipelineCommand> commands = new List<PipelineCommand>();
@@ -37,12 +51,20 @@ namespace DeninaSharp.Core
 
         public List<DebugEntry> DebugData { get; private set; }
 
+        static Pipeline()
+        {
+            // Add the filters in this assembly
+            AddAssembly(typeof(Pipeline).Assembly);
+        }
+
         public Pipeline(string commandString = null)
         {
             // Add this assembly to initialze the filters
-            AddAssembly(Assembly.GetExecutingAssembly());
+            // I moved this to the static constructor so it only inits once and always inits when accessed statically
+            // (I'm leaving this comment here in case I get confused later...)
+            // AddAssembly(Assembly.GetExecutingAssembly());
 
-            if (!String.IsNullOrWhiteSpace(commandString))
+            if (!string.IsNullOrWhiteSpace(commandString))
             {
                 AddCommand(commandString);
             }
@@ -105,6 +127,10 @@ namespace DeninaSharp.Core
                 category = ((FiltersAttribute) type.GetCustomAttributes(typeof (FiltersAttribute), true).First()).Category;
             }
 
+            // Add to the documentation
+            categoryDoc.Remove(category);
+            categoryDoc.Add(category, new CategoryDoc(type));
+
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
             {
                 string name = ((FilterAttribute) method.GetCustomAttributes(typeof (FilterAttribute), true).First()).Name;
@@ -114,7 +140,9 @@ namespace DeninaSharp.Core
 
         public static void AddMethod(MethodInfo method, string category, string name = null)
         {
-            var fullyQualifiedFilterName = String.Concat(category.ToLower(), ".", Convert.ToString(name).ToLower());
+            name = name ?? method.Name;
+
+            var fullyQualifiedFilterName = string.Concat(category.ToLower(), ".", Convert.ToString(name).ToLower());
 
             // Check if it has any requirements
             foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof (RequiresAttribute), true))
@@ -128,11 +156,14 @@ namespace DeninaSharp.Core
                 }
             }
 
-            if (String.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrWhiteSpace(name))
             {
                 name = ((FilterAttribute) method.GetCustomAttributes(typeof (FilterAttribute), true).First()).Name;
             }
-            
+
+            filterDoc.Remove(fullyQualifiedFilterName);
+            filterDoc.Add(fullyQualifiedFilterName, new FilterDoc(method));
+
             commandMethods.Remove(fullyQualifiedFilterName); // Remove it if it exists already                  
             commandMethods.Add(fullyQualifiedFilterName, method);
         }
@@ -195,7 +226,7 @@ namespace DeninaSharp.Core
                 // Does the specified next command exist?
                 if (!commandQueue.ContainsKey(NextCommandLabel.ToLower()))
                 {
-                    throw new Exception(String.Format("Specified command label \"{0}\" does not exist in the command queue.", NextCommandLabel));
+                    throw new Exception(string.Format("Specified command label \"{0}\" does not exist in the command queue.", NextCommandLabel));
                 }
 
                 // Get the next command
@@ -236,8 +267,8 @@ namespace DeninaSharp.Core
                 {
                     // This command doesn't exist. We're going to try to be helpful and let the user know if it's becaue of a missing dependency.
                     var errorString = hiddenCommandMethods.ContainsKey(command.NormalizedCommandName)
-                        ? String.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", command.CommandName, hiddenCommandMethods[command.NormalizedCommandName])
-                        : String.Format(@"No command loaded for ""{0}""", command.CommandName);
+                        ? string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", command.CommandName, hiddenCommandMethods[command.NormalizedCommandName])
+                        : string.Format(@"No command loaded for ""{0}""", command.CommandName);
 
                     throw new DeninaException(errorString);
                 }
@@ -264,7 +295,7 @@ namespace DeninaSharp.Core
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
                     if (command.AppendToLast)
                     {
-                        output = String.Concat(GetVariable(command.InputVariable), output);
+                        output = string.Concat(GetVariable(command.InputVariable), output);
                     }
 
                     SafeSetVariable(command.OutputVariable, output);
@@ -295,8 +326,14 @@ namespace DeninaSharp.Core
                 DebugData.Add(debugData);
             }
 
-            // Return what's in the global variable            
-            return GetVariable(GLOBAL_VARIABLE_NAME).ToString();
+            var finalOutput = GetVariable(GLOBAL_VARIABLE_NAME).ToString();
+
+            // Raise the PipelineCompleted event
+            var eventArgs = new PipelineEventArgs(this, finalOutput);
+            OnPipelineComplete(eventArgs);
+            finalOutput = eventArgs.Value;
+
+            return finalOutput;
 
         }
 
@@ -324,10 +361,10 @@ namespace DeninaSharp.Core
                     }
                 }
 
-                throw new DeninaException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
+                throw new DeninaException(string.Format("Attempt to access non-existent variable: \"{0}\"", key));
             }
 
-            return variables[PipelineCommandParser.NormalizeVariableName(key)].Value ?? String.Empty;
+            return variables[PipelineCommandParser.NormalizeVariableName(key)].Value ?? string.Empty;
         }
 
         public static object GetGlobalVariable(string key)
@@ -336,7 +373,7 @@ namespace DeninaSharp.Core
 
             if (!globalVariables.ContainsKey(key))
             {
-                throw new DeninaException(String.Format("Attempt to access non-existent variable: \"{0}\"", key));
+                throw new DeninaException(string.Format("Attempt to access non-existent variable: \"{0}\"", key));
             }
 
             return globalVariables[PipelineCommandParser.NormalizeVariableName(key)].Value;           
@@ -381,7 +418,7 @@ namespace DeninaSharp.Core
             // Do we have a variable with the same name that's readonly?
             if (variables.Any(v => v.Value.Name == key && v.Value.ReadOnly))
             {
-                throw new DeninaException(String.Format("Attempt to reset value of read-only variable \"{0}\"", key));
+                throw new DeninaException(string.Format("Attempt to reset value of read-only variable \"{0}\"", key));
             }
 
             SetVariable(key, value, readOnly);
@@ -405,6 +442,14 @@ namespace DeninaSharp.Core
                 CommandArgs = commandArgs
             };
             commands.Add(command);
+        }
+
+        public static void OnPipelineComplete(PipelineEventArgs e)
+        {
+            if (PipelineComplete != null)
+            {
+                PipelineComplete(null, e);
+            }
         }
     }
 }
