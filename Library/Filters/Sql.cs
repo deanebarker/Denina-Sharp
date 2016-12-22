@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using DeninaSharp.Core.Documentation;
+using DeninaSharp.Core.Utility;
+using System;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.UI;
 using System.Xml;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Documentation;
-using System.Configuration;
-using DeninaSharp.Core.Filters;
-using DeninaSharp.Core.Utility;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -25,7 +20,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("connection", true, "The name of a connection string key from the application configuration.")]
         [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
         [CodeSample("SELECT * FROM TableName", "Sql.GetXml -connection:myConnectionString", "(An XML string)")]
-        [CodeSample("", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\"", "(An XML string)")]
+        [CodeSample("(None)", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\"", "(An XML string)")]
         public static string GetXml(string input, PipelineCommand command)
         {
             var sql = command.GetArgument("sql,proc", input);
@@ -76,11 +71,12 @@ namespace DeninaSharp.Core.Filters
             return String.IsNullOrWhiteSpace(xml) ? ">" : xml;
         }
 
-        [Filter("GetTable", "Executes SQL against the specified connection string and returns an HTML table of the results.")]
-        [ArgumentMeta("connecton", true, "The name of a connection string key from the application configuration.")]
+        [Filter("GetTable", "Executes SQL against the specified connection string and returns an HTML table of the results. TH tags contain the field names of the returned dataset and each TD and TH has a CSS class of \"column-field-name\" for styling.")]
+        [ArgumentMeta("connecton", true, "The name of a connection string key from the application configuration. This connection string name must be enabled via a Sql.AllowedConnectionStrings setting.")]
         [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
+        [ArgumentMeta("class", false, "A CSS class name for the TABLE tag.")]
         [CodeSample("SELECT * FROM TableName", "Sql.GetXml -connection:myConnectionString", "(An HTML table)")]
-        [CodeSample("", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\"", "(An HTML table)")]
+        [CodeSample("(None)", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\" -class:table", "(An HTML table with a \"class\" attribute of \"table\")")]
         public static string GetTable(string input, PipelineCommand command)
         {
             var sql = input;

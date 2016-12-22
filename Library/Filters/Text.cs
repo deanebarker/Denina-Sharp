@@ -1,10 +1,8 @@
-﻿using System;
+﻿using DeninaSharp.Core.Documentation;
+using System;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Web;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -29,7 +27,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("Concat", "Concatenates a series of arguments together.")]
         [ArgumentMeta("value", true, "Any value (variable or literal). This argument may be repeated multiple times. All passed-in arguments will be concatenated.")]
-        [CodeSample("", "Text.Append -value:James -value:Bond", "JamesBond")]
+        [CodeSample("(None)", "Text.Concat -value:James -value:Bond", "JamesBond")]
         public static string Concat(string input, PipelineCommand command)
         {
             var arguments = command.GetMultiArgument("value");
@@ -71,9 +69,8 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("template", true, "A format string suitable for usage in String.Format. The input string will replace the {0} token. Variable values will replace {variableName} tokens.")]
         [CodeSample("James Bond", "Text.Format -template:\"My name is {0}.\"", "My name is James Bond.")]
         [CodeSample(
-            "",
-            @"SetVar Name ""James Bond""
-            Text.Format ""My name is {Name}""",
+            "(None)",
+            "SetVar Name \"James Bond\"\nText.Format \"My name is {Name}\"",
             "My name is James Bond.")]
         public static string Format(string input, PipelineCommand command)
         {
@@ -98,7 +95,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("FormatLines", "Performs a template formatting operation on every line in a string and concatenates the result.")]
         [ArgumentMeta("template", true, "A format string suitable for usage in String.Format. Each line will replace the {0} token.")]
-        [CodeSample("James Bond\nErnst Blofeld", "Text.FormatLines -template:&lt;li&gt;{0}&lt;/li&gt;", "&lt;li&gt;James Bond&lt;/li&gt;&lt;li&gt;Ernst Blofeld&lt;/li&gt;")]
+        [CodeSample("James Bond\nErnst Blofeld", "Text.FormatLines -template:<li>{0}</li>", "<li>James Bond</li>\n<li>Ernst Blofeld</li>")]
         public static string FormatLines(string input, PipelineCommand command)
         {
             var returnString = new StringBuilder();

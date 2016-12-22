@@ -1,14 +1,11 @@
-﻿using System;
+﻿using DeninaSharp.Core.Documentation;
+using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Web;
-using System.Web.Compilation;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -32,11 +29,54 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("Proxy", "Proxies the current request to a specified URL.")]
+        [ArgumentMeta("method", false, "GET or POST. If not provided, the same method is used as the current request.")]
         [ArgumentMeta("url", false, "The URL to request. If not provided, the input string is assumed to be a URL.")]
+        [ArgumentMeta("get", false, "GET variables (querystring arguments) to pass-through to the proxy.")]
+        [ArgumentMeta("post", false, "POST variables (form arguments) to pass-through to the proxy.")]
+        [ArgumentMeta("header", false, "HTTP headers to pass-through to the proxy.")]
+        [ArgumentMeta("cookie", false, "Cookies to pass-through to the proxy.")]
+        [CodeSample("(Anything)", "Http.Proxy -url:http://gadgetopia.com/search -get:q -get:p", "(The results of the page at http://gadgetopia.com/search?q=[whatever]&p=[whatever] as if it were called with the same querystring arguments of \"q\" and \"p\" as the request to the current page.)")]
         public static string Proxy(string input, PipelineCommand command)
         {
+            var method = command.GetArgument("method", HttpContext.Current.Request.HttpMethod);
+            var get = command.GetMultiArgument("get");
+            var post = command.GetMultiArgument("post");
+            var cookie = command.GetMultiArgument("cookie");
+            var header = command.GetMultiArgument("header");
             var url = GetUrlArgument(input, command);
-            var request = CreateProxyRequest(new Uri(url));
+
+            var builder = new UriBuilder(url);
+
+            // Add querystring args
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            foreach (var getItem in get)
+            {
+                if (HttpContext.Current.Request.QueryString.AllKeys.Contains(getItem))
+                {
+                    query[getItem] = HttpContext.Current.Request.QueryString[getItem];
+                }
+            }
+            builder.Query = query.ToString();
+
+            //var request = CreateProxyRequest(builder.Uri);
+            var request = (HttpWebRequest)WebRequest.Create(builder.Uri);
+            request.Method = method.ToUpper();
+
+            // Add form args
+            if (post.Count > 0)
+            {
+                var postBody = HttpUtility.ParseQueryString("");
+                foreach (var postItem in post)
+                {
+                    postBody[postItem] = HttpContext.Current.Request.Form[postItem];
+                }
+                if (postBody.Count > 0)
+                {
+                    var buf = Encoding.UTF8.GetBytes(postBody.ToString());
+                    request.ContentLength = buf.Length;
+                    request.GetRequestStream().Write(buf, 0, buf.Length);
+                }
+            }
 
             HttpWebResponse response;
             try
@@ -54,7 +94,7 @@ namespace DeninaSharp.Core.Filters
                 return String.Empty;
             }
 
-            var enc = Encoding.Unicode;  // TODO: This is very poor form. I need to dynamically detect encoding...
+            var enc = Encoding.UTF8;  // TODO: This is very poor form. I need to dynamically detect encoding...
             return new StreamReader(responseStream, enc).ReadToEnd();
         }
 
@@ -80,7 +120,7 @@ namespace DeninaSharp.Core.Filters
                 builder.Path = url;
                 url = builder.Uri.AbsoluteUri;
             }
-            
+
             Uri parsedUri;
             try
             {
@@ -124,34 +164,34 @@ namespace DeninaSharp.Core.Filters
             destination.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             // Copy unrestricted headers (including cookies, if any)
-            foreach (var headerKey in source.Headers.AllKeys)
-            {
-                switch (headerKey)
-                {
-                    case "Connection":
-                    case "Content-Length":
-                    case "Date":
-                    case "Expect":
-                    case "Host":
-                    case "If-Modified-Since":
-                    case "Range":
-                    case "Transfer-Encoding":
-                    case "Proxy-Connection":
-                        // Let IIS handle these
-                        break;
+            //foreach (var headerKey in source.Headers.AllKeys)
+            //{
+            //    switch (headerKey)
+            //    {
+            //        case "Connection":
+            //        case "Content-Length":
+            //        case "Date":
+            //        case "Expect":
+            //        case "Host":
+            //        case "If-Modified-Since":
+            //        case "Range":
+            //        case "Transfer-Encoding":
+            //        case "Proxy-Connection":
+            //            // Let IIS handle these
+            //            break;
 
-                    case "Accept":
-                    case "Content-Type":
-                    case "Referer":
-                    case "User-Agent":
-                        // Restricted - copied below
-                        break;
+            //        case "Accept":
+            //        case "Content-Type":
+            //        case "Referer":
+            //        case "User-Agent":
+            //            // Restricted - copied below
+            //            break;
 
-                    default:
-                        destination.Headers[headerKey] = source.Headers[headerKey];
-                        break;
-                }
-            }
+            //        default:
+            //            destination.Headers[headerKey] = source.Headers[headerKey];
+            //            break;
+            //    }
+            //}
 
             // Copy any extra headers they passed in
             if (additionalHeaders != null && additionalHeaders.Count > 0)
@@ -173,14 +213,14 @@ namespace DeninaSharp.Core.Filters
             destination.UserAgent = source.UserAgent;
 
             // Copy content (if content body is allowed)
-            if (source.HttpMethod != "GET"
-                && source.HttpMethod != "HEAD"
-                && source.ContentLength > 0)
-            {
-                var destinationStream = destination.GetRequestStream();
-                source.InputStream.CopyTo(destinationStream);
-                destinationStream.Close();
-            }
+            //if (source.HttpMethod != "GET"
+            //    && source.HttpMethod != "HEAD"
+            //    && source.ContentLength > 0)
+            //{
+            //    var destinationStream = destination.GetRequestStream();
+            //    source.InputStream.CopyTo(destinationStream);
+            //    destinationStream.Close();
+            //}
 
             return destination;
         }

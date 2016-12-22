@@ -1,8 +1,7 @@
-﻿using System;
+﻿using DeninaSharp.Core.Documentation;
+using System;
 using System.IO;
 using System.Linq;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -13,7 +12,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("Read", "Reads the content of a file on the file system.")]
         [ArgumentMeta("file", true, "The path to the file, relative to AppDomain.CurrentDomain.BaseDirectory. This value should not start with a leading slash as Path.Combine will interpret that as \"root.\"")]
-        [CodeSample("", "File.Read -file:my-file.txt", "(The contents of my-file.txt)")]
+        [CodeSample("(None)", "File.Read -file:my-file.txt", "(The contents of my-file.txt, relate to the \"File.BaseIncludePath\" setting.)")]
         public static string Read(string input, PipelineCommand command)
         {
             // The sandbox variable must be set...

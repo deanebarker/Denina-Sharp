@@ -9,7 +9,6 @@ using System.Web.UI.WebControls.WebParts;
 using System.Xml;
 using System.Xml.Xsl;
 using BlendInteractive;
-using BlendInteractive.Denina.Core.Documentation;
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Filters;
 using DeninaSharp.Core.Utility;
@@ -23,7 +22,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
         [ArgumentMeta("xpath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
-        [CodeSample("&lt;person&gt;&lt;name&gt;James Bond&lt;/name&gt;&lt;/person&gt;", "Xml.Extract -xpath://name", "James Bond")]
+        [CodeSample("resource:extract-sample.xml", "Xml.Extract -xpath://name", "James Bond")]
         public static string ExtractFromXml(string input, PipelineCommand command)
         {
             var doc = new XmlDocument();
@@ -44,22 +43,11 @@ namespace DeninaSharp.Core.Filters
         [Filter("Transform", "Transforms an XML document against an XSL stylesheet")]
         [ArgumentMeta("xslt", true, "The raw XSLT to transform the input string.")]
         [ArgumentMeta("xml", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
-        [CodeSample(
-            "",
-            @"File.Read xml-file.xml => $xml
-            File.Read xslt-file.xslt => $xslt
-            Xml.Transform -xslt:$xslt -xml:$xml",
-            "(The transformed XML)"
-            )]
-        [CodeSample(
-            "(An XML string)",
-            @"File.Read xslt-file.xslt => $xslt
-            Xml.Transform $xslt",
-            "(The transformed XML)"
-            )]
+        [CodeSample("", "resource:no-input.dna", "(The transformed XML)")]
+        [CodeSample("(An XML string)", "resource:with-input.dna", "(The transformed XML)")]
         public static string Transform(string input, PipelineCommand command)
         {
-            var xml = String.Empty;
+            var xml = string.Empty;
             var xsl = command.GetArgument("xslt");
 
             // This adds an extension object for XSL transforms
@@ -155,9 +143,9 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("xpath", true, "XPath to return a list of XML nodes.")]
         [ArgumentMeta("template", true, "The template to apply to each node. XPath can be enclosed in brackets. These XPath expessions will be executed on the XML of that node and the resulting content will replace the token.")]
         [CodeSample(
-            "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
-            "Xml.FormatNodes -xpath://row -template:\"&lt;p&gt;Name: {name}&lt;/p&gt;\"",
-            "&lt;p&gt;Name: James&lt;/p&gt;&lt;p&gt;Name: Bond&lt;/p&gt;"
+            "resource:xml-count-format-nodes-input.xml",
+            "Xml.FormatNodes - xpath://row -template:\"<p>Name: {name}</p>\"",
+            "<p>Name: James</p><p>Name: Bond</p>"
             )]
         public static string FormatNodes(string input, PipelineCommand command)
         {
@@ -194,7 +182,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("CountNodes", "Returns the number of matching nodes.")]
         [ArgumentMeta("xpath", true, "XPath to return a list of XML nodes.")]
         [CodeSample(
-            "&lt;rows&gt;\n&lt;row&gt;\n&lt;name&gt;James&lt;/name&gt;\n&lt;/row&gt;\n&lt;row&gt;\n&lt;name&gt;Bond&lt;/name&gt;\n&lt;/row&gt;\n&lt;/rows&gt;",
+            "resource:xml-count-format-nodes-input.xml",
             "Xml.CountNodes -xpath://name",
             "2"
             )]

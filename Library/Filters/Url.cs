@@ -1,8 +1,7 @@
-﻿using System;
+﻿using DeninaSharp.Core.Documentation;
+using System;
 using System.Collections.Specialized;
 using System.Web;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core.Filters
 {

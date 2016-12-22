@@ -1,11 +1,9 @@
-﻿using System;
+﻿using AngleSharp.Parser.Html;
+using DeninaSharp.Core.Documentation;
+using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web.UI;
-using AngleSharp.Parser.Html;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -14,7 +12,7 @@ namespace DeninaSharp.Core.Filters
     {
         [Filter("Extract", "Extracts an element from an HTML string.")]
         [ArgumentMeta("path", true, "The AngleSharp selector (very CSS like).")]
-        [CodeSample("<html><body><div id=\"a\">James Bond</div></body></html>", "Html.Extract -path:div#a", "James Bond")]
+        [CodeSample("resource:html-extract-input.html", "Html.Extract -path:div#a", "James Bond")]
         [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
         public static string Extract(string input, PipelineCommand command)
         {
@@ -37,7 +35,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("tag", true, "The name of the HTML tag in which to wrap the content.")]
         [ArgumentMeta("class", false, "If provided, the tag will use this as a \"class\" attribute.")]
         [ArgumentMeta("id", false, "If provided, the tag will use this as an \"id\" attribute.")]
-        [CodeSample("James Bond", "Html.Wrap -tag:div -class:spy -id:agent", "&lt;div id=\"spy\" class=\"agent\"&gt;James Bond&lt;/div&gt;")]
+        [CodeSample("James Bond", "Html.Wrap -tag:div -class:spy -id:agent", "<div id=\"spy\" class=\"agent\">James Bond</div>")]
         public static string WrapInTag(string input, PipelineCommand command)
         {
             var stringWriter = new StringWriter();
@@ -63,13 +61,17 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("LineBreaks", "Replaces line breaks with the corresponding HTML tag.")]
-        [CodeSample("James\nBond", "Html.LineBreaks", "James&lt;br/&gt;Bond")]
+        [CodeSample("James\nBond", "Html.LineBreaks", "James<br/>Bond")]
         public static string LineBreaks(string input, PipelineCommand command)
         {
             return input.Replace(Environment.NewLine, "<br/>");
         }
 
-        [Filter("MakeTag", "Create a tag.")]
+        [Filter("MakeTag", "Creates an arbitrary HTML tag from supplied data.")]
+        [ArgumentMeta("tag", true, "The name of the tag.")]
+        [ArgumentMeta("content", false, "The content of the tag. If not supplied, the input text will be used.")]
+        [ArgumentMeta("*", false, "All arguments other than \"tag\" and \"content\" will be converted to HTML attributes of the same name and value.")]
+        [CodeSample("(None)", "Html.MakeTag -tag:div -content:\"James Bond\" -data-number:007", "<div data-number=\"007\">James Bond</div>")]
         public static string MakeTag(string input, PipelineCommand command)
         {
             var namedArgs = new string[] {"tag", "content"};
@@ -92,6 +94,30 @@ namespace DeninaSharp.Core.Filters
             return stringWriter.ToString();
 
         }
+
+        [Filter("SetAttribute", "Set a specific attribute on a tag.")]
+        [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
+        [ArgumentMeta("path", true, "The path to the tag.")]
+        [ArgumentMeta("attribute", true, "The name of the attribute to set.")]
+        [ArgumentMeta("val", true, "The new value of the attribute.")]
+        [CodeSample(
+            "<div data-number=\"006\">James Bond</div>",
+            "Html.SetAttribute -path:div -attribute:data-number -value:007",
+            "<div data-number=\"007\">James Bond</div>"
+            )]
+        public static string SetAttribute(string input, PipelineCommand command)
+        {
+            var path = command.GetArgument("path");
+            var attribute = command.GetArgument("attribute");
+            var value = command.GetArgument("val");
+
+            var doc = new HtmlParser(input).Parse();
+            var element = doc.QuerySelector(path);
+            element.Attributes.ToList().First(a => a.Name == attribute).Value = value;
+
+            return doc.DocumentElement.InnerHtml;
+        }
+
 
 
     }

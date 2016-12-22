@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BlendInteractive.Denina.Core.Documentation;
-using DeninaSharp.Core;
-using DeninaSharp.Core.Documentation;
+﻿using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core.Filters
 {
