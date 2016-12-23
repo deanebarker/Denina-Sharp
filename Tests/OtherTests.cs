@@ -33,10 +33,10 @@ namespace Tests
         }
 
         [TestMethod]
-        public void UnloadCommand()
+        public void RemoveFilter()
         {
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("text.append"));
-            Pipeline.RemoveCommand("text.append", "Never append text to anything!!!");
+            Pipeline.RemoveFilter("text.append", "Never append text to anything!!!");
             Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("text.append"));
             
             var pipeline = new Pipeline();
@@ -55,11 +55,11 @@ namespace Tests
 
 
         [TestMethod]
-        public void UnloadCategory()
+        public void RemoveFilterCategory()
         {
             Pipeline.Init();
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("text.append"));
-            Pipeline.RemoveCategory("text");
+            Pipeline.RemoveFilterCategory("text");
             Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("text.append"));
         }
     }

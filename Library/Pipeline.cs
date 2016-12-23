@@ -449,25 +449,25 @@ namespace DeninaSharp.Core
             commands.Add(command);
         }
 
-        public static void RemoveCommand(string commandName, string reason = null)
+        public static void RemoveFilter(string filterName, string reason = null)
         {
             reason = reason ?? "It was removed from the command set";
 
-            if (!commandMethods.ContainsKey(commandName.ToLower()))
+            if (!commandMethods.ContainsKey(filterName.ToLower()))
             {
                 return;
             }
-            commandMethods.Remove(commandName.ToLower());
-            hiddenCommandMethods.Add(commandName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", commandName, reason));
+            commandMethods.Remove(filterName.ToLower());
+            hiddenCommandMethods.Add(filterName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", filterName, reason));
         }
 
-        public static void RemoveCategory(string categoryName, string reason = null)
+        public static void RemoveFilterCategory(string filterCategoryName, string reason = null)
         {
             commandMethods
-                .Where(x => x.Key.StartsWith(string.Concat(categoryName.ToLower(), ".")))
+                .Where(x => x.Key.StartsWith(string.Concat(filterCategoryName.ToLower(), ".")))
                 .Select(y => y.Key)
                 .ToList()
-                .ForEach(z => RemoveCommand(z, reason));
+                .ForEach(z => RemoveFilter(z, reason));
         }
 
         public static void OnPipelineComplete(PipelineEventArgs e)
