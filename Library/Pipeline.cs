@@ -449,6 +449,27 @@ namespace DeninaSharp.Core
             commands.Add(command);
         }
 
+        public static void RemoveCommand(string commandName, string reason = null)
+        {
+            reason = reason ?? "It was removed from the command set";
+
+            if (!commandMethods.ContainsKey(commandName.ToLower()))
+            {
+                return;
+            }
+            commandMethods.Remove(commandName.ToLower());
+            hiddenCommandMethods.Add(commandName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", commandName, reason));
+        }
+
+        public static void RemoveCategory(string categoryName, string reason = null)
+        {
+            commandMethods
+                .Where(x => x.Key.StartsWith(string.Concat(categoryName.ToLower(), ".")))
+                .Select(y => y.Key)
+                .ToList()
+                .ForEach(z => RemoveCommand(z, reason));
+        }
+
         public static void OnPipelineComplete(PipelineEventArgs e)
         {
             if (PipelineComplete != null)
