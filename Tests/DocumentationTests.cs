@@ -11,6 +11,12 @@ namespace Tests
     [TestClass]
     public class DocumentationTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
+
         [TestMethod]
         public void LoadsForCategory()
         {

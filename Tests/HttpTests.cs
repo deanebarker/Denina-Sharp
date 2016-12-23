@@ -8,6 +8,12 @@ namespace Tests
     [TestClass]
     public class HttpTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
+
         [TestCleanup]
         public void Cleanup()
         {

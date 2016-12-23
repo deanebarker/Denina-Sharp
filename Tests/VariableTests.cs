@@ -8,6 +8,12 @@ namespace Tests
     [TestClass]
     public class VariableTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
+
         [TestMethod]
         public void WriteToVariable()
         {

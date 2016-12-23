@@ -11,6 +11,7 @@ namespace Tests
         [TestInitialize]
         public void Init()
         {
+            Pipeline.Init();    
             Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
         }
 

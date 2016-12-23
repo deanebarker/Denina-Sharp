@@ -10,6 +10,12 @@ namespace Tests
     [TestClass]
     public class CustomFilterLoading
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
+
         [TestMethod]
         public void LoadCustomFiltersFromType()
         {

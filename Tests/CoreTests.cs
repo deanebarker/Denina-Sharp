@@ -6,6 +6,11 @@ namespace Tests
     [TestClass]
     public class CoreTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
 
         [TestMethod]
         public void InitVar()

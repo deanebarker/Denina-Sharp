@@ -8,6 +8,12 @@ namespace Tests
     [TestClass]
     public class TextTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
+
         [TestMethod]
         public void Replace()
         {

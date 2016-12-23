@@ -7,6 +7,12 @@ namespace Tests
     [TestClass]
     public class HtmlTests
     {
+        [TestInitialize]
+        public void Init()
+        {
+            Pipeline.Init();
+        }
+
         [TestMethod]
         public void Wrap()
         {
