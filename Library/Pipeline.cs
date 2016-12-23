@@ -53,6 +53,11 @@ namespace DeninaSharp.Core
 
         static Pipeline()
         {
+            Init();
+        }
+
+        public static void Init()
+        {
             // Add the filters in this assembly
             AddAssembly(typeof(Pipeline).Assembly);
         }
