@@ -156,7 +156,7 @@ namespace DeninaSharp.Core
                 {
                     // This dependency doesn't exist, so we're not going to load this command.
                     // We're going to add this to the hidden commands dictionary, so we can give a more specific error message if this command is requested.
-                    hiddenCommandMethods.Add(fullyQualifiedFilterName, dependency.TypeName);
+                    hiddenCommandMethods.Add(fullyQualifiedFilterName, string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", fullyQualifiedFilterName, dependency.TypeName));
                     return;
                 }
             }
@@ -272,7 +272,7 @@ namespace DeninaSharp.Core
                 {
                     // This command doesn't exist. We're going to try to be helpful and let the user know if it's becaue of a missing dependency.
                     var errorString = hiddenCommandMethods.ContainsKey(command.NormalizedCommandName)
-                        ? string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", command.CommandName, hiddenCommandMethods[command.NormalizedCommandName])
+                        ? string.Format(hiddenCommandMethods[command.NormalizedCommandName])  // This should be the reason the command is hidden
                         : string.Format(@"No command loaded for ""{0}""", command.CommandName);
 
                     throw new DeninaException(errorString);
