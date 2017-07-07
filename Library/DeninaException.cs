@@ -1,4 +1,6 @@
-﻿using System;
+﻿using BlendInteractive.Denina.Core;
+using System;
+using System.Collections.Generic;
 
 namespace DeninaSharp.Core
 {
@@ -8,17 +10,27 @@ namespace DeninaSharp.Core
         public string CurrentCommandText { get; set; }
         public string CurrentCommandName { get; set; }
 
+        public List<DebugEntry> DebugData { get; set; }
+
 
         public DeninaException()
         {
+            Init();
         }
 
         public DeninaException(string message) : base(message)
         {
+            Init();
         }
 
         public DeninaException(string message, Exception inner) : base(message, inner)
         {
+            Init();
+        }
+
+        private void Init()
+        {
+            DebugData = new List<DebugEntry>();
         }
     }
 }
