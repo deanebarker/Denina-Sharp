@@ -10,3 +10,4 @@ Documentor/obj/
 GeneratedPackages/
 /Binaries/DeninaUI.exe
 *.suo
+.vs/
