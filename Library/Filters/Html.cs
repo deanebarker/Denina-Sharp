@@ -16,8 +16,8 @@ namespace DeninaSharp.Core.Filters
         [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
         public static string Extract(string input, PipelineCommand command)
         {
-            var parser = new HtmlParser();
-            var doc = parser.Parse(input);
+            var parser = new HtmlParser(input);
+            var doc = parser.Parse();
             var element = doc.QuerySelector(command.GetArgument("path"));
 
             return element == null ? String.Empty : element.InnerHtml;
@@ -28,8 +28,8 @@ namespace DeninaSharp.Core.Filters
         [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
         public static string StripTags(string input, PipelineCommand command)
         {
-            var parser = new HtmlParser();
-            var doc = parser.Parse(input);
+            var parser = new HtmlParser(input);
+            var doc = parser.Parse();
             return doc.DocumentElement.TextContent;
         }
 
@@ -113,8 +113,8 @@ namespace DeninaSharp.Core.Filters
             var attribute = command.GetArgument("attribute");
             var value = command.GetArgument("val");
 
-            var parser = new HtmlParser();
-            var doc = parser.Parse(input);
+            var parser = new HtmlParser(input);
+            var doc = parser.Parse();
             var element = doc.QuerySelector(path);
             element.Attributes.ToList().First(a => a.Name == attribute).Value = value;
 
