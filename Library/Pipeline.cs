@@ -305,7 +305,10 @@ namespace DeninaSharp.Core
 
                     SafeSetVariable(command.OutputVariable, output);
 
-                    command.ElapsedTime = timer.ElapsedMilliseconds;
+                    debugData.ElapsedTime = timer.ElapsedMilliseconds;
+
+                    // If we got here with no exception
+                    debugData.SuccessfullyExecuted = true;
                 }
                 catch (Exception e)
                 {

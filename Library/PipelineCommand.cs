@@ -26,7 +26,6 @@ namespace DeninaSharp.Core
         public string OutputVariable { get; set; }
         public string InputVariable { get; set; }
         public string OriginalText { get; set; }
-        public long ElapsedTime { get; set; }
         public string Label { get; set; } // For now, this just exists to identify the "end" command
         public string SendToLabel { get; set; }
         public bool AppendToLast { get; set; }

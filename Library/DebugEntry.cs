@@ -15,6 +15,8 @@ namespace BlendInteractive.Denina.Core
         public string OutputValue { get; set; }
         public bool SuccessfullyExecuted { get; set; }
 
+        public long ElapsedTime { get; set; }
+
         public DebugEntry(PipelineCommand command) : this()
         {
             CommandName = command.CommandName;
