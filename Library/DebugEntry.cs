@@ -17,10 +17,22 @@ namespace BlendInteractive.Denina.Core
 
         public long ElapsedTime { get; set; }
 
+        public Dictionary<string,string> Variables { get; set; }
+        public Dictionary<string,string> Arguments { get; set; }
+
         public DebugEntry(PipelineCommand command) : this()
         {
             CommandName = command.CommandName;
             CommandText = command.OriginalText;
+
+            Variables = new Dictionary<string, string>();
+            Arguments = new Dictionary<string, string>();
+
+            foreach(var argument in command.CommandArgs)
+            {
+                Arguments.Add(argument.Key.ToString(), argument.Value);
+            }
+            
         }
     }
 }

@@ -239,6 +239,10 @@ namespace DeninaSharp.Core
 
                 // Create the debug entry
                 var debugData = new DebugEntry(command);
+                Variables.Where(v => v.Key != GLOBAL_VARIABLE_NAME).ToList().ForEach(v =>
+                {
+                    debugData.Variables.Add(v.Key ?? "NULL", v.Value?.Value.ToString());
+                });
 
                 // Are we writing to a variable?
                 if (command.NormalizedCommandName == WRITE_TO_VARIABLE_COMMAND)

@@ -2,6 +2,9 @@
 using System.Linq;
 using System.Web.UI;
 using DeninaSharp.Core.Documentation;
+using System.IO;
+using System.Xml;
+using System.Text;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -111,6 +114,79 @@ namespace DeninaSharp.Core.Filters
             return input;
         }
 
+        [Filter("Dump", "Dumps debug information to output.")]
+        [ArgumentMeta("io", false, "Include input and output data (this can get long). Defaults to \"true\".)")]
+        [ArgumentMeta("variables", false, "Include variables (this can get long). Defaults to \"true\".)")]
+        public static string Dump(string input, PipelineCommand command)
+        {
 
+            Boolean.TryParse(command.GetArgument("io", "true"), out bool includeIo);
+            Boolean.TryParse(command.GetArgument("variables", "true"), out bool includeVariables);
+
+            var sb = new StringBuilder();
+            var sw = new StringWriter(sb);
+            var writer = new XmlTextWriter(sw);
+
+            writer.Formatting = Formatting.Indented;
+            writer.Indentation = 4;
+
+            writer.WriteStartDocument();
+            writer.WriteStartElement("pipelineDebugData");
+
+            foreach (var debugEntry in command.Pipeline.DebugData)
+            {
+                writer.WriteStartElement("commandDebugData");
+
+                writer.WriteElementString("commandName", debugEntry.CommandName);
+                writer.WriteElementString("commandText", debugEntry.CommandText);
+
+                writer.WriteStartElement("arguments");
+                foreach(var argument in debugEntry.Arguments)
+                {
+                    writer.WriteStartElement("argument");
+                    writer.WriteAttributeString("key", argument.Key.ToString());
+                    writer.WriteCData(argument.Value);
+                    writer.WriteEndElement();
+                }
+                writer.WriteEndElement();
+
+                if (includeIo)
+                {
+                    writer.WriteStartElement("inputValue");
+                    writer.WriteCData(debugEntry.InputValue);
+                    writer.WriteEndElement();
+
+                    writer.WriteStartElement("outputValue");
+                    writer.WriteCData(debugEntry.OutputValue);
+                    writer.WriteEndElement();
+                }
+
+                if (includeVariables)
+                {
+                    writer.WriteStartElement("variables");
+                    foreach (var variable in debugEntry.Variables)
+                    {
+                        writer.WriteStartElement("variable");
+                        writer.WriteAttributeString("key", variable.Key);
+                        writer.WriteCData(variable.Value);
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                }
+
+                writer.WriteElementString("successfullyExecuted", debugEntry.SuccessfullyExecuted.ToString());
+                writer.WriteElementString("elapsedTime", debugEntry.ElapsedTime.ToString());
+
+                writer.WriteEndElement();
+            }
+
+            writer.WriteEndElement();
+            writer.WriteEndDocument();
+            writer.Flush();
+            writer.Close();
+
+            return sb.ToString();
+        }
+        
     }
 }
