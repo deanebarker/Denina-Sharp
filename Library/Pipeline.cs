@@ -133,7 +133,7 @@ namespace DeninaSharp.Core
             }
 
             // Add to the documentation
-            categoryDoc.Remove(category);
+            categoryDoc.Remove(category.ToLower());
             categoryDoc.Add(category.ToLower(), new CategoryDoc(type));
 
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
