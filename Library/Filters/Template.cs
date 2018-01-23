@@ -80,7 +80,7 @@ namespace BlendInteractive.Denina.Core.Filters
             {
                 private Dictionary<string, string> vars;
 
-                public VarsDrop(IDictionary<string,PipelineVariable> vars)
+                public VarsDrop(IDictionary<string, PipelineVariable> vars)
                 {
                     this.vars = vars.ToDictionary(v => v.Key, v => v.Value.Value.ToString());
                 }
@@ -95,6 +95,9 @@ namespace BlendInteractive.Denina.Core.Filters
             // ex: "data.person.name.first" to find the text in the XML node at "/person/name/first"
             public class XmlNode : Drop
             {
+                private const char attributeIndicatorChar = '_';
+                private const string xpathQueryMethodName = "xpath";
+
                 private XmlElement doc;
 
                 public XmlNode(XmlDocument xml)
@@ -135,7 +138,12 @@ namespace BlendInteractive.Denina.Core.Filters
 
                 public override object BeforeMethod(string method)
                 {
-                    if (method.StartsWith("_"))
+                    if (method == xpathQueryMethodName)
+                    {
+                        return new XPathQuery(doc);
+                    }
+
+                    if (method[0] == attributeIndicatorChar)
                     {
                         // Attribute selector
                         // If it starts with an underscore, swap for an "@"
@@ -159,11 +167,19 @@ namespace BlendInteractive.Denina.Core.Filters
                     return new XmlNode((XmlElement)doc.SelectSingleNode(GetPathToNode(method)));
                 }
             }
+
+            public class XPathQuery : Drop, IIndexable
+            {
+                private XmlElement doc;
+
+                public XPathQuery(XmlElement xml)
+                {
+                    doc = xml;
+                }
+
+                public override object this[object key] => doc.SelectSingleNode(key.ToString())?.InnerText;
+                public override bool ContainsKey(object name) => true;
+            }
         }
     }
-
-
-
-
-    // Define other methods and classes here
 }

@@ -67,5 +67,17 @@ namespace Tests
 
             Assert.AreEqual("Foo Bar", result);
         }
+
+        [TestMethod]
+        public void XPathQuery()
+        {
+            var template = "Foo {{ data.xpath['/person/name/@last'] }}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("__template", template);
+            pipeline.AddCommand("Template.FromXml -template:$__template");
+            string result = pipeline.Execute("<person><name first=\"Foo\" last=\"Bar\"></name></person>");
+
+            Assert.AreEqual("Foo Bar", result);
+        }
     }
 }
