@@ -4,6 +4,7 @@ using DotLiquid;
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using System.Linq;
 
 namespace BlendInteractive.Denina.Core.Filters
 {
@@ -19,7 +20,7 @@ namespace BlendInteractive.Denina.Core.Filters
 
             var parsedTemplate = DotLiquid.Template.Parse(template);
             return parsedTemplate.Render(Hash.FromAnonymousObject(
-                    new { data = input }
+                    new { data = input, vars = new Drops.VarsDrop(command.Pipeline.Variables) }
                 ));
         }
 
@@ -59,7 +60,7 @@ namespace BlendInteractive.Denina.Core.Filters
                 }
 
                 return parsedTemplate.Render(Hash.FromAnonymousObject(
-                    new { data = templateData }
+                    new { data = templateData, vars = new Drops.VarsDrop(command.Pipeline.Variables) }
                 ));
             }
             else
@@ -67,13 +68,28 @@ namespace BlendInteractive.Denina.Core.Filters
                 // No xpath, so the entire input is feed to the template as a single object
                 // "data" in the template is a single XmlNode
                 return parsedTemplate.Render(Hash.FromAnonymousObject(
-                    new { data = new Drops.XmlNode(xml) }
+                    new { data = new Drops.XmlNode(xml), vars = new Drops.VarsDrop(command.Pipeline.Variables) }
                 ));
             }
         }
 
         public static class Drops
         {
+
+            public class VarsDrop : Drop
+            {
+                private Dictionary<string, string> vars;
+
+                public VarsDrop(IDictionary<string,PipelineVariable> vars)
+                {
+                    this.vars = vars.ToDictionary(v => v.Key, v => v.Value.Value.ToString());
+                }
+                public override object BeforeMethod(string method)
+                {
+                    return vars[method] ?? string.Empty;
+                }
+            }
+
             // Represents an XML document
             // Allows addressing content in a DotLiquid template
             // ex: "data.person.name.first" to find the text in the XML node at "/person/name/first"

@@ -54,5 +54,18 @@ namespace Tests
 
             Assert.AreEqual("Foo Bar Baz ", result);
         }
+
+        [TestMethod]
+        public void Variables()
+        {
+            var template = "Foo {{ vars.bar }}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("bar","Bar");
+            pipeline.SetVariable("__template",template);
+            pipeline.AddCommand("Template.FromText -template:$__template");
+            string result = pipeline.Execute(string.Empty);
+
+            Assert.AreEqual("Foo Bar", result);
+        }
     }
 }
