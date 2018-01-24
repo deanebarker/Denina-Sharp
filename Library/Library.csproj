@@ -56,6 +56,7 @@
     <Compile Include="Configuration\PipelineConfigVariables.cs" />
     <Compile Include="DebugEntry.cs" />
     <Compile Include="Documentation\ArgumentDoc.cs" />
+    <Compile Include="Documentation\BaseDoc.cs" />
     <Compile Include="Documentation\CategoryDoc.cs" />
     <Compile Include="Documentation\CodeSampleAttribute.cs" />
     <Compile Include="Documentation\CodeSampleDoc.cs" />
