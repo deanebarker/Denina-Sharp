@@ -15,16 +15,20 @@ namespace UI
         private const string settingsFileLocation = "settings.xml";
         private const string lastInputSettingName = "lastInput";
         private const string lastCommandsSettingName = "lastCommands";
+        private const string lastIncludeFolderSettingName = "lastIncludeFolder";
 
         public MainWindow()
         {
             InitializeComponent();
             ReadSettings();
+            Application.EnableVisualStyles();
         }
 
         private void ExecuteButton_Click(object sender, EventArgs e)
         {
             PipelineResults.BackColor = Color.FromName("White");
+
+            Status.Text = "Processing...";
 
             var commands = String.IsNullOrWhiteSpace(PipelineCommands.SelectedText) ? PipelineCommands.Text : PipelineCommands.SelectedText;
 
@@ -43,8 +47,9 @@ namespace UI
             }
             catch (Exception exception)
             {
-                PipelineResults.Text = String.Join(Environment.NewLine, exception.Message, exception.StackTrace);
+                PipelineResults.Text = exception?.InnerException?.Message ?? exception.Message;
                 PipelineResults.BackColor = Color.FromName("LightPink");
+                Status.Text = "Error Occured";
             }
 
             WriteSettings();
@@ -56,6 +61,11 @@ namespace UI
             {
                 ExecuteButton_Click(sender, new EventArgs());
             }
+
+            if (e.Control && e.KeyCode == Keys.A)
+            {
+                PipelineCommands.SelectAll();
+            }
         }
 
         private void WriteSettings()
@@ -64,11 +74,22 @@ namespace UI
             {
                 xml.WriteStartDocument();
                 xml.WriteStartElement("settings");
+
+                // Last input
                 xml.WriteStartElement(lastInputSettingName);
                 xml.WriteCData(InputTextbox.Text);
                 xml.WriteEndElement();
+
+                // Last commands
                 xml.WriteStartElement(lastCommandsSettingName);
                 xml.WriteCData(PipelineCommands.Text);
+                xml.WriteEndElement();
+
+                // Last include folder
+                xml.WriteStartElement(lastIncludeFolderSettingName);
+                xml.WriteCData(BaseIncludeFolderInput.Text);
+                xml.WriteEndElement();
+
                 xml.WriteEndElement();
                 xml.WriteEndDocument();
                 xml.Flush();
@@ -85,14 +106,42 @@ namespace UI
                     var xml = XDocument.Load(settingsFileLocation);
                     InputTextbox.Text = xml.Root.Element(lastInputSettingName).Value;
                     PipelineCommands.Text = xml.Root.Element(lastCommandsSettingName).Value;
+                    BaseIncludeFolderInput.Text = xml.Root.Element(lastIncludeFolderSettingName).Value;
                 }
                 catch (Exception e)
                 {
                     // Just don't read the settings, I guess
                 }
+
+                SetBaseIncludeFolder();
             }
         }
 
-        
+        private void SelectFolderButton_Click(object sender, EventArgs e)
+        {
+            var folderBrowser = new FolderBrowserDialog();
+
+            if (folderBrowser.ShowDialog() == DialogResult.OK)
+            {
+                BaseIncludeFolderInput.Text = folderBrowser.SelectedPath;
+            }
+        }
+
+        private void BaseIncludeFolderInput_TextChanged(object sender, EventArgs e)
+        {
+            SetBaseIncludeFolder();
+        }
+
+        private void SetBaseIncludeFolder()
+        {
+            if (!String.IsNullOrWhiteSpace(BaseIncludeFolderInput.Text))
+            {
+                Pipeline.SetGlobalVariable(DeninaSharp.Core.Filters.File.SANDBOX_VARIABLE_NAME, BaseIncludeFolderInput.Text);
+            }
+            else
+            {
+                Pipeline.UnsetGlobalVariable(DeninaSharp.Core.Filters.File.SANDBOX_VARIABLE_NAME);
+            }
+        }
     }
 }

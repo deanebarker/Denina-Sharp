@@ -30,19 +30,22 @@ namespace UI
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainWindow));
             this.ExecuteButton = new System.Windows.Forms.Button();
             this.Status = new System.Windows.Forms.Label();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.PipelineResults = new System.Windows.Forms.TextBox();
             this.PipelineCommands = new System.Windows.Forms.TextBox();
             this.InputTextbox = new System.Windows.Forms.TextBox();
+            this.BaseIncludeFolderInput = new System.Windows.Forms.TextBox();
+            this.SelectFolderButton = new System.Windows.Forms.Button();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // ExecuteButton
             // 
-            this.ExecuteButton.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
-            this.ExecuteButton.Location = new System.Drawing.Point(512, 591);
+            this.ExecuteButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.ExecuteButton.Location = new System.Drawing.Point(1022, 559);
             this.ExecuteButton.Name = "ExecuteButton";
             this.ExecuteButton.Size = new System.Drawing.Size(106, 48);
             this.ExecuteButton.TabIndex = 1;
@@ -52,7 +55,8 @@ namespace UI
             // 
             // Status
             // 
-            this.Status.Location = new System.Drawing.Point(512, 642);
+            this.Status.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.Status.Location = new System.Drawing.Point(894, 575);
             this.Status.Name = "Status";
             this.Status.Size = new System.Drawing.Size(106, 17);
             this.Status.TabIndex = 3;
@@ -75,7 +79,7 @@ namespace UI
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             this.tableLayoutPanel1.RowCount = 1;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(1106, 545);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(1106, 531);
             this.tableLayoutPanel1.TabIndex = 5;
             // 
             // PipelineResults
@@ -90,7 +94,7 @@ namespace UI
             this.PipelineResults.Name = "PipelineResults";
             this.PipelineResults.ReadOnly = true;
             this.PipelineResults.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.PipelineResults.Size = new System.Drawing.Size(364, 539);
+            this.PipelineResults.Size = new System.Drawing.Size(364, 525);
             this.PipelineResults.TabIndex = 7;
             // 
             // PipelineCommands
@@ -103,7 +107,7 @@ namespace UI
             this.PipelineCommands.Multiline = true;
             this.PipelineCommands.Name = "PipelineCommands";
             this.PipelineCommands.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.PipelineCommands.Size = new System.Drawing.Size(362, 539);
+            this.PipelineCommands.Size = new System.Drawing.Size(362, 525);
             this.PipelineCommands.TabIndex = 6;
             this.PipelineCommands.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PipelineCommands_KeyDown);
             // 
@@ -117,22 +121,46 @@ namespace UI
             this.InputTextbox.Multiline = true;
             this.InputTextbox.Name = "InputTextbox";
             this.InputTextbox.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.InputTextbox.Size = new System.Drawing.Size(362, 539);
+            this.InputTextbox.Size = new System.Drawing.Size(362, 525);
             this.InputTextbox.TabIndex = 5;
+            // 
+            // BaseIncludeFolderInput
+            // 
+            this.BaseIncludeFolderInput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.BaseIncludeFolderInput.Location = new System.Drawing.Point(25, 574);
+            this.BaseIncludeFolderInput.Name = "BaseIncludeFolderInput";
+            this.BaseIncludeFolderInput.Size = new System.Drawing.Size(335, 20);
+            this.BaseIncludeFolderInput.TabIndex = 6;
+            this.BaseIncludeFolderInput.TextChanged += new System.EventHandler(this.BaseIncludeFolderInput_TextChanged);
+            // 
+            // SelectFolderButton
+            // 
+            this.SelectFolderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.SelectFolderButton.Location = new System.Drawing.Point(366, 574);
+            this.SelectFolderButton.Name = "SelectFolderButton";
+            this.SelectFolderButton.Size = new System.Drawing.Size(147, 23);
+            this.SelectFolderButton.TabIndex = 7;
+            this.SelectFolderButton.Text = "Select Include Folder...";
+            this.SelectFolderButton.UseVisualStyleBackColor = true;
+            this.SelectFolderButton.Click += new System.EventHandler(this.SelectFolderButton_Click);
             // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1153, 692);
+            this.ClientSize = new System.Drawing.Size(1153, 624);
+            this.Controls.Add(this.SelectFolderButton);
+            this.Controls.Add(this.BaseIncludeFolderInput);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.Status);
             this.Controls.Add(this.ExecuteButton);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainWindow";
-            this.Text = "Text Filter Pipeline Tester";
+            this.Text = "Denina Pipeline Tester";
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
 
@@ -143,6 +171,8 @@ namespace UI
         private System.Windows.Forms.TextBox PipelineResults;
         private System.Windows.Forms.TextBox PipelineCommands;
         private System.Windows.Forms.TextBox InputTextbox;
+        private System.Windows.Forms.TextBox BaseIncludeFolderInput;
+        private System.Windows.Forms.Button SelectFolderButton;
     }
 }
 
