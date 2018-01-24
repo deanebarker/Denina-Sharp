@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DeninaSharp.Core;
+using System;
 using System.Windows.Forms;
 
 namespace UI
@@ -11,6 +12,8 @@ namespace UI
         [STAThread]
         private static void Main()
         {
+            Pipeline.SetGlobalVariable("Http.AllowedDomains", "*");
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainWindow());
