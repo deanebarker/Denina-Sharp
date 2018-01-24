@@ -405,6 +405,11 @@ namespace DeninaSharp.Core
             );
         }
 
+        public static void UnsetGlobalVariable(string key)
+        {
+            globalVariables.Remove(key);
+        }
+
         public static void SetGlobalVariable(string key, object value, bool readOnly = false)
         {
             key = PipelineCommandParser.NormalizeVariableName(key);
