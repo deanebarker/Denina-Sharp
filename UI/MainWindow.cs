@@ -70,7 +70,11 @@ namespace UI
 
         private void WriteSettings()
         {
-            using (var xml = XmlWriter.Create(settingsFileLocation))
+            var xmlSettings = new XmlWriterSettings()
+            {
+                NewLineHandling = NewLineHandling.Replace
+            };
+            using (var xml = XmlWriter.Create(settingsFileLocation, xmlSettings))
             {
                 xml.WriteStartDocument();
                 xml.WriteStartElement("settings");
@@ -104,8 +108,8 @@ namespace UI
                 try
                 {
                     var xml = XDocument.Load(settingsFileLocation);
-                    InputTextbox.Text = xml.Root.Element(lastInputSettingName).Value;
-                    PipelineCommands.Text = xml.Root.Element(lastCommandsSettingName).Value;
+                    InputTextbox.Text = xml.Root.Element(lastInputSettingName).Value.Replace("\n", Environment.NewLine);
+                    PipelineCommands.Text = xml.Root.Element(lastCommandsSettingName).Value.Replace("\n", Environment.NewLine);
                     BaseIncludeFolderInput.Text = xml.Root.Element(lastIncludeFolderSettingName).Value;
                 }
                 catch (Exception e)

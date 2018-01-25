@@ -99,6 +99,7 @@ namespace UI
             // 
             // PipelineCommands
             // 
+            this.PipelineCommands.AcceptsReturn = true;
             this.PipelineCommands.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
