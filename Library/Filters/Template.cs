@@ -27,10 +27,8 @@ namespace BlendInteractive.Denina.Core.Filters
         [Filter("FromXml", "Processes a DotLiquid template with the 'data' variable representing either the entire input XML, or a collection of XML nodes.")]
         [Requires("DotLiquid.Template, DotLiquid", "DotLiquid is an open-source templating library.")]
         [ArgumentMeta("template", true, "A DotLiquid template string.")]
-        [ArgumentMeta("xpath", false, "If supplied, the XPath will be executed on the XML to return a node list. The 'data' variable in the DotLiquid template will be a collection of these nodes. If not supplied, the 'data variable will be the entire XML as a single object.")]
         public static string FromXml(string input, PipelineCommand command)
         {
-            var xpath = command.GetArgument("xpath", string.Empty);
             var template = command.GetArgument("template");
 
             var parsedTemplate = DotLiquid.Template.Parse(template);
@@ -46,31 +44,9 @@ namespace BlendInteractive.Denina.Core.Filters
                 throw new DeninaException("XML Not Valid", e);
             }
 
-            if (!String.IsNullOrWhiteSpace(xpath))
-            {
-                // If they supplied XPath, then we need to run it against the input to find multiple, individual XML nodes
-                // We feed those to the template as a collection
-                // "data" in the template is a List<XmlNode>
-
-                // Load the XML nodes into a list of objects
-                var templateData = new List<Drops.XmlNode>();
-                foreach (XmlElement node in xml.SelectNodes(xpath))
-                {
-                    templateData.Add(new Drops.XmlNode(node.OuterXml));
-                }
-
-                return parsedTemplate.Render(Hash.FromAnonymousObject(
-                    new { data = templateData, vars = new Drops.VarsDrop(command.Pipeline.Variables) }
-                ));
-            }
-            else
-            {
-                // No xpath, so the entire input is feed to the template as a single object
-                // "data" in the template is a single XmlNode
-                return parsedTemplate.Render(Hash.FromAnonymousObject(
-                    new { data = new Drops.XmlNode(xml), vars = new Drops.VarsDrop(command.Pipeline.Variables) }
-                ));
-            }
+            return parsedTemplate.Render(Hash.FromAnonymousObject(
+                new { data = new Drops.XmlNode(xml), vars = new Drops.VarsDrop(command.Pipeline.Variables) }
+            ));
         }
 
         public static class Drops
@@ -138,32 +114,44 @@ namespace BlendInteractive.Denina.Core.Filters
 
                 public override object BeforeMethod(string method)
                 {
+                    // If they want to run pure XPath, send them back a query object
                     if (method == xpathQueryMethodName)
                     {
                         return new XPathQuery(doc);
                     }
 
+                    // Attribute selector
+                    // If it starts with an underscore, swap for an "@"
+                    // (You can't start DotLiquid methods with a "@", so we have to hack with the underscore.)
                     if (method[0] == attributeIndicatorChar)
                     {
-                        // Attribute selector
-                        // If it starts with an underscore, swap for an "@"
-                        // (You can't start DotLiquid methods with a "@", so we have to hack with the underscore.)
                         method = string.Concat("@", method.Substring(1));
                     }
 
+                    // We have nothing for this node, return an empty string
                     if (doc.SelectSingleNode(GetPathToNode(method)) == null)
                     {
-                        // We have nothing for this node, return an empty string
                         return string.Empty;
                     }
 
+                    // If there's more than one node, return a list of them
+                    if(doc.SelectNodes(GetPathToNode(method)).Count > 1)
+                    {
+                        var drops = new List<XmlNode>();
+                        foreach(XmlElement node in doc.SelectNodes(GetPathToNode(method)))
+                        {
+                            drops.Add(new XmlNode(node));
+                        }
+                        return drops;
+                     }
+
+                    // We have inner text for this node, then this is what they actually want, so return it
                     if (doc.SelectSingleNode(GetPathToTextNode(method)) != null)
                     {
-                        // We have inner text for this node, return it
                         return doc.SelectSingleNode(GetPathToTextNode(method)).InnerText;
                     }
 
-                    // We have a new node for this method, so return a new node so they can drill down further
+                    // If there's no text, then assume they want to drill down into the inner XML of it
                     return new XmlNode((XmlElement)doc.SelectSingleNode(GetPathToNode(method)));
                 }
             }

@@ -30,26 +30,20 @@ namespace Tests
         [TestMethod]
         public void FromXml()
         {
-            //var pipeline = new Pipeline();
-            //pipeline.AddCommand("Template.FromXml -template:\"Foo {{ data.name }}\"");
-            //string result = pipeline.Execute("<person><name>Bar</name></person>");
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("Template.FromXml -template:\"Foo {{ data.name.first }} {{ data.name.last }}\"");
+            string result = pipeline.Execute("<person><name><first>Bar</first><last>Baz</last></name></person>");
 
-            //Assert.AreEqual("Foo Bar", result);
-
-            var pipeline2 = new Pipeline();
-            pipeline2.AddCommand("Template.FromXml -template:\"Foo {{ data.name.first }} {{ data.name.last }}\"");
-            string result2 = pipeline2.Execute("<person><name><first>Bar</first><last>Baz</last></name></person>");
-
-            Assert.AreEqual("Foo Bar Baz", result2);
+            Assert.AreEqual("Foo Bar Baz", result);
         }
 
         [TestMethod]
         public void FromXmlNodes()
         {
-            var template = "Foo {% for thing in data %}{{ thing.name }} {% endfor %}";
+            var template = "Foo {% for thing in data.person %}{{ thing.name }} {% endfor %}";
             var pipeline = new Pipeline();
             pipeline.SetVariable("__template", template);
-            pipeline.AddCommand("Template.FromXml -xpath://person -template:$__template");
+            pipeline.AddCommand("Template.FromXml -template:$__template");
             string result = pipeline.Execute("<root><person><name>Bar</name></person><person><name>Baz</name></person></root>");
 
             Assert.AreEqual("Foo Bar Baz ", result);
