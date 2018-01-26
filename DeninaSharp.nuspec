@@ -17,6 +17,5 @@
     </metadata>
     <files>
         <file src="Library\bin\Release\net47\DeninaSharp.dll" target="lib\net47\DeninaSharp.dll" />
-        <file src="Library\bin\Release\net462\DeninaSharp.dll" target="lib\net462\DeninaSharp.dll" />
     </files>
 </package>
