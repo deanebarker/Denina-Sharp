@@ -153,7 +153,6 @@ namespace UI
             this.DefaultConnectionStringInput.Name = "DefaultConnectionStringInput";
             this.DefaultConnectionStringInput.Size = new System.Drawing.Size(335, 20);
             this.DefaultConnectionStringInput.TabIndex = 8;
-            this.DefaultConnectionStringInput.TextChanged += new System.EventHandler(this.DefaultConnectionStringInput_TextChanged);
             // 
             // label1
             // 

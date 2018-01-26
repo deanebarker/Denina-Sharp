@@ -19,9 +19,7 @@ namespace UI
         private const string lastIncludeFolderSettingName = "lastIncludeFolder";
         private const string defaultConnectionStringSettingName = "defaultConnectionString";
         public const string DefaultConnectionStringName = "__conn";
-
-        private string defaultConnectionString;
-
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -42,7 +40,11 @@ namespace UI
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 var pipeline = new Pipeline();
-                pipeline.SafeSetVariable("__conn", defaultConnectionString);
+
+                if (!String.IsNullOrWhiteSpace(DefaultConnectionStringInput.Text))
+                {
+                    pipeline.SafeSetVariable(DefaultConnectionStringName, DefaultConnectionStringInput.Text.Trim());
+                }
                 pipeline.AddCommand(commands);
                 long parseTime = stopWatch.ElapsedMilliseconds;
                 PipelineResults.Text = pipeline.Execute(InputTextbox.Text);
@@ -158,11 +160,6 @@ namespace UI
             {
                 Pipeline.UnsetGlobalVariable(DeninaSharp.Core.Filters.File.SANDBOX_VARIABLE_NAME);
             }
-        }
-
-        private void DefaultConnectionStringInput_TextChanged(object sender, EventArgs e)
-        {
-            defaultConnectionString = DefaultConnectionStringInput.Text.Trim();
         }
     }
 }
