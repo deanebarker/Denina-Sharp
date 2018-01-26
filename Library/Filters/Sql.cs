@@ -163,9 +163,12 @@ namespace DeninaSharp.Core.Filters
 
         private static SqlCommand ConfigureCommand(string connectionStringName, PipelineCommand command)
         {
+            // Determine if we have an actual connection string, or a connection string name
+            var connectionString = IsConnectionString("Data Source=") ? connectionStringName : ConfigurationManager.ConnectionStrings[connectionStringName].ToString();
+
             var sqlCommand = new SqlCommand()
             {
-                Connection = new SqlConnection(ConfigurationManager.ConnectionStrings[connectionStringName].ToString())
+                Connection = new SqlConnection(connectionString)
             };
 
             // Add all variables as params
@@ -190,8 +193,13 @@ namespace DeninaSharp.Core.Filters
 
         private static bool IsValidConnectionStringName(string connectionStringName)
         {
+            if(IsConnectionString(connectionStringName))
+            {
+                return true;
+            }
+
             // Have they set the allowed connection strings variable?
-            if (!Pipeline.IsSetGlobally(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME))
+                if (!Pipeline.IsSetGlobally(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME))
             {
                 throw new DeninaException(String.Format("Allowed connection strings must be set as the \"{0}\" variable.", ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME));
             }
@@ -210,6 +218,13 @@ namespace DeninaSharp.Core.Filters
             }
 
             return true;
+        }
+
+        private static bool IsConnectionString(string input)
+        {
+            // I don't know that there's a standard methodology for this.
+            // This is my best guess.
+            return input.Contains("Data Source=");
         }
     }
 }
