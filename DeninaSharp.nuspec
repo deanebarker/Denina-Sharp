@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>DeninaSharp</id>
+        <version>1.0.2</version>
+        <title>Denina Sharp</title>
+        <authors>Deane Barker</authors>
+        <owners>Deane Barker</owners>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>A text processing pipeline.</description>
+        <summary>A text processing pipeline.</summary>
+        <dependencies>
+            <dependency id="AngleSharp" version="0.9.9" />
+            <dependency id="Newtonsoft.Json" version="10.0.3" />
+            <dependency id="DotLiquid" version="(,3)" />
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="Library\bin\Release\net47\DeninaSharp.dll" target="lib\net47\DeninaSharp.dll" />
+        <file src="Library\bin\Release\net462\DeninaSharp.dll" target="lib\net462\DeninaSharp.dll" />
+    </files>
+</package>
