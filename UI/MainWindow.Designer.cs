@@ -39,6 +39,8 @@ namespace UI
             this.InputTextbox = new System.Windows.Forms.TextBox();
             this.BaseIncludeFolderInput = new System.Windows.Forms.TextBox();
             this.SelectFolderButton = new System.Windows.Forms.Button();
+            this.DefaultConnectionStringInput = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -128,7 +130,7 @@ namespace UI
             // BaseIncludeFolderInput
             // 
             this.BaseIncludeFolderInput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.BaseIncludeFolderInput.Location = new System.Drawing.Point(25, 574);
+            this.BaseIncludeFolderInput.Location = new System.Drawing.Point(186, 561);
             this.BaseIncludeFolderInput.Name = "BaseIncludeFolderInput";
             this.BaseIncludeFolderInput.Size = new System.Drawing.Size(335, 20);
             this.BaseIncludeFolderInput.TabIndex = 6;
@@ -137,7 +139,7 @@ namespace UI
             // SelectFolderButton
             // 
             this.SelectFolderButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.SelectFolderButton.Location = new System.Drawing.Point(366, 574);
+            this.SelectFolderButton.Location = new System.Drawing.Point(25, 559);
             this.SelectFolderButton.Name = "SelectFolderButton";
             this.SelectFolderButton.Size = new System.Drawing.Size(147, 23);
             this.SelectFolderButton.TabIndex = 7;
@@ -145,11 +147,30 @@ namespace UI
             this.SelectFolderButton.UseVisualStyleBackColor = true;
             this.SelectFolderButton.Click += new System.EventHandler(this.SelectFolderButton_Click);
             // 
+            // DefaultConnectionStringInput
+            // 
+            this.DefaultConnectionStringInput.Location = new System.Drawing.Point(186, 586);
+            this.DefaultConnectionStringInput.Name = "DefaultConnectionStringInput";
+            this.DefaultConnectionStringInput.Size = new System.Drawing.Size(335, 20);
+            this.DefaultConnectionStringInput.TabIndex = 8;
+            this.DefaultConnectionStringInput.TextChanged += new System.EventHandler(this.DefaultConnectionStringInput_TextChanged);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(34, 589);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(146, 13);
+            this.label1.TabIndex = 9;
+            this.label1.Text = "\"$__conn\" Connection String";
+            // 
             // MainWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1153, 624);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.DefaultConnectionStringInput);
             this.Controls.Add(this.SelectFolderButton);
             this.Controls.Add(this.BaseIncludeFolderInput);
             this.Controls.Add(this.tableLayoutPanel1);
@@ -174,6 +195,8 @@ namespace UI
         private System.Windows.Forms.TextBox InputTextbox;
         private System.Windows.Forms.TextBox BaseIncludeFolderInput;
         private System.Windows.Forms.Button SelectFolderButton;
+        private System.Windows.Forms.TextBox DefaultConnectionStringInput;
+        private System.Windows.Forms.Label label1;
     }
 }
 

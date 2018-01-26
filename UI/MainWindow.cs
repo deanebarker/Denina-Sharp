@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
@@ -16,6 +17,10 @@ namespace UI
         private const string lastInputSettingName = "lastInput";
         private const string lastCommandsSettingName = "lastCommands";
         private const string lastIncludeFolderSettingName = "lastIncludeFolder";
+        private const string defaultConnectionStringSettingName = "defaultConnectionString";
+        public const string DefaultConnectionStringName = "__conn";
+
+        private string defaultConnectionString;
 
         public MainWindow()
         {
@@ -37,6 +42,7 @@ namespace UI
                 var stopWatch = new Stopwatch();
                 stopWatch.Start();
                 var pipeline = new Pipeline();
+                pipeline.SafeSetVariable("__conn", defaultConnectionString);
                 pipeline.AddCommand(commands);
                 long parseTime = stopWatch.ElapsedMilliseconds;
                 PipelineResults.Text = pipeline.Execute(InputTextbox.Text);
@@ -94,6 +100,11 @@ namespace UI
                 xml.WriteCData(BaseIncludeFolderInput.Text);
                 xml.WriteEndElement();
 
+                // Last include folder
+                xml.WriteStartElement(defaultConnectionStringSettingName);
+                xml.WriteCData(DefaultConnectionStringInput.Text);
+                xml.WriteEndElement();
+
                 xml.WriteEndElement();
                 xml.WriteEndDocument();
                 xml.Flush();
@@ -111,6 +122,7 @@ namespace UI
                     InputTextbox.Text = xml.Root.Element(lastInputSettingName).Value.Replace("\n", Environment.NewLine);
                     PipelineCommands.Text = xml.Root.Element(lastCommandsSettingName).Value.Replace("\n", Environment.NewLine);
                     BaseIncludeFolderInput.Text = xml.Root.Element(lastIncludeFolderSettingName).Value;
+                    DefaultConnectionStringInput.Text = xml.Root.Element(defaultConnectionStringSettingName).Value;
                 }
                 catch (Exception e)
                 {
@@ -146,6 +158,11 @@ namespace UI
             {
                 Pipeline.UnsetGlobalVariable(DeninaSharp.Core.Filters.File.SANDBOX_VARIABLE_NAME);
             }
+        }
+
+        private void DefaultConnectionStringInput_TextChanged(object sender, EventArgs e)
+        {
+            defaultConnectionString = DefaultConnectionStringInput.Text.Trim();
         }
     }
 }
