@@ -161,10 +161,10 @@ namespace DeninaSharp.Core.Filters
 
         }
 
-        private static SqlCommand ConfigureCommand(string connectionStringName, PipelineCommand command)
+        private static SqlCommand ConfigureCommand(string connectionInfo, PipelineCommand command)
         {
             // Determine if we have an actual connection string, or a connection string name
-            var connectionString = IsConnectionString("Data Source=") ? connectionStringName : ConfigurationManager.ConnectionStrings[connectionStringName].ToString();
+            var connectionString = IsConnectionStringName("Data Source=") ? ConfigurationManager.ConnectionStrings[connectionInfo].ToString() : connectionInfo;
 
             var sqlCommand = new SqlCommand()
             {
@@ -184,7 +184,7 @@ namespace DeninaSharp.Core.Filters
             catch (Exception e)
             {
 
-                throw new DeninaException("Error connecting to SQL Server with connection string \"" + connectionStringName + "\"", e);
+                throw new DeninaException("Error connecting to SQL Server with connection string \"" + connectionInfo + "\"", e);
             }
             
 
@@ -193,7 +193,11 @@ namespace DeninaSharp.Core.Filters
 
         private static bool IsValidConnectionStringName(string connectionStringName)
         {
-            if(IsConnectionString(connectionStringName))
+            // If it's not a connection string name, then we're not going to authorize it
+            // We're only worried about connection string names because that's shorthand for a connection string you might not know otherwise
+            // If you have the actual connection string, we don't care. If you have it you have it.
+            // Our concern is that a connection string name gives you access to connection credentials you don't know in advance.
+            if (!IsConnectionStringName(connectionStringName))
             {
                 return true;
             }
@@ -220,11 +224,9 @@ namespace DeninaSharp.Core.Filters
             return true;
         }
 
-        private static bool IsConnectionString(string input)
+        private static bool IsConnectionStringName(string input)
         {
-            // I don't know that there's a standard methodology for this.
-            // This is my best guess.
-            return input.Contains("Data Source=");
+            return (ConfigurationManager.ConnectionStrings[input] != null);
         }
     }
 }
