@@ -29,9 +29,11 @@ namespace UI
 
         private void ExecuteButton_Click(object sender, EventArgs e)
         {
+            PipelineCommands.BackColor = Color.FromArgb(230, 250, 230);
             PipelineResults.BackColor = Color.FromName("White");
 
             Status.Text = "Processing...";
+            ExecuteButton.Enabled = false;
 
             var commands = String.IsNullOrWhiteSpace(PipelineCommands.SelectedText) ? PipelineCommands.Text : PipelineCommands.SelectedText;
 
@@ -56,8 +58,13 @@ namespace UI
             catch (Exception exception)
             {
                 PipelineResults.Text = exception?.InnerException?.Message ?? exception.Message;
-                PipelineResults.BackColor = Color.FromName("LightPink");
+                PipelineResults.BackColor = Color.FromArgb(250, 230, 230);
                 Status.Text = "Error Occured";
+            }
+            finally
+            {
+                ExecuteButton.Enabled = true;
+                PipelineCommands.BackColor = Color.FromName("White");
             }
 
             WriteSettings();
