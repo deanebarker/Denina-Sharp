@@ -20,7 +20,7 @@ namespace BlendInteractive.Denina.Core
         public Dictionary<string,string> Variables { get; set; }
         public Dictionary<string,string> Arguments { get; set; }
 
-        public DebugEntry(PipelineCommand command) : this()
+        public DebugEntry(PipelineCommand command, IDictionary<string, PipelineVariable> variables) : this()
         {
             CommandName = command.CommandName;
             CommandText = command.OriginalText;
@@ -32,7 +32,11 @@ namespace BlendInteractive.Denina.Core
             {
                 Arguments.Add(argument.Key.ToString(), argument.Value);
             }
-            
+
+            foreach(var variable in variables.Where(v => v.Key != Pipeline.GLOBAL_VARIABLE_NAME))
+            {
+                Variables.Add(variable.Key, variable.Value?.Value?.ToString());
+            }
         }
     }
 }
