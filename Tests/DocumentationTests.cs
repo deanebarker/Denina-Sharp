@@ -9,14 +9,8 @@ using System.IO;
 namespace Tests
 {
     [TestClass]
-    public class DocumentationTests
+    public class DocumentationTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void LoadsForCategory()
         {

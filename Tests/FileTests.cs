@@ -6,18 +6,12 @@ using System;
 namespace Tests
 {
     [TestClass]
-    public class FileTests
+    public class FileTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();    
-            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
-        }
-
         [TestMethod]
         public void ReadContentFromFile()
         {
+            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
             var pipeline = new Pipeline();
             pipeline.AddCommand("file.Read -file:Utility/text.txt");
             string result = pipeline.Execute(String.Empty);

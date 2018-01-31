@@ -8,14 +8,8 @@ using Tests.Utility;
 namespace Tests
 {
     [TestClass]
-    public class CustomFilterLoading
+    public class CustomFilterLoading : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void LoadCustomFiltersFromType()
         {

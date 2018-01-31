@@ -6,19 +6,13 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     [TestClass]
-    public class XmlTests
+    public class XmlTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
-        }
-
         [TestMethod]
         public void TransformXml()
         {
             // This test relies on controlled XSLT/XML files in the "Utility" folder
+            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
             var pipeline = GetPipeline();
             pipeline.AddCommand("File.Read -file:utility/data.xml => $xml");
             pipeline.AddCommand("File.Read -file:utility/transform.xslt => $xslt");
@@ -33,6 +27,7 @@ namespace Tests
         [TestMethod]
         public void FormatNodes()
         {
+            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
             var pipeline = GetPipeline();
             pipeline.AddCommand("File.Read -file:utility/data.xml");
             pipeline.AddCommand("Xml.FormatNodes -xpath://element -template:\"Value: {.}\"");
@@ -44,7 +39,7 @@ namespace Tests
         [TestMethod]
         public void CountNodes()
         {
-
+            Pipeline.SetGlobalVariable(File.SANDBOX_VARIABLE_NAME, AppDomain.CurrentDomain.BaseDirectory);
             var pipeline = GetPipeline();
             pipeline.AddCommand("File.Read -file:utility/data.xml");
             pipeline.AddCommand("Xml.CountNodes -xpath://element");

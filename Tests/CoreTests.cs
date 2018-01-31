@@ -4,14 +4,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     [TestClass]
-    public class CoreTests
+    public class CoreTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void InitVar()
         {
@@ -23,8 +17,7 @@ namespace Tests
 
             // No need for an assertion. If it didn't work, it would throw an exception...
         }
-
-
+        
         [TestMethod]
         public void SetVar()
         {
@@ -35,7 +28,5 @@ namespace Tests
 
             Assert.AreEqual("Awesome", result);
         }
-
-
     }
 }

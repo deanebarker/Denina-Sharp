@@ -9,14 +9,8 @@ using System.Threading.Tasks;
 namespace Tests
 {
     [TestClass]
-    public class TemplateTests
+    public class TemplateTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void FromText()
         {

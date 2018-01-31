@@ -9,14 +9,8 @@ using System.Threading.Tasks;
 namespace Tests
 {
     [TestClass]
-    public class EventTests
+    public class EventTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void PipelineComplete()
         {

@@ -6,14 +6,8 @@ using System.Linq;
 namespace Tests
 {
     [TestClass]
-    public class VariableTests
+    public class VariableTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void WriteToVariable()
         {
