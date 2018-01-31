@@ -58,8 +58,9 @@ namespace DeninaSharp.Core
 
         public static void Init()
         {
-            // Add the filters in this assembly
+            ClearGlobalVariables();
             AddAssembly(typeof(Pipeline).Assembly);
+            PipelineComplete = null;
         }
 
         public Pipeline(string commandString = null)
