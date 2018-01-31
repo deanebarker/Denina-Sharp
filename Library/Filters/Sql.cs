@@ -164,7 +164,7 @@ namespace DeninaSharp.Core.Filters
         private static SqlCommand ConfigureCommand(string connectionInfo, PipelineCommand command)
         {
             // Determine if we have an actual connection string, or a connection string name
-            var connectionString = IsConnectionStringName("Data Source=") ? ConfigurationManager.ConnectionStrings[connectionInfo].ToString() : connectionInfo;
+            var connectionString = IsConnectionStringName(connectionInfo) ? ConfigurationManager.ConnectionStrings[connectionInfo].ToString() : connectionInfo;
 
             var sqlCommand = new SqlCommand()
             {
