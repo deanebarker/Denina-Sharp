@@ -203,14 +203,14 @@ namespace DeninaSharp.Core.Filters
             }
 
             // Have they set the allowed connection strings variable?
-                if (!Pipeline.IsSetGlobally(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME))
+            if (!Pipeline.IsSetGlobally(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME))
             {
                 throw new DeninaException(String.Format("Allowed connection strings must be set as the \"{0}\" variable.", ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME));
             }
 
             // Is this connection string authorized?
             var allowedConnectionStrings = Pipeline.GetGlobalVariable(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME).ToString();
-            if (!allowedConnectionStrings.Split(',').Contains(connectionStringName))
+            if (!allowedConnectionStrings.Split(",".ToCharArray()).Select(s => s.Trim().ToLower()).Contains(connectionStringName.ToLower()))
             {
                 throw new DeninaException(String.Format("Connection string key \"{0}\" has not been authorized.", connectionStringName));
             }
