@@ -14,6 +14,11 @@ namespace DeninaSharp.Core.Documentation
 
         protected string Eval(string value)
         {
+            if(value == null)
+            {
+                return string.Empty;
+            }
+
             if (!value.StartsWith(RESOURCE_PREFIX))
             {
                 return value;
