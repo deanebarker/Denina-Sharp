@@ -135,7 +135,7 @@ namespace BlendInteractive.Denina.Core.Filters
                     // Prepends "//", so it's the same as the prior example
                     if (StartsWithMethodName(method, listQueryMethodName))
                     {
-                        return ListQuery.GetDrops(doc, GetShorthandValue(method));
+                        return ListQuery.GetDrops(doc, string.Concat("//", GetShorthandValue(method)));
                     }
 
                     // Attribute shortcut
