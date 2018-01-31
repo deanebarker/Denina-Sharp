@@ -116,31 +116,35 @@ namespace BlendInteractive.Denina.Core.Filters
 
                 public override object BeforeMethod(string method)
                 {
-                    // If they want to run pure XPath, send them back a query object
+                    // Raw Xpath
+                    // {{ data.xpath['/name/first/@type'] }}
                     if (method == xpathQueryMethodName)
                     {
                         return new XPathQuery(doc);
                     }
 
-                    if(StartsWithMethodName(method, listQueryMethodName))
-                    {
-                        return ListQuery.GetDrops(doc, GetShorthandValue(method));
-                    }
-
-                    if (StartsWithMethodName(method, attributeMethodName))
-                    {
-                        return doc.Attributes[GetShorthandValue(method)]?.Value;
-                    }
-
+                    // A list of nodes
+                    // {{ for person in data.list['//person'] }}
                     if (method == listQueryMethodName)
                     {
                         return new ListQuery(doc);
                     }
 
-                    // Attribute selector
-                    // If it starts with an underscore, swap for an "@"
-                    // (You can't start DotLiquid methods with a "@", so we have to hack with the underscore.)
+                    // List shortcut
+                    // {% for person in data.list-person %}
+                    // Prepends "//", so it's the same as the prior example
+                    if (StartsWithMethodName(method, listQueryMethodName))
+                    {
+                        return ListQuery.GetDrops(doc, GetShorthandValue(method));
+                    }
 
+                    // Attribute shortcut
+                    // {{ data.name.first.attr-type }}
+                    // Same as the XPath example above
+                    if (StartsWithMethodName(method, attributeMethodName))
+                    {
+                        return doc.Attributes[GetShorthandValue(method)]?.Value;
+                    }
 
                     // We have nothing for this node, return an empty string
                     if (doc.SelectSingleNode(GetPathToNode(method)) == null)
