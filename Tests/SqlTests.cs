@@ -40,9 +40,28 @@ namespace Tests
             }
             catch (Exception e)
             {
-                Assert.IsTrue(e.InnerException != null);
-                Assert.IsTrue(e.InnerException.Message.Contains("Format of the initialization string"));
+                Assert.IsTrue(e != null);
+                Assert.IsTrue(e.Message.Contains("Format of the initialization string"));
             }
         }
+
+        //[TestMethod]
+        //public void GetXml()
+        //{
+        //    var pipeline = new Pipeline();
+        //    pipeline.AddCommand("Core.SetVar -var:name -val:deane");
+        //    pipeline.AddCommand("Sql.GetXml -connection:g -sql:\"SELECT * FROM contacts\"");
+        //    pipeline.AddCommand("Core.DumpToXml -io:false");
+
+        //    string result = null;
+        //    try
+        //    {
+        //        result = pipeline.Execute();
+        //    }
+        //    catch(Exception e)
+        //    {
+        //        Assert.IsTrue(result.Contains("Deane"));
+        //    }
+        //}
     }
 }
