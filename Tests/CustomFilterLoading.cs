@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core;
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Filters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -106,20 +107,20 @@ namespace Tests
         }
 
 
-        public static string DoSomething(string input, PipelineCommand command)
+        public static string DoSomething(string input, PipelineCommand command, ExecutionLog log)
         {
             return "It worked!";
         }
 
         [Filter("DoSomethingElse")]
-        public static string DoSomethingElse(string input, PipelineCommand command)
+        public static string DoSomethingElse(string input, PipelineCommand command, ExecutionLog log)
         {
             return "It worked!";
         }
 
         [Filter("FilterWithFakeDependency")]
         [Requires("MissingType, MissingAssembly", "")]
-        public static string NeedsMissingDependency(string input, PipelineCommand command)
+        public static string NeedsMissingDependency(string input, PipelineCommand command, ExecutionLog log)
         {
             return "It worked!";
         }
@@ -130,7 +131,7 @@ namespace Tests
     internal static class OverwriteFilterTestClass
     {
         [Filter("Append")]
-        public static string Append(string input, PipelineCommand command)
+        public static string Append(string input, PipelineCommand command, ExecutionLog log)
         {
             return String.Concat(input, "BAZ");
         }

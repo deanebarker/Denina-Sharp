@@ -49,7 +49,7 @@ namespace DeninaSharp.Core
         private Dictionary<string, PipelineVariable> variables = new Dictionary<string, PipelineVariable>();
         private static Dictionary<string, PipelineVariable> globalVariables = new Dictionary<string, PipelineVariable>();
 
-        public List<DebugEntry> DebugData { get; private set; }
+        public List<ExecutionLog> LogEntries { get; private set; }
 
         static Pipeline()
         {
@@ -84,7 +84,7 @@ namespace DeninaSharp.Core
                 }
             }
 
-            DebugData = new List<DebugEntry>();
+            LogEntries = new List<ExecutionLog>();
         }
 
         public static ReadOnlyDictionary<string, MethodInfo> CommandMethods
@@ -177,7 +177,7 @@ namespace DeninaSharp.Core
         public string Execute(string input = null)
         {
             // Clear the debug data
-            DebugData.Clear();
+            LogEntries.Clear();
 
             // Add a pass-through command at the end just to hold a label called "end".
             if (commands.Any(c => c.Label == FINAL_COMMAND_LABEL))
@@ -239,7 +239,7 @@ namespace DeninaSharp.Core
                 var command = commandQueue[NextCommandLabel.ToLower()];
 
                 // Create the debug entry
-                var debugData = new DebugEntry(command, Variables);
+                var log = new ExecutionLog(command, Variables);
 
                 // Are we writing to a variable?
                 if (command.NormalizedCommandName == WRITE_TO_VARIABLE_COMMAND)
@@ -294,9 +294,9 @@ namespace DeninaSharp.Core
 
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
                     // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
-                    debugData.InputValue = GetVariable(command.InputVariable).ToString();
-                    var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command});
-                    debugData.OutputValue = output.ToString();
+                    log.InputValue = GetVariable(command.InputVariable).ToString();
+                    var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command, log});
+                    log.OutputValue = output.ToString();
 
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
                     if (command.AppendToLast)
@@ -306,33 +306,35 @@ namespace DeninaSharp.Core
 
                     SafeSetVariable(command.OutputVariable, output);
 
-                    debugData.ElapsedTime = timer.ElapsedMilliseconds;
+                    log.ElapsedTime = timer.ElapsedMilliseconds;
 
                     // If we got here with no exception
-                    debugData.SuccessfullyExecuted = true;
+                    log.SuccessfullyExecuted = true;
+                }
+                catch(DeninaException e)
+                {
+                    LogEntries.Add(log); // Add the last log item
+                    e.CurrentCommandText = command.OriginalText;
+                    e.CurrentCommandName = command.NormalizedCommandName;
+                    e.LogData = LogEntries;
+                    throw;
                 }
                 catch (Exception e)
                 {
-                    if (e.InnerException is DeninaException)
+                    LogEntries.Add(log); // Add the last log item
+                    var exception = new DeninaException(e?.InnerException.Message ?? e.Message)
                     {
-                        // Since this was reflected, the "outer" exception is "an exception was thrown by the target of an invocation"
-                        // Hence, the "real" exception is the inner exception
-                        var exception = (DeninaException) e.InnerException;
-
-                        exception.CurrentCommandText = command.OriginalText;
-                        exception.CurrentCommandName = command.NormalizedCommandName;
-                        throw exception;
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                        CurrentCommandText = command.OriginalText,
+                        CurrentCommandName = command.NormalizedCommandName,
+                        LogData = LogEntries
+                    };
+                    throw exception;
                 }
 
                 // Set the pointer to the next command
                 NextCommandLabel = command.SendToLabel;
 
-                DebugData.Add(debugData);
+                LogEntries.Add(log);
             }
 
             var finalOutput = GetVariable(GLOBAL_VARIABLE_NAME).ToString();

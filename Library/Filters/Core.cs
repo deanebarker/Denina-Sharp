@@ -5,6 +5,7 @@ using DeninaSharp.Core.Documentation;
 using System.IO;
 using System.Xml;
 using System.Text;
+using BlendInteractive.Denina.Core;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -13,7 +14,7 @@ namespace DeninaSharp.Core.Filters
     {
         [Filter("Clear", "Replaces the input text. (The same as ReplaceAll called with no arguments.)")]
         [CodeSample("(Anything)", "Core.Clear", "(Nothing)")]
-        public static string Clear(string input, PipelineCommand command)
+        public static string Clear(string input, PipelineCommand command, ExecutionLog log)
         {
             return String.Empty;
         }
@@ -22,7 +23,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("var", true, "The name of the variable to be retrieved.")]
         [CodeSample("(Anything, with the \"Name\" variable holding the value \"James Bond\")", "Core.ReadFrom Name", "James Bond")]
         [DoNotResolveVariables]
-        public static string ReadFrom(string input, PipelineCommand command)
+        public static string ReadFrom(string input, PipelineCommand command, ExecutionLog log)
         {
             // This is a placeholder. No code will ever get here. See the "Execute" method of TextFilterPipeline.
             return string.Empty;
@@ -32,7 +33,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("var", true, "The name of the variable to which to write the input string.")]
         [CodeSample("James Bond", "Core.WriteTo Name", "(The variable \"Name\" now contains \"James Bond\".)")]
         [DoNotResolveVariables]
-        public static string WriteTo(string input, PipelineCommand command)
+        public static string WriteTo(string input, PipelineCommand command, ExecutionLog log)
         {
             // This is a placeholder. No code will ever get here. See the "Execute" method of TextFilterPipeline.
             return String.Empty;
@@ -43,7 +44,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("value", false, "The desired value. If not provided, the variable is set to an empty string (same as InitVar).")]
         [CodeSample("(Anything)", "Core.SetVar -var:Name -value:\"James Bond\"\nReadFrom Name", "James Bond")]
         [DoNotResolveVariables]
-        public static string SetVar(string input, PipelineCommand command)
+        public static string SetVar(string input, PipelineCommand command, ExecutionLog log)
         {
             var variableName = command.GetArgument("var");
             var value = command.GetArgument("value", String.Empty);
@@ -57,7 +58,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("var", true, "The name of the variable to set. Multiple variables can be specified. All will be initialized.")]
         [DoNotResolveVariables]
         [CodeSample("(Anything)", "Core.InitVar -var:Name -var:Address -var:City -var:State -var:Zip", "(Unchanged; no output. However, the named variables are all initialized to empty strings.)")]
-        public static string InitVar(string input, PipelineCommand command)
+        public static string InitVar(string input, PipelineCommand command, ExecutionLog log)
         {
             foreach (var variableName in command.GetMultiArgument("var"))
             {
@@ -72,7 +73,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Now", "Returns the current date and time, formatted by an optional format string.")]
         [ArgumentMeta("format", false, "The C# time format string with which to format the results.")]
         [CodeSample("(Anything)", "Core.Now -format:\"ddd d MMM\"", "Wed 25 Feb")]
-        public static string Now(string input, PipelineCommand command)
+        public static string Now(string input, PipelineCommand command, ExecutionLog log)
         {
             var formatString = "f";
             if (command.CommandArgs.Count == 1)
@@ -86,7 +87,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("var", true, "The name of the variable to which to append data.")]
         [ArgumentMeta("value", false, "The value to append. If omitted, the input string will be appended.")]
         [CodeSample("(Anything)", "Core.SetVar -var:Name -value:James\nCore.AppendVar -var:Name -value:\" Bond\"\nCore.ReadFrom Name", "James Bond")]
-        public static string AppendVar(string input, PipelineCommand command)
+        public static string AppendVar(string input, PipelineCommand command, ExecutionLog log)
         {
             // If they didn't provide a value, then use the input
             var valueToAppend = command.GetArgument("value", input);
@@ -101,23 +102,23 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("Label", "A placeholder filter for a label. Simply passes text through.")]
-        public static string Pass(string input, PipelineCommand command)
+        public static string Pass(string input, PipelineCommand command, ExecutionLog log)
         {
             return input;
         }
 
         [Filter("End", "Ends execution.")]
         [CodeSample("(Anything)", "Core.End", "(Execution ends, and the active text is passed out of the pipeline as if this was the last command.)")]
-        public static string End(string input, PipelineCommand command)
+        public static string End(string input, PipelineCommand command, ExecutionLog log)
         {
             command.SendToLabel = "end";
             return input;
         }
 
-        [Filter("Dump", "Dumps debug information to output.")]
+        [Filter("DumpToXml", "Dumps debug information to output.")]
         [ArgumentMeta("io", false, "Include input and output data (this can get long). Defaults to \"true\".)")]
         [ArgumentMeta("variables", false, "Include variables (this can get long). Defaults to \"true\".)")]
-        public static string Dump(string input, PipelineCommand command)
+        public static string DumpToXml(string input, PipelineCommand command, ExecutionLog log)
         {
 
             Boolean.TryParse(command.GetArgument("io", "true"), out bool includeIo);
@@ -131,11 +132,11 @@ namespace DeninaSharp.Core.Filters
             writer.Indentation = 4;
 
             writer.WriteStartDocument();
-            writer.WriteStartElement("pipelineDebugData");
+            writer.WriteStartElement("pipelineLog");
 
-            foreach (var debugEntry in command.Pipeline.DebugData)
+            foreach (var debugEntry in command.Pipeline.LogEntries)
             {
-                writer.WriteStartElement("commandDebugData");
+                writer.WriteStartElement("commandExecution");
 
                 writer.WriteElementString("commandName", debugEntry.CommandName);
                 writer.WriteElementString("commandText", debugEntry.CommandText);
@@ -145,7 +146,7 @@ namespace DeninaSharp.Core.Filters
                 {
                     writer.WriteStartElement("argument");
                     writer.WriteAttributeString("key", argument.Key.ToString());
-                    writer.WriteCData(argument.Value);
+                    writer.WriteCData(argument.Value.ToString());
                     writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
@@ -173,6 +174,13 @@ namespace DeninaSharp.Core.Filters
                     }
                     writer.WriteEndElement();
                 }
+
+                writer.WriteStartElement("messages");
+                foreach (var message in debugEntry.Messages)
+                {
+                    writer.WriteElementString("message", message);
+                }
+                writer.WriteEndElement();
 
                 writer.WriteElementString("successfullyExecuted", debugEntry.SuccessfullyExecuted.ToString());
                 writer.WriteElementString("elapsedTime", debugEntry.ElapsedTime.ToString());

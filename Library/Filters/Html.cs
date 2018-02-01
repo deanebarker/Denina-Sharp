@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Parser.Html;
+using BlendInteractive.Denina.Core;
 using DeninaSharp.Core.Documentation;
 using System;
 using System.IO;
@@ -14,7 +15,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("path", true, "The AngleSharp selector (very CSS like).")]
         [CodeSample("resource:html-extract-input.html", "Html.Extract -path:div#a", "James Bond")]
         [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
-        public static string Extract(string input, PipelineCommand command)
+        public static string Extract(string input, PipelineCommand command, ExecutionLog log)
         {
             var parser = new HtmlParser(input);
             var doc = parser.Parse();
@@ -26,7 +27,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Strip", "Strips tags from the HTML string.)")]
         [CodeSample("James <b>Bond</b>.", "Html.StripTags", "James Bond.")]
         [Requires("AngleSharp.Parser.Html.HtmlParser, AngleSharp", "AngleSharp is an open-source markup parsing library.")]
-        public static string StripTags(string input, PipelineCommand command)
+        public static string StripTags(string input, PipelineCommand command, ExecutionLog log)
         {
             var parser = new HtmlParser(input);
             var doc = parser.Parse();
@@ -38,7 +39,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("class", false, "If provided, the tag will use this as a \"class\" attribute.")]
         [ArgumentMeta("id", false, "If provided, the tag will use this as an \"id\" attribute.")]
         [CodeSample("James Bond", "Html.Wrap -tag:div -class:spy -id:agent", "<div id=\"spy\" class=\"agent\">James Bond</div>")]
-        public static string WrapInTag(string input, PipelineCommand command)
+        public static string WrapInTag(string input, PipelineCommand command, ExecutionLog log)
         {
             var stringWriter = new StringWriter();
             var tagBuilder = new HtmlTextWriter(stringWriter);
@@ -64,7 +65,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("LineBreaks", "Replaces line breaks with the corresponding HTML tag.")]
         [CodeSample("James\nBond", "Html.LineBreaks", "James<br/>Bond")]
-        public static string LineBreaks(string input, PipelineCommand command)
+        public static string LineBreaks(string input, PipelineCommand command, ExecutionLog log)
         {
             return input.Replace(Environment.NewLine, "<br/>");
         }
@@ -74,7 +75,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("content", false, "The content of the tag. If not supplied, the input text will be used.")]
         [ArgumentMeta("*", false, "All arguments other than \"tag\" and \"content\" will be converted to HTML attributes of the same name and value.")]
         [CodeSample("(None)", "Html.MakeTag -tag:div -content:\"James Bond\" -data-number:007", "<div data-number=\"007\">James Bond</div>")]
-        public static string MakeTag(string input, PipelineCommand command)
+        public static string MakeTag(string input, PipelineCommand command, ExecutionLog log)
         {
             var namedArgs = new string[] {"tag", "content"};
 
@@ -107,7 +108,7 @@ namespace DeninaSharp.Core.Filters
             "Html.SetAttribute -path:div -attribute:data-number -value:007",
             "<div data-number=\"007\">James Bond</div>"
             )]
-        public static string SetAttribute(string input, PipelineCommand command)
+        public static string SetAttribute(string input, PipelineCommand command, ExecutionLog log)
         {
             var path = command.GetArgument("path");
             var attribute = command.GetArgument("attribute");

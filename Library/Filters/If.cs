@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using DeninaSharp.Core.Documentation;
+using BlendInteractive.Denina.Core;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -14,7 +15,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("NoVar", "Goes to the specified label if the specified variable has not been initialized.")]
         [ArgumentMeta("var", true, "The variable to check for a value.")]
         [ArgumentMeta("label", true, "The label to find if the specified variable has no value.")]
-        public static string NoVar(string input, PipelineCommand command)
+        public static string NoVar(string input, PipelineCommand command, ExecutionLog log)
         {
             var varName = command.GetArgument("var");
             var labelName = command.GetArgument("label");
@@ -29,7 +30,7 @@ namespace DeninaSharp.Core.Filters
 
         [Filter("IsEmpty", "Goes to the specified label if the input text is empty.")]
         [ArgumentMeta("label", true, "The label to find if the input text is empty.")]
-        public static string IsEmpty(string input, PipelineCommand command)
+        public static string IsEmpty(string input, PipelineCommand command, ExecutionLog log)
         {
             var value = command.GetArgument("value", input);
             var label = command.GetArgument("label");
@@ -45,7 +46,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("IsEqualTo", "Goes to the specified label if the input text is equal.")]
         [ArgumentMeta("label", true, "The label to find if the input text is empty.")]
         [ArgumentMeta("value", true, "The value to check against.")]
-        public static string IsEqualTo(string input, PipelineCommand command)
+        public static string IsEqualTo(string input, PipelineCommand command, ExecutionLog log)
         {
             var value = command.GetArgument("value");
 
@@ -60,7 +61,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("IsInGroup", "Goes to the specified label if current user is in the specified group.")]
         [ArgumentMeta("group", true, "The group to check.")]
         [ArgumentMeta("label", true, "The label to go to if the check is true.")]
-        public static string IsInGroup(string input, PipelineCommand command)
+        public static string IsInGroup(string input, PipelineCommand command, ExecutionLog log)
         {
             if (HttpContext.Current == null)
             {
@@ -85,7 +86,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("IsNotInGroup", "Goes to the specified label if current user is in the specified group.")]
         [ArgumentMeta("group", true, "The group to check.")]
         [ArgumentMeta("label", true, "The label to go to if the check is true.")]
-        public static string IsNotInGroup(string input, PipelineCommand command)
+        public static string IsNotInGroup(string input, PipelineCommand command, ExecutionLog log)
         {
             if (HttpContext.Current == null)
             {

@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core.Documentation;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Documentation;
 using Newtonsoft.Json.Linq;
 
 namespace DeninaSharp.Core.Filters
@@ -11,7 +12,7 @@ namespace DeninaSharp.Core.Filters
         [CodeSample("resource:json-extract-input.json", "Json.Extract -path:person.name", "James Bond")]     
         [Requires("Newtonsoft.Json.Linq.JObject, Newtonsoft.Json", "This is in the JSON.NET Nuget package.")]  
         [Requires("Newtonsoft.Json.Linq.JToken, Newtonsoft.Json", "This is in the JSON.NET Nuget package.")]  
-        public static string ExtractFromJson(string input, PipelineCommand command)
+        public static string ExtractFromJson(string input, PipelineCommand command, ExecutionLog log)
         {
             var path = command.GetArgument(key: "path");
 

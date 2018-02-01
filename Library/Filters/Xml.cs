@@ -12,6 +12,7 @@ using BlendInteractive;
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Filters;
 using DeninaSharp.Core.Utility;
+using BlendInteractive.Denina.Core;
 
 namespace DeninaSharp.Core.Filters
 {
@@ -23,7 +24,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Extract", "Extracts a single value from an XML document parsed from the input string.")]
         [ArgumentMeta("xpath", true, "The XPath identifying the desired XML node. The InnerText of the resulting node will be returned.")]
         [CodeSample("resource:extract-sample.xml", "Xml.Extract -xpath://name", "James Bond")]
-        public static string ExtractFromXml(string input, PipelineCommand command)
+        public static string ExtractFromXml(string input, PipelineCommand command, ExecutionLog log)
         {
             var doc = new XmlDocument();
             doc.LoadXml(input);
@@ -45,7 +46,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("xml", false, "The XML to transform.  If not provided, the XML is formed from the active text.")]
         [CodeSample("", "resource:no-input.dna", "(The transformed XML)")]
         [CodeSample("(An XML string)", "resource:with-input.dna", "(The transformed XML)")]
-        public static string Transform(string input, PipelineCommand command)
+        public static string Transform(string input, PipelineCommand command, ExecutionLog log)
         {
             var xml = string.Empty;
             var xsl = command.GetArgument("xslt");
@@ -147,7 +148,7 @@ namespace DeninaSharp.Core.Filters
             "Xml.FormatNodes - xpath://row -template:\"<p>Name: {name}</p>\"",
             "<p>Name: James</p><p>Name: Bond</p>"
             )]
-        public static string FormatNodes(string input, PipelineCommand command)
+        public static string FormatNodes(string input, PipelineCommand command, ExecutionLog log)
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(input);
@@ -186,7 +187,7 @@ namespace DeninaSharp.Core.Filters
             "Xml.CountNodes -xpath://name",
             "2"
             )]
-        public static string CountNodes(string input, PipelineCommand command)
+        public static string CountNodes(string input, PipelineCommand command, ExecutionLog log)
         {
             var xmlDoc = new XmlDocument();
             xmlDoc.LoadXml(input);

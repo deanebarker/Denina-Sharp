@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core.Documentation;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Documentation;
 using System;
 using System.Collections.Specialized;
 using System.IO;
@@ -21,7 +22,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("encoding", false, "The parseable encoding for the request. If not specified (or parseable), it defaults to UTF-8.")]
         [CodeSample("", "Http.Get -url:http://denina.org", "(The contents of the page at denina.org)")]
         [CodeSample("http://denina.org", "Http.Get", "(The contents of the page at denina.org)")]
-        public static string Get(string input, PipelineCommand command)
+        public static string Get(string input, PipelineCommand command, ExecutionLog log)
         {
 
             var url = GetUrlArgument(input, command);
@@ -50,7 +51,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("header", false, "HTTP headers to pass-through to the proxy.")]
         [ArgumentMeta("cookie", false, "Cookies to pass-through to the proxy.")]
         [CodeSample("(Anything)", "Http.Proxy -url:http://gadgetopia.com/search -get:q -get:p", "(The results of the page at http://gadgetopia.com/search?q=[whatever]&p=[whatever] as if it were called with the same querystring arguments of \"q\" and \"p\" as the request to the current page.)")]
-        public static string Proxy(string input, PipelineCommand command)
+        public static string Proxy(string input, PipelineCommand command, ExecutionLog log)
         {
             var method = command.GetArgument("method", HttpContext.Current.Request.HttpMethod);
             var get = command.GetMultiArgument("get");

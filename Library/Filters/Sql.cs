@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core.Documentation;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Utility;
 using System;
 using System.Configuration;
@@ -17,18 +18,19 @@ namespace DeninaSharp.Core.Filters
         public static readonly string ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME = "Sql.AllowedConnectionStrings";
 
         [Filter("GetXml", "Executes SQL against the specified connection string and returns an XML recordset.")]
-        [ArgumentMeta("connection", true, "The name of a connection string key from the application configuration.")]
+        [ArgumentMeta("connection", true, "The name of a connection string key from the application configuration. This connection string name must be enabled via a Sql.AllowedConnectionStrings setting. Alternately, this can be a raw connection string.")]
         [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
         [CodeSample("SELECT * FROM TableName", "Sql.GetXml -connection:myConnectionString", "(An XML string)")]
         [CodeSample("(None)", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\"", "(An XML string)")]
-        public static string GetXml(string input, PipelineCommand command)
+        public static string GetXml(string input, PipelineCommand command, ExecutionLog log)
         {
             var sql = command.GetArgument("sql,proc", input);
-            var connectionStringName = command.GetArgument("connection");
+            var connectionInfo = command.GetArgument("connection");
 
-            IsValidConnectionStringName(connectionStringName);
+            log.AddMessage($"Allowed connection strings are: {Pipeline.GetGlobalVariable(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME)}");
+            IsValidConnectionStringName(connectionInfo);
 
-            var sqlCommand = ConfigureCommand(connectionStringName, command);
+            var sqlCommand = ConfigureCommand(connectionInfo, command, log);
 
             // If this isn't a stored proc, then we need to append the XML stuff to it.  If it is a stored proc, when we assume that's already there.
             if (!command.HasArgument("proc"))
@@ -44,6 +46,7 @@ namespace DeninaSharp.Core.Filters
             try
             {
                 var reader = sqlCommand.ExecuteXmlReader();
+                log.AddMessage($"Successful SQL execution in {sqlCommand.Connection.RetrieveStatistics()["ExecutionTime"]}ms");
                 reader.Read();
                 var rawResult = reader.ReadOuterXml();
                 if (!String.IsNullOrWhiteSpace(rawResult))
@@ -72,15 +75,15 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("GetTable", "Executes SQL against the specified connection string and returns an HTML table of the results. TH tags contain the field names of the returned dataset and each TD and TH has a CSS class of \"column-field-name\" for styling.")]
-        [ArgumentMeta("connecton", true, "The name of a connection string key from the application configuration. This connection string name must be enabled via a Sql.AllowedConnectionStrings setting.")]
+        [ArgumentMeta("connecton", true, "The name of a connection string key from the application configuration. This connection string name must be enabled via a Sql.AllowedConnectionStrings setting. Alternately, this can be a raw connection string.")]
         [ArgumentMeta("sql", false, "The SQL to execute. If omitted, the input string will be used.")]
         [ArgumentMeta("class", false, "A CSS class name for the TABLE tag.")]
         [CodeSample("SELECT * FROM TableName", "Sql.GetXml -connection:myConnectionString", "(An HTML table)")]
         [CodeSample("(None)", "Sql.GetXml -connection:myConnectionString -sql:\"SELECT * FROM TableName\" -class:table", "(An HTML table with a \"class\" attribute of \"table\")")]
-        public static string GetTable(string input, PipelineCommand command)
+        public static string GetTable(string input, PipelineCommand command, ExecutionLog log)
         {
             var sql = input;
-            var connectionStringName = command.GetArgument("connection");
+            var connectionInfo = command.GetArgument("connection");
 
             // If they passed in a SQL argument, use it
             if (command.HasArgument("sql"))
@@ -88,9 +91,10 @@ namespace DeninaSharp.Core.Filters
                 sql = command.GetArgument("sql");
             }
 
-            IsValidConnectionStringName(connectionStringName);
+            log.AddMessage($"Allowed connection strings are: {Pipeline.GetGlobalVariable(ALLOWED_CONNECTION_STRINGS_VARIABLE_NAME)}");
+            IsValidConnectionStringName(connectionInfo);
 
-            var sqlCommand = ConfigureCommand(connectionStringName, command);
+            var sqlCommand = ConfigureCommand(connectionInfo, command, log);
 
             sqlCommand.CommandText = sql;
 
@@ -98,6 +102,7 @@ namespace DeninaSharp.Core.Filters
             try
             {
                 reader = sqlCommand.ExecuteReader();
+                log.AddMessage($"Successful SQL execution in {sqlCommand.Connection.RetrieveStatistics()["ExecutionTime"]}ms");
             }
             catch (Exception e)
             {
@@ -161,20 +166,23 @@ namespace DeninaSharp.Core.Filters
 
         }
 
-        private static SqlCommand ConfigureCommand(string connectionInfo, PipelineCommand command)
+        private static SqlCommand ConfigureCommand(string connectionInfo, PipelineCommand command, ExecutionLog log)
         {
             // Determine if we have an actual connection string, or a connection string name
             var connectionString = IsConnectionStringName(connectionInfo) ? ConfigurationManager.ConnectionStrings[connectionInfo].ToString() : connectionInfo;
+            log.AddMessage(connectionString != connectionInfo ? "Connection argument is a valid, authorized connection string key" : "Connection argument is not a connection string name; assuming a raw connection string");
 
             var sqlCommand = new SqlCommand()
             {
                 Connection = new SqlConnection(connectionString)
             };
+            sqlCommand.Connection.StatisticsEnabled = true;
 
             // Add all variables as params
-            foreach (var variable in command.Pipeline.Variables)
+            foreach (var variable in command.Pipeline.Variables.Where(v => v.Key != Pipeline.GLOBAL_VARIABLE_NAME))
             {
                 sqlCommand.Parameters.AddWithValue(variable.Key, variable.Value.Value ?? String.Empty);
+                log.AddMessage($"Added SQL param: \"{variable.Key}\"");
             }
 
             try
@@ -183,11 +191,9 @@ namespace DeninaSharp.Core.Filters
             }
             catch (Exception e)
             {
-
                 throw new DeninaException("Error connecting to SQL Server with connection string \"" + connectionInfo + "\"", e);
             }
             
-
             return sqlCommand;
         }
 

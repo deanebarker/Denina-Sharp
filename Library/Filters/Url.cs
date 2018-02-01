@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core.Documentation;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Documentation;
 using System;
 using System.Collections.Specialized;
 using System.Web;
@@ -12,7 +13,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("key", true, "The key for the pair.")]
         [ArgumentMeta("value", true, "The value for the pair.")]
         [CodeSample("http://denina.org", "Url.AddQuerystringArg -key:a -value:b", "http://denina.org?a=b")]
-        public static string AddQuerysgtringArg(string input, PipelineCommand command)
+        public static string AddQuerysgtringArg(string input, PipelineCommand command, ExecutionLog log)
         {
             var uriBuilder = new UriBuilder(input);
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);

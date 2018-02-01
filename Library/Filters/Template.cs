@@ -14,7 +14,7 @@ namespace BlendInteractive.Denina.Core.Filters
         [Filter("FromText", "Processes a DotLiquid template with the input text as the 'data' variable.")]
         [Requires("DotLiquid.Template, DotLiquid", "DotLiquid is an open-source templating library.")]
         [ArgumentMeta("template", true, "A DotLiquid template string.")]
-        public static string FromText(string input, PipelineCommand command)
+        public static string FromText(string input, PipelineCommand command, ExecutionLog log)
         {
             var template = command.GetArgument("template");
 
@@ -27,7 +27,7 @@ namespace BlendInteractive.Denina.Core.Filters
         [Filter("FromXml", "Processes a DotLiquid template with the 'data' variable representing either the entire input XML, or a collection of XML nodes.")]
         [Requires("DotLiquid.Template, DotLiquid", "DotLiquid is an open-source templating library.")]
         [ArgumentMeta("template", true, "A DotLiquid template string.")]
-        public static string FromXml(string input, PipelineCommand command)
+        public static string FromXml(string input, PipelineCommand command, ExecutionLog log)
         {
             var template = command.GetArgument("template");
 

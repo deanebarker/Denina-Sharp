@@ -20,11 +20,11 @@ namespace Tests
             pipeline.AddCommand("Text.Append -suffix:Barker");
             pipeline.Execute();
 
-            Assert.AreEqual(pipeline.DebugData.Count, 2);
-            Assert.AreEqual(pipeline.DebugData.First().InputValue.Length, 0);
-            Assert.AreEqual(pipeline.DebugData.First().OutputValue.Length, 5);
-            Assert.AreEqual(pipeline.DebugData.Last().InputValue.Length, 5);
-            Assert.AreEqual(pipeline.DebugData.Last().OutputValue.Length, 11);
+            Assert.AreEqual(pipeline.LogEntries.Count, 2);
+            Assert.AreEqual(pipeline.LogEntries.First().InputValue.Length, 0);
+            Assert.AreEqual(pipeline.LogEntries.First().OutputValue.Length, 5);
+            Assert.AreEqual(pipeline.LogEntries.Last().InputValue.Length, 5);
+            Assert.AreEqual(pipeline.LogEntries.Last().OutputValue.Length, 11);
         }
 
         [TestMethod]

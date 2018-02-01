@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core.Documentation;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Documentation;
 using System;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Append", "Appends a string to the input string.")]
         [ArgumentMeta("suffix", true, "The string to append to the input string.")]
         [CodeSample("James", "Text.Append -suffix:\" Bond\"", "James Bond")]
-        public static string Append(string input, PipelineCommand command)
+        public static string Append(string input, PipelineCommand command, ExecutionLog log)
         {
             return String.Concat(input, command.GetArgument("suffix"));
         }
@@ -20,7 +21,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Prepend", "Prepends a string to the input string.")]
         [ArgumentMeta("prefix", true, "The string to prepend to the input string.")]
         [CodeSample("Bond", "Text.Append -prefix:\"James \"", "James Bond")]
-        public static string Prepend(string input, PipelineCommand command)
+        public static string Prepend(string input, PipelineCommand command, ExecutionLog log)
         {
             return String.Concat(command.GetArgument("prefix"), input);
         }
@@ -28,7 +29,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("Concat", "Concatenates a series of arguments together.")]
         [ArgumentMeta("value", true, "Any value (variable or literal). This argument may be repeated multiple times. All passed-in arguments will be concatenated.")]
         [CodeSample("(None)", "Text.Concat -value:James -value:Bond", "JamesBond")]
-        public static string Concat(string input, PipelineCommand command)
+        public static string Concat(string input, PipelineCommand command, ExecutionLog log)
         {
             var arguments = command.GetMultiArgument("value");
             return String.Join(String.Empty, arguments);
@@ -40,7 +41,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("new", false, "The new string. If this argument is not provided, String.Empty will be used (so, the Old String will simply be removed.)")]
         [CodeSample("James Bond", "Text.Replace -old:James -new:\"Bond. James\"", "Bond. James Bond")]
         [CodeSample("James Bond", "Text.Replace -old:\"James \"", "Bond")]
-        public static string Replace(string input, PipelineCommand command)
+        public static string Replace(string input, PipelineCommand command, ExecutionLog log)
         {
             var oldValue = command.GetArgument("old");
             var newValue = command.GetArgument("new", String.Empty);
@@ -55,7 +56,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("text", false, "The new string. After this filter executes, the active text will be set to this value. If no argument is provided, String.Empty is used, effectively clearing the active text.")]
         [CodeSample("(Any)", "ReplaceAll -text:\"James Bond\"", "James Bond")]
         [CodeSample("(Any)", "ReplaceAll", "(None)")]
-        public static string ReplaceAll(string input, PipelineCommand command)
+        public static string ReplaceAll(string input, PipelineCommand command, ExecutionLog log)
         {
             // ReplaceAll with no arguments is essentially the same as Clear
             if (!command.CommandArgs.Any())
@@ -72,7 +73,7 @@ namespace DeninaSharp.Core.Filters
             "(None)",
             "SetVar Name \"James Bond\"\nText.Format \"My name is {Name}\"",
             "My name is James Bond.")]
-        public static string Format(string input, PipelineCommand command)
+        public static string Format(string input, PipelineCommand command, ExecutionLog log)
         {
             var template = command.GetArgument("template");
 
@@ -88,7 +89,7 @@ namespace DeninaSharp.Core.Filters
         }
 
         [Filter("Trim", "Trims whitespace from the ends of the input string.")]
-        public static string Trim(string input, PipelineCommand command)
+        public static string Trim(string input, PipelineCommand command, ExecutionLog log)
         {
             return input.Trim();
         }
@@ -96,7 +97,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("FormatLines", "Performs a template formatting operation on every line in a string and concatenates the result.")]
         [ArgumentMeta("template", true, "A format string suitable for usage in String.Format. Each line will replace the {0} token.")]
         [CodeSample("James Bond\nErnst Blofeld", "Text.FormatLines -template:<li>{0}</li>", "<li>James Bond</li>\n<li>Ernst Blofeld</li>")]
-        public static string FormatLines(string input, PipelineCommand command)
+        public static string FormatLines(string input, PipelineCommand command, ExecutionLog log)
         {
             var returnString = new StringBuilder();
             foreach (var line in input.Split(new [] { Environment.NewLine }, StringSplitOptions.None))
@@ -109,7 +110,7 @@ namespace DeninaSharp.Core.Filters
         [Filter("ExtractRegex", "Extracts a substring based on a supplied regex.")]
         [ArgumentMeta("pattern", true, "A regex string pattern. It will require an extraction expression.")]
         [CodeSample("James Bond", "Text.ExtractRegex -pattern:a(..)s", "me")]
-        public static string ExtractRegex(string input, PipelineCommand command)
+        public static string ExtractRegex(string input, PipelineCommand command, ExecutionLog log)
         {
             var result = Regex.Match(input, command.GetArgument("pattern"));
 
