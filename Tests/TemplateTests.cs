@@ -46,11 +46,11 @@ namespace Tests
         [TestMethod]
         public void LoopingNodesAsShorthand()
         {
-            var template = "Foo {% for thing in data.list-person %}{{ thing.name }} {% endfor %}";
+            var template = "Foo {% for thing in data.people.list-person %}{{ thing.name }} {% endfor %}";
             var pipeline = new Pipeline();
             pipeline.SetVariable("__template", template);
             pipeline.AddCommand("Template.FromXml -template:$__template");
-            string result = pipeline.Execute("<root><person><name>Bar</name></person><person><name>Baz</name></person></root>");
+            string result = pipeline.Execute("<root><people><person><name>Bar</name></person><person><name>Baz</name></person></people><more-people><person><name>This should not be iterated.</name></person></more-people></root>");
 
             Assert.AreEqual("Foo Bar Baz ", result);
         }
