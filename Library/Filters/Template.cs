@@ -58,7 +58,7 @@ namespace BlendInteractive.Denina.Core.Filters
 
                 public VarsDrop(IDictionary<string, PipelineVariable> vars)
                 {
-                    this.vars = vars.ToDictionary(v => v.Key, v => v.Value.Value.ToString());
+                    this.vars = vars.ToDictionary(v => v.Key, v => v.Value.Value?.ToString() ?? string.Empty);
                 }
                 public override object BeforeMethod(string method)
                 {
