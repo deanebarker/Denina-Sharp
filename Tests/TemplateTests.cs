@@ -55,6 +55,26 @@ namespace Tests
             Assert.AreEqual("Foo Bar Baz ", result);
         }
 
+        // This does not pass. I do not know how to fix this one.
+        /* <root>
+         *   <person>Deane</person>
+         *   <person>Annie</person>
+         * </root>
+         * 
+         * {% for person in data %} will not work, because we never call a method. "data" is the drop. There's no method call we can catch here.
+        */    
+        //[TestMethod]
+        //public void LoopingstDirectNodesWithDirectText()
+        //{
+        //    var template = "{% for person in data %}{{ person }} {% endfor %}";
+        //    var pipeline = new Pipeline();
+        //    pipeline.SetVariable("__template", template);
+        //    pipeline.AddCommand("Template.FromXml -template:$__template");
+        //    string result = pipeline.Execute("<people><person>Deane</person><person>Annie</person></people>");
+
+        //    Assert.AreEqual("Deane Annie ", result);
+        //}
+
         [TestMethod]
         public void Variables()
         {

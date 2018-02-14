@@ -177,6 +177,26 @@ namespace DeninaSharp.Core.Filters
                 {
                     return method.Split(new char[] { shorthandDelimiter }).Last();
                 }
+
+
+                // See the LoopingstDirectNodesWithDirectText for what I was trying to solve here
+                // It remains unsolved
+                //public override object ToLiquid()
+                //{
+                //    // This is has no child nodes and has InnerText, then there's really only one thing we can be doing here...
+                //    if(doc.SelectNodes("./*").Count > 0 && doc.SelectSingleNode("text()") == null)
+                //    {
+                //        return ListQuery.GetDrops(doc, "./*");
+                //    }
+
+                //    // This is has no child nodes and has InnerText, then there's really only one thing we can be doing here...
+                //    if (doc.SelectNodes("./*").Count == 0 && doc.SelectSingleNode("text()") != null)
+                //    {
+                //        return doc.SelectSingleNode("text()").InnerText;
+                //    }
+
+                //    return base.ToLiquid();
+                //}
             }
 
 
