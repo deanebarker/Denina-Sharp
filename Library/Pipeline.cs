@@ -29,6 +29,7 @@ namespace DeninaSharp.Core
 
         public delegate void PipelineEventHandler(object o, PipelineEventArgs e);
         public static event PipelineEventHandler PipelineComplete;
+        public static event PipelineEventHandler PipelineCreated;
 
         private static readonly Dictionary<string, FilterDoc> filterDoc = new Dictionary<string, FilterDoc>();
         public static ReadOnlyDictionary<string, FilterDoc> FilterDoc
@@ -83,7 +84,11 @@ namespace DeninaSharp.Core
                 }
             }
 
-            DebugData = new List<DebugEntry>();
+            LogEntries = new List<ExecutionLog>();
+
+            // Raise the PipelineCreated event
+            var eventArgs = new PipelineEventArgs(this, null);
+            OnPipelineCreated(eventArgs);
         }
 
         public static ReadOnlyDictionary<string, MethodInfo> CommandMethods
@@ -484,10 +489,12 @@ namespace DeninaSharp.Core
 
         public static void OnPipelineComplete(PipelineEventArgs e)
         {
-            if (PipelineComplete != null)
-            {
-                PipelineComplete(null, e);
-            }
+            PipelineComplete?.Invoke(null, e);
+        }
+
+        public static void OnPipelineCreated(PipelineEventArgs e)
+        {
+            PipelineCreated?.Invoke(null, e);
         }
     }
 }
