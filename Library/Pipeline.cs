@@ -474,6 +474,12 @@ namespace DeninaSharp.Core
                 return;
             }
             commandMethods.Remove(filterName.ToLower());
+
+            // Add this to the hidden command methods
+            if (hiddenCommandMethods.ContainsKey(filterName.ToLower()))
+            {
+                hiddenCommandMethods.Remove(filterName.ToLower());
+            }
             hiddenCommandMethods.Add(filterName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", filterName, reason));
         }
 
