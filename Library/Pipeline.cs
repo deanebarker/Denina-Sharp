@@ -243,11 +243,7 @@ namespace DeninaSharp.Core
                 var command = commandQueue[NextCommandLabel.ToLower()];
 
                 // Create the debug entry
-                var debugData = new ExecutionLog(command, Variables);
-                Variables.Where(v => v.Key != GLOBAL_VARIABLE_NAME).ToList().ForEach(v =>
-                {
-                    debugData.Variables.Add(v.Key ?? "NULL", v.Value?.Value.ToString());
-                });
+                var executionLog = new ExecutionLog(command, Variables);
 
                 // Are we writing to a variable?
                 if (command.NormalizedCommandName == WRITE_TO_VARIABLE_COMMAND)
@@ -302,9 +298,9 @@ namespace DeninaSharp.Core
 
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
                     // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
-                    debugData.InputValue = GetVariable(command.InputVariable).ToString();
-                    var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command});
-                    debugData.OutputValue = output.ToString();
+                    executionLog.InputValue = GetVariable(command.InputVariable).ToString();
+                    var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command, executionLog});
+                    executionLog.OutputValue = output.ToString();
 
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
                     if (command.AppendToLast)
@@ -314,10 +310,10 @@ namespace DeninaSharp.Core
 
                     SafeSetVariable(command.OutputVariable, output);
 
-                    debugData.ElapsedTime = timer.ElapsedMilliseconds;
+                    executionLog.ElapsedTime = timer.ElapsedMilliseconds;
 
                     // If we got here with no exception
-                    debugData.SuccessfullyExecuted = true;
+                    executionLog.SuccessfullyExecuted = true;
                 }
                 catch (Exception e)
                 {
@@ -340,7 +336,7 @@ namespace DeninaSharp.Core
                 // Set the pointer to the next command
                 NextCommandLabel = command.SendToLabel;
 
-                LogEntries.Add(debugData);
+                LogEntries.Add(executionLog);
             }
 
             var finalOutput = GetVariable(GLOBAL_VARIABLE_NAME).ToString();
