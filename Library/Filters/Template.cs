@@ -54,11 +54,11 @@ namespace BlendInteractive.Denina.Core.Filters
 
             public class VarsDrop : Drop
             {
-                private Dictionary<string, string> vars;
+                private Dictionary<string, object> vars;
 
                 public VarsDrop(IDictionary<string, PipelineVariable> vars)
                 {
-                    this.vars = vars.ToDictionary(v => v.Key, v => v.Value.Value?.ToString() ?? string.Empty);
+                    this.vars = vars.ToDictionary(v => v.Key, v => v.Value.Value);
                 }
                 public override object BeforeMethod(string method)
                 {
