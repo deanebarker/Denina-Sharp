@@ -50,7 +50,7 @@ namespace DeninaSharp.Core
         private Dictionary<string, PipelineVariable> variables = new Dictionary<string, PipelineVariable>();
         private static Dictionary<string, PipelineVariable> globalVariables = new Dictionary<string, PipelineVariable>();
 
-        public List<DebugEntry> DebugData { get; private set; }
+        public List<ExecutionLog> LogEntries { get; private set; }
 
         static Pipeline()
         {
@@ -181,7 +181,7 @@ namespace DeninaSharp.Core
         public string Execute(string input = null)
         {
             // Clear the debug data
-            DebugData.Clear();
+            LogEntries.Clear();
 
             // Add a pass-through command at the end just to hold a label called "end".
             if (commands.Any(c => c.Label == FINAL_COMMAND_LABEL))
@@ -243,7 +243,7 @@ namespace DeninaSharp.Core
                 var command = commandQueue[NextCommandLabel.ToLower()];
 
                 // Create the debug entry
-                var debugData = new DebugEntry(command);
+                var debugData = new ExecutionLog(command, Variables);
                 Variables.Where(v => v.Key != GLOBAL_VARIABLE_NAME).ToList().ForEach(v =>
                 {
                     debugData.Variables.Add(v.Key ?? "NULL", v.Value?.Value.ToString());
@@ -340,7 +340,7 @@ namespace DeninaSharp.Core
                 // Set the pointer to the next command
                 NextCommandLabel = command.SendToLabel;
 
-                DebugData.Add(debugData);
+                LogEntries.Add(debugData);
             }
 
             var finalOutput = GetVariable(GLOBAL_VARIABLE_NAME).ToString();
