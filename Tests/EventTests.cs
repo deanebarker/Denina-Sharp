@@ -20,5 +20,14 @@ namespace Tests
 
             Assert.AreEqual("foo", result);
         }
+
+        [TestMethod]
+        public void PipelineCreated()
+        {
+            Pipeline.PipelineCreated += (s, e) => { e.Pipeline.SetVariable("name", "James Bond"); }; 
+            var pipeline = new Pipeline("ReadFrom name");
+            var result = pipeline.Execute();
+            Assert.AreEqual("James Bond", result);
+        }
     }
 }
