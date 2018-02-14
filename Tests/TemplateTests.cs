@@ -91,5 +91,32 @@ namespace Tests
 
             Assert.AreEqual("Foo Bar", result);
         }
+
+
+        [TestMethod]
+        public void NumberFormatting()
+        {
+            var template = "{{ vars:age|number:'0.00' }}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("__template", template);
+            pipeline.SetVariable("age", 47);
+            pipeline.AddCommand("Template.FromText -template:$__template");
+            string result = pipeline.Execute();
+
+            Assert.AreEqual("47.00", result);
+        }
+
+        [TestMethod]
+        public void InvalidNumberFormatting()
+        {
+            var template = "{{ vars:age|number:'0.00' }}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("__template", template);
+            pipeline.SetVariable("age", "this is not an age");
+            pipeline.AddCommand("Template.FromText -template:$__template");
+            string result = pipeline.Execute();
+
+            Assert.AreEqual("this is not an age", result);
+        }
     }
 }

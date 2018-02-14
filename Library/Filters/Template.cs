@@ -5,12 +5,18 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
+using BlendInteractive.Denina.Core;
 
-namespace BlendInteractive.Denina.Core.Filters
+namespace DeninaSharp.Core.Filters
 {
     [Filters("Template", "Templating output with DotLiquid.")]
     public static class Template
     {
+        static Template()
+        {
+            DotLiquid.Template.RegisterFilter(typeof(Filters));
+        }
+
         [Filter("FromText", "Processes a DotLiquid template with the input text as the 'data' variable.")]
         [Requires("DotLiquid.Template, DotLiquid", "DotLiquid is an open-source templating library.")]
         [ArgumentMeta("template", true, "A DotLiquid template string.")]
@@ -221,5 +227,19 @@ namespace BlendInteractive.Denina.Core.Filters
                 public override bool ContainsKey(object name) => true;
             }
         }
+        public static class Filters
+        {
+            public static string Number(object input, string format)
+            {
+                float asFloat;
+                if (!float.TryParse(input.ToString(), out asFloat))
+                {
+                    return input.ToString();
+                }
+                return asFloat.ToString(format);
+            }
+        }
     }
+
+
 }
