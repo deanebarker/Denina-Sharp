@@ -2,6 +2,7 @@
 using DeninaSharp.Core.Documentation;
 using DotLiquid;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
@@ -257,6 +258,21 @@ namespace DeninaSharp.Core.Filters
                     return input.ToString();
                 }
                 return asFloat.ToString(format);
+            }
+
+            public static string Pluralize(object input, string single, string plural)
+            {
+                float asFloat;
+                if(float.TryParse(input.ToString(), out asFloat) && asFloat != 1F)
+                {
+                    return plural;
+                }
+
+                if(input is IEnumerable && ((IEnumerable<object>)input).Count() != 1)
+                {
+                    return plural;
+                }
+                return single;
             }
         }
     }

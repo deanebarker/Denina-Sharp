@@ -116,7 +116,7 @@ namespace Tests
         [TestMethod]
         public void NumberFormatting()
         {
-            var template = "{{ vars:age|number:'0.00' }}";
+            var template = "{{ vars.age|number:'0.00' }}";
             var pipeline = new Pipeline();
             pipeline.SetVariable("__template", template);
             pipeline.SetVariable("age", 47);
@@ -129,7 +129,7 @@ namespace Tests
         [TestMethod]
         public void InvalidNumberFormatting()
         {
-            var template = "{{ vars:age|number:'0.00' }}";
+            var template = "{{ vars.age|number:'0.00' }}";
             var pipeline = new Pipeline();
             pipeline.SetVariable("__template", template);
             pipeline.SetVariable("age", "this is not an age");
@@ -137,6 +137,22 @@ namespace Tests
             string result = pipeline.Execute();
 
             Assert.AreEqual("this is not an age", result);
+        }
+
+        [TestMethod]
+        public void PluralizeFilter()
+        {
+            var template = "{{ vars.numbersingle|pluralize:'single','plural' }} {{ vars.numberplural|pluralize:'single','plural' }} {{ vars.collectionsingle|pluralize:'single','plural' }} {{ vars.collectionplural|pluralize:'single','plural' }}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("__template", template);
+            pipeline.SetVariable("numbersingle", 1);
+            pipeline.SetVariable("numberplural", 2);
+            pipeline.SetVariable("collectionsingle", new string[] { "" });
+            pipeline.SetVariable("collectionplural", new string[] { "", "" });
+            pipeline.AddCommand("Template.FromText -template:$__template");
+            string result = pipeline.Execute();
+
+            Assert.AreEqual("single plural single plural", result);
         }
     }
 }
