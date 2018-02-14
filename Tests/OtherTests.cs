@@ -5,18 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using DeninaSharp.Core.Filters;
 
 namespace Tests
 {
     [TestClass]
-    public class OtherTests
+    public class OtherTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void DebugData()
         {
@@ -25,11 +20,11 @@ namespace Tests
             pipeline.AddCommand("Text.Append -suffix:Barker");
             pipeline.Execute();
 
-            Assert.AreEqual(pipeline.DebugData.Count, 2);
-            Assert.AreEqual(pipeline.DebugData.First().InputValue.Length, 0);
-            Assert.AreEqual(pipeline.DebugData.First().OutputValue.Length, 5);
-            Assert.AreEqual(pipeline.DebugData.Last().InputValue.Length, 5);
-            Assert.AreEqual(pipeline.DebugData.Last().OutputValue.Length, 11);
+            Assert.AreEqual(pipeline.LogEntries.Count, 2);
+            Assert.AreEqual(pipeline.LogEntries.First().InputValue.Length, 0);
+            Assert.AreEqual(pipeline.LogEntries.First().OutputValue.Length, 5);
+            Assert.AreEqual(pipeline.LogEntries.Last().InputValue.Length, 5);
+            Assert.AreEqual(pipeline.LogEntries.Last().OutputValue.Length, 11);
         }
 
         [TestMethod]
@@ -38,7 +33,7 @@ namespace Tests
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("text.append"));
             Pipeline.RemoveFilter("text.append", "Never append text to anything!!!");
             Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("text.append"));
-            
+
             var pipeline = new Pipeline();
             pipeline.AddCommand("Text.Append -prefix:foo");
 
@@ -46,18 +41,18 @@ namespace Tests
             {
                 pipeline.Execute("bar");
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Assert.IsTrue(e.Message.Contains("!!!"));
             }
 
+            Pipeline.AddMethod(typeof(Text).GetMethod("Append"), "text", "append");
         }
 
 
         [TestMethod]
         public void RemoveFilterCategory()
         {
-            Pipeline.Init();
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("text.append"));
             Pipeline.RemoveFilterCategory("text");
             Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("text.append"));

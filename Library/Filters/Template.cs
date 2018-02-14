@@ -14,7 +14,7 @@ namespace BlendInteractive.Denina.Core.Filters
         [Filter("FromText", "Processes a DotLiquid template with the input text as the 'data' variable.")]
         [Requires("DotLiquid.Template, DotLiquid", "DotLiquid is an open-source templating library.")]
         [ArgumentMeta("template", true, "A DotLiquid template string.")]
-        public static string FromText(string input, PipelineCommand command)
+        public static string FromText(string input, PipelineCommand command, ExecutionLog log)
         {
             var template = command.GetArgument("template");
 
@@ -27,7 +27,7 @@ namespace BlendInteractive.Denina.Core.Filters
         [Filter("FromXml", "Processes a DotLiquid template with the 'data' variable representing either the entire input XML, or a collection of XML nodes.")]
         [Requires("DotLiquid.Template, DotLiquid", "DotLiquid is an open-source templating library.")]
         [ArgumentMeta("template", true, "A DotLiquid template string.")]
-        public static string FromXml(string input, PipelineCommand command)
+        public static string FromXml(string input, PipelineCommand command, ExecutionLog log)
         {
             var template = command.GetArgument("template");
 
@@ -71,8 +71,10 @@ namespace BlendInteractive.Denina.Core.Filters
             // ex: "data.person.name.first" to find the text in the XML node at "/person/name/first"
             public class XmlNode : Drop
             {
-                private const char attributeIndicatorChar = '_';
+                private const string attributeMethodName = "attr";
                 private const string xpathQueryMethodName = "xpath";
+                private const string listQueryMethodName = "list";
+                private const char shorthandDelimiter = '-';
 
                 private XmlElement doc;
 
@@ -114,18 +116,34 @@ namespace BlendInteractive.Denina.Core.Filters
 
                 public override object BeforeMethod(string method)
                 {
-                    // If they want to run pure XPath, send them back a query object
+                    // Raw Xpath
+                    // {{ data.xpath['/name/first/@type'] }}
                     if (method == xpathQueryMethodName)
                     {
                         return new XPathQuery(doc);
                     }
 
-                    // Attribute selector
-                    // If it starts with an underscore, swap for an "@"
-                    // (You can't start DotLiquid methods with a "@", so we have to hack with the underscore.)
-                    if (method[0] == attributeIndicatorChar)
+                    // A list of nodes
+                    // {{ for person in data.list['//person'] }}
+                    if (method == listQueryMethodName)
                     {
-                        method = string.Concat("@", method.Substring(1));
+                        return new ListQuery(doc);
+                    }
+
+                    // List shortcut
+                    // {% for person in data.list-person %}
+                    // Prepends "//", so it's the same as the prior example
+                    if (StartsWithMethodName(method, listQueryMethodName))
+                    {
+                        return ListQuery.GetDrops(doc, string.Concat("//", GetShorthandValue(method)));
+                    }
+
+                    // Attribute shortcut
+                    // {{ data.name.first.attr-type }}
+                    // Same as the XPath example above
+                    if (StartsWithMethodName(method, attributeMethodName))
+                    {
+                        return doc.Attributes[GetShorthandValue(method)]?.Value;
                     }
 
                     // We have nothing for this node, return an empty string
@@ -133,17 +151,6 @@ namespace BlendInteractive.Denina.Core.Filters
                     {
                         return string.Empty;
                     }
-
-                    // If there's more than one node, return a list of them
-                    if(doc.SelectNodes(GetPathToNode(method)).Count > 1)
-                    {
-                        var drops = new List<XmlNode>();
-                        foreach(XmlElement node in doc.SelectNodes(GetPathToNode(method)))
-                        {
-                            drops.Add(new XmlNode(node));
-                        }
-                        return drops;
-                     }
 
                     // We have inner text for this node, then this is what they actually want, so return it
                     if (doc.SelectSingleNode(GetPathToTextNode(method)) != null)
@@ -154,7 +161,18 @@ namespace BlendInteractive.Denina.Core.Filters
                     // If there's no text, then assume they want to drill down into the inner XML of it
                     return new XmlNode((XmlElement)doc.SelectSingleNode(GetPathToNode(method)));
                 }
+
+                private bool StartsWithMethodName(string method, string checkFor)
+                {
+                    return method.StartsWith(string.Concat(checkFor, shorthandDelimiter));
+                }
+
+                private string GetShorthandValue(string method)
+                {
+                    return method.Split(new char[] { shorthandDelimiter }).Last();
+                }
             }
+
 
             public class XPathQuery : Drop, IIndexable
             {
@@ -166,6 +184,40 @@ namespace BlendInteractive.Denina.Core.Filters
                 }
 
                 public override object this[object key] => doc.SelectSingleNode(key.ToString())?.InnerText;
+                public override bool ContainsKey(object name) => true;
+            }
+
+            public class ListQuery : Drop, IIndexable
+            {
+                private XmlElement doc;
+
+                public ListQuery(XmlElement xml)
+                {
+                    doc = xml;
+                }
+
+                public override object this[object key]
+                {
+                    get
+                    {
+                        return GetDrops(doc, key.ToString());   
+                    }
+                }
+
+                public static List<XmlNode> GetDrops(XmlElement xml, string xpath)
+                {
+                    var returnDrops = new List<XmlNode>();
+                    var nodes = xml.SelectNodes(xpath);
+                    if (nodes != null && nodes.Count > 0)
+                    {
+                        foreach (XmlElement node in nodes)
+                        {
+                            returnDrops.Add(new XmlNode(node));
+                        }
+                    }
+                    return returnDrops;
+                }
+
                 public override bool ContainsKey(object name) => true;
             }
         }

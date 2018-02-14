@@ -7,7 +7,7 @@ using System.Linq;
 namespace Tests
 {
     [TestClass]
-    public class CommandParsing
+    public class CommandParsing : BaseTests
     {
         [TestMethod]
         public void PopulateCommand()

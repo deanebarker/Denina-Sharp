@@ -1,4 +1,5 @@
-﻿using DeninaSharp.Core.Documentation;
+﻿using BlendInteractive.Denina.Core;
+using DeninaSharp.Core.Documentation;
 using System;
 using System.Collections.Specialized;
 using System.IO;
@@ -14,17 +15,31 @@ namespace DeninaSharp.Core.Filters
     {
         public static readonly string ALLOWED_DOMAINS_VARIABLE_NAME = "Http.AllowedDomains";
         public static readonly string ALL_DOMAINS_WILDCARD = "*";
-
+        public static readonly string DEFAULT_ENCODING = "utf-8";
 
         [Filter("Get", "Makes an HTTP GET request and returns the result.")]
         [ArgumentMeta("url", false, "The URL to request. If not provided, the input string is assumed to be a URL.")]
+        [ArgumentMeta("encoding", false, "The parseable encoding for the request. If not specified (or parseable), it defaults to UTF-8.")]
         [CodeSample("", "Http.Get -url:http://denina.org", "(The contents of the page at denina.org)")]
         [CodeSample("http://denina.org", "Http.Get", "(The contents of the page at denina.org)")]
-        public static string Get(string input, PipelineCommand command)
+        public static string Get(string input, PipelineCommand command, ExecutionLog log)
         {
+
             var url = GetUrlArgument(input, command);
-            
+            var encodingCommand = command.GetArgument("encoding", DEFAULT_ENCODING);
+
+            Encoding encoding = Encoding.UTF8;
+            try
+            {
+                encoding = Encoding.GetEncoding(encodingCommand);
+            }
+            catch(ArgumentException e)
+            {
+                // Encoding was not parseable. We're going to swallow this for now, since there's already a default
+            }
+
             var client = new WebClient();
+            client.Encoding = encoding;
             return client.DownloadString(url);
         }
 
@@ -36,7 +51,7 @@ namespace DeninaSharp.Core.Filters
         [ArgumentMeta("header", false, "HTTP headers to pass-through to the proxy.")]
         [ArgumentMeta("cookie", false, "Cookies to pass-through to the proxy.")]
         [CodeSample("(Anything)", "Http.Proxy -url:http://gadgetopia.com/search -get:q -get:p", "(The results of the page at http://gadgetopia.com/search?q=[whatever]&p=[whatever] as if it were called with the same querystring arguments of \"q\" and \"p\" as the request to the current page.)")]
-        public static string Proxy(string input, PipelineCommand command)
+        public static string Proxy(string input, PipelineCommand command, ExecutionLog log)
         {
             var method = command.GetArgument("method", HttpContext.Current.Request.HttpMethod);
             var get = command.GetMultiArgument("get");

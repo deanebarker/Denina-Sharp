@@ -2,18 +2,13 @@
 using System.Runtime;
 using DeninaSharp.Core;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics;
 
 namespace Tests
 {
     [TestClass]
-    public class TextTests
+    public class TextTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void Replace()
         {

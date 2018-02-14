@@ -10,7 +10,7 @@ namespace DeninaSharp.Core
         public string CurrentCommandText { get; set; }
         public string CurrentCommandName { get; set; }
 
-        public List<DebugEntry> DebugData { get; set; }
+        public List<ExecutionLog> LogData { get; set; }
 
 
         public DeninaException()
@@ -30,7 +30,7 @@ namespace DeninaSharp.Core
 
         private void Init()
         {
-            DebugData = new List<DebugEntry>();
+            LogData = new List<ExecutionLog>();
         }
     }
 }

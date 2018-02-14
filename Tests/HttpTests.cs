@@ -6,14 +6,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Tests
 {
     [TestClass]
-    public class HttpTests
+    public class HttpTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestCleanup]
         public void Cleanup()
         {
@@ -25,7 +19,6 @@ namespace Tests
         public void GetFromArgument()
         {
             Pipeline.SetGlobalVariable(Http.ALLOWED_DOMAINS_VARIABLE_NAME, "gadgetopia.com");
-
             var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get -url:http://gadgetopia.com/");
             var result = pipeline.Execute("");
@@ -37,7 +30,6 @@ namespace Tests
         public void GetFromInput()
         {
             Pipeline.SetGlobalVariable(Http.ALLOWED_DOMAINS_VARIABLE_NAME, "gadgetopia.com");
-            
             var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get");
             var result = pipeline.Execute("http://gadgetopia.com/");
@@ -49,7 +41,6 @@ namespace Tests
         public void AuthorizedDomainsNotSet()
         {
             // Note that we're NOT setting the global variable here...
-
             var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get -url:http://gadgetopia.com/");
 
@@ -71,7 +62,6 @@ namespace Tests
         public void AttemptUnauthorizedDomain()
         {
             Pipeline.SetGlobalVariable(Http.ALLOWED_DOMAINS_VARIABLE_NAME, "cnn.com");
-            
             var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get -url:http://gadgetopia.com/");
             try
@@ -91,7 +81,6 @@ namespace Tests
         public void AttemptInvalidUrl()
         {
             Pipeline.SetGlobalVariable(Http.ALLOWED_DOMAINS_VARIABLE_NAME, "gadgetopia.com");
-
             var pipeline = new Pipeline();
             pipeline.AddCommand("HTTP.Get -url:gadgetopia.com");
             try

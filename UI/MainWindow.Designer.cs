@@ -149,6 +149,7 @@ namespace UI
             // 
             // DefaultConnectionStringInput
             // 
+            this.DefaultConnectionStringInput.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.DefaultConnectionStringInput.Location = new System.Drawing.Point(186, 586);
             this.DefaultConnectionStringInput.Name = "DefaultConnectionStringInput";
             this.DefaultConnectionStringInput.Size = new System.Drawing.Size(335, 20);
@@ -156,6 +157,7 @@ namespace UI
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(34, 589);
             this.label1.Name = "label1";

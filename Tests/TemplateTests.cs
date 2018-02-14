@@ -9,14 +9,8 @@ using System.Threading.Tasks;
 namespace Tests
 {
     [TestClass]
-    public class TemplateTests
+    public class TemplateTests : BaseTests
     {
-        [TestInitialize]
-        public void Init()
-        {
-            Pipeline.Init();
-        }
-
         [TestMethod]
         public void FromText()
         {
@@ -38,9 +32,21 @@ namespace Tests
         }
 
         [TestMethod]
-        public void FromXmlNodes()
+        public void LoopingNodesAsIndexable()
         {
-            var template = "Foo {% for thing in data.person %}{{ thing.name }} {% endfor %}";
+            var template = "Foo {% for thing in data.list['//person'] %}{{ thing.name }} {% endfor %}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("__template", template);
+            pipeline.AddCommand("Template.FromXml -template:$__template");
+            string result = pipeline.Execute("<root><person><name>Bar</name></person><person><name>Baz</name></person></root>");
+
+            Assert.AreEqual("Foo Bar Baz ", result);
+        }
+
+        [TestMethod]
+        public void LoopingNodesAsShorthand()
+        {
+            var template = "Foo {% for thing in data.list-person %}{{ thing.name }} {% endfor %}";
             var pipeline = new Pipeline();
             pipeline.SetVariable("__template", template);
             pipeline.AddCommand("Template.FromXml -template:$__template");
@@ -58,6 +64,18 @@ namespace Tests
             pipeline.SetVariable("__template",template);
             pipeline.AddCommand("Template.FromText -template:$__template");
             string result = pipeline.Execute(string.Empty);
+
+            Assert.AreEqual("Foo Bar", result);
+        }
+
+        [TestMethod]
+        public void AttributeShorthand()
+        {
+            var template = "Foo {{ data.name.attr-last }}";
+            var pipeline = new Pipeline();
+            pipeline.SetVariable("__template", template);
+            pipeline.AddCommand("Template.FromXml -template:$__template");
+            string result = pipeline.Execute("<person><name first=\"Foo\" last=\"Bar\"></name></person>");
 
             Assert.AreEqual("Foo Bar", result);
         }
