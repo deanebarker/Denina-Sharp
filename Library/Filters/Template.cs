@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
 using System.Linq;
-using BlendInteractive.Denina.Core;
 
 namespace DeninaSharp.Core.Filters
 {

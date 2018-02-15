@@ -1,12 +1,8 @@
-﻿using System;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DeninaSharp.Core;
-using System.Collections;
 
-namespace BlendInteractive.Denina.Core
+namespace DeninaSharp.Core
 {
     public struct ExecutionLog
     {

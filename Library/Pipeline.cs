@@ -1,5 +1,4 @@
-﻿using BlendInteractive.Denina.Core;
-using DeninaSharp.Core.Configuration;
+﻿using DeninaSharp.Core.Configuration;
 using DeninaSharp.Core.Documentation;
 using System;
 using System.Collections.Generic;

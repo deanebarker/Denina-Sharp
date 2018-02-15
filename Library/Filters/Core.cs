@@ -5,7 +5,6 @@ using DeninaSharp.Core.Documentation;
 using System.IO;
 using System.Xml;
 using System.Text;
-using BlendInteractive.Denina.Core;
 
 namespace DeninaSharp.Core.Filters
 {

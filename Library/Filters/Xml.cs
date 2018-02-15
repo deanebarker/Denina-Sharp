@@ -8,11 +8,9 @@ using System.Text.RegularExpressions;
 using System.Web.UI.WebControls.WebParts;
 using System.Xml;
 using System.Xml.Xsl;
-using BlendInteractive;
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Filters;
 using DeninaSharp.Core.Utility;
-using BlendInteractive.Denina.Core;
 
 namespace DeninaSharp.Core.Filters
 {

@@ -1,5 +1,4 @@
-﻿using BlendInteractive.Denina.Core;
-using DeninaSharp.Core.Documentation;
+﻿using DeninaSharp.Core.Documentation;
 using Newtonsoft.Json.Linq;
 
 namespace DeninaSharp.Core.Filters
