@@ -305,9 +305,9 @@ namespace DeninaSharp.Core
                     executionLog.OutputValue = output.ToString();
 
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
-                    if (command.AppendToLast)
+                    if (command.AppendToOutput)
                     {
-                        output = string.Concat(GetVariable(command.InputVariable), output);
+                        output = string.Concat(GetVariable(command.OutputVariable), output);
                     }
 
                     SafeSetVariable(command.OutputVariable, output);

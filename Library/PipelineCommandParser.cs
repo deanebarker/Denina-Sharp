@@ -10,6 +10,7 @@ namespace DeninaSharp.Core
     {
         private const string COMMENT_PREFIX = "#";
         private const string PIPE_TOKEN = "=>";
+        private const string APPEND_TOKEN = "==>";
         private const string VARIABLE_PREFIX = "$";
         private static readonly string COMMAND_DELIMITER = Environment.NewLine;
 
@@ -43,13 +44,6 @@ namespace DeninaSharp.Core
                 {
                     OriginalText = line
                 };
-
-                // + 
-                if (tokens.First == "+")
-                {
-                    command.AppendToLast = true;
-                    tokens.RemoveFromStart(1);
-                }
 
                 // $myVar =>
                 if (tokens.Last == PIPE_TOKEN && tokens.Count == 2)
@@ -88,9 +82,10 @@ namespace DeninaSharp.Core
                 }
 
                 // DoSomething SomeArgument => $myVar
-                if (tokens.Count > 2 && tokens.SecondToLast == PIPE_TOKEN && IsVariableName(tokens.Last))
+                if (tokens.Count > 2 && (tokens.SecondToLast == PIPE_TOKEN || tokens.SecondToLast == APPEND_TOKEN) && IsVariableName(tokens.Last))
                 {
                     command.OutputVariable = NormalizeVariableName(tokens.Last());
+                    command.AppendToOutput = tokens.SecondToLast == APPEND_TOKEN;
 
                     // Now, remove the last two items from the tokens and continue like normal...
                     tokens.RemoveFromEnd(2);
@@ -227,7 +222,7 @@ namespace DeninaSharp.Core
 
         public string SecondToLast
         {
-            get { return Count == 1 ? null : this.Skip(Count - 2).First(); } 
+            get { return Count == 1 ? null : this.Skip(Count - 2).First(); }
         }
 
         public void RemoveFromEnd(int count)

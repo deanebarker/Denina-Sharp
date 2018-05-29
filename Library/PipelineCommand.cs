@@ -28,7 +28,7 @@ namespace DeninaSharp.Core
         public string OriginalText { get; set; }
         public string Label { get; set; } // For now, this just exists to identify the "end" command
         public string SendToLabel { get; set; }
-        public bool AppendToLast { get; set; }
+        public bool AppendToOutput{ get; set; }
 
         public string DefaultArgument
         {

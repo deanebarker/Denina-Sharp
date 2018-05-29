@@ -61,6 +61,19 @@ namespace Tests
         }
 
         [TestMethod]
+        public void AppendToImplicitVariable()
+        {
+            var pipeline = new Pipeline();
+            pipeline.AddCommand("Text.Append -suffix:\" married Deane.\" => $myVar");
+            pipeline.AddCommand("Text.ReplaceAll -text:\" \" ==> $myVar");
+            pipeline.AddCommand("Text.Append -suffix:\" likes Deane.\" ==> $myVar");
+            var result = pipeline.Execute("Annie");
+
+            Assert.AreEqual(result, "Annie");   // The input text should be unchanged
+            Assert.AreEqual(pipeline.GetVariable("myVar"), "Annie married Deane. Annie likes Deane.");
+        }
+
+        [TestMethod]
         public void ResolveVariableNames()
         {
             var input = "Deane";
