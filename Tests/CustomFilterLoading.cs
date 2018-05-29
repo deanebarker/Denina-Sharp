@@ -1,5 +1,4 @@
-﻿using BlendInteractive.Denina.Core;
-using DeninaSharp.Core;
+﻿using DeninaSharp.Core;
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Filters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
