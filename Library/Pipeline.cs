@@ -51,6 +51,10 @@ namespace DeninaSharp.Core
 
         public List<ExecutionLog> LogEntries { get; private set; }
 
+        // This is the delegate through which we run all the filters
+        // We do this through a delegate so we can handle anonymous functions
+        public delegate string FilterDelegate(string input, PipelineCommand command, ExecutionLog log);
+
         static Pipeline()
         {
             Init();
@@ -304,10 +308,14 @@ namespace DeninaSharp.Core
                     timer.Reset();
                     timer.Start();
 
-                    // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
-                    // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
                     executionLog.InputValue = GetVariable(command.InputVariable).ToString();
-                    var output = method.Invoke(null, new[] {GetVariable(command.InputVariable), command, executionLog});
+
+                    // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
+                    // We create a delete so that we can use anonymous functions. Since non-anonymous functions are static, and anonymous functions aren't static, we have to create a 
+                    // delegate so we can handle both
+                    var filter = (FilterDelegate)Delegate.CreateDelegate(typeof(FilterDelegate), null, method);
+                    var output = filter((string)GetVariable(command.InputVariable), command, executionLog);
+
                     executionLog.OutputValue = output.ToString();
 
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
@@ -316,6 +324,7 @@ namespace DeninaSharp.Core
                         output = string.Concat(GetVariable(command.OutputVariable), output);
                     }
 
+                    // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
                     SafeSetVariable(command.OutputVariable, output);
 
                     executionLog.ElapsedTime = timer.ElapsedMilliseconds;

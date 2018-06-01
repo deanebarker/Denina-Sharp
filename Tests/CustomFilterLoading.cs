@@ -114,6 +114,26 @@ namespace Tests
             Assert.IsTrue(Pipeline.CommandMethods["multinametest.bar"] != null);
         }
 
+        [TestMethod]
+        public void AddAnonymousFunction()
+        {
+            var category = "AnonymousFunctionTest";
+            var name = "myFilter";
+            var fqName = string.Concat(category.ToLower(), ".", name.ToLower());
+
+            Func<string, PipelineCommand, ExecutionLog, string> myFilter = (input, command, log) =>
+            {
+                return "It worked!";
+            };
+
+            Pipeline.AddMethod(myFilter.Method, category, name);
+
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey(fqName));
+
+            var pipeline = new Pipeline(fqName);
+            Assert.AreEqual("It worked!", pipeline.Execute());
+        }
+
 
         public static string DoSomething(string input, PipelineCommand command, ExecutionLog log)
         {
