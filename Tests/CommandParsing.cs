@@ -13,11 +13,11 @@ namespace Tests
         public void PopulateCommand()
         {
             var command = new PipelineCommand();
-            command.CommandName = "Replace";
+            command.FullyQualifiedCommandName = "Replace";
             command.CommandArgs.Add("1", "a");
             command.CommandArgs.Add("2", "b");
 
-            Assert.AreEqual("Replace", command.CommandName);
+            Assert.AreEqual("Replace", command.FullyQualifiedCommandName);
             Assert.AreEqual("core.replace", command.NormalizedCommandName);
             Assert.AreEqual("a", command.CommandArgs.First().Value);
             Assert.AreEqual("b", command.CommandArgs.Last().Value);
@@ -29,21 +29,21 @@ namespace Tests
             var pipeline = new Pipeline("Prepend FOO");
 
             Assert.AreEqual(1, pipeline.Commands.Count);
-            Assert.AreEqual("Prepend", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Prepend", pipeline.Commands.First().FullyQualifiedCommandName);
         }
 
         [TestMethod]
         public void AddCommandByObject()
         {
             var command = new PipelineCommand();
-            command.CommandName = "Replace";
+            command.FullyQualifiedCommandName = "Replace";
             command.CommandArgs.Add("a", "b");
 
             var pipeline = new Pipeline();
             pipeline.AddCommand(command);
 
             Assert.AreEqual(1, pipeline.Commands.Count());
-            Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Replace", pipeline.Commands.First().FullyQualifiedCommandName);
             Assert.AreEqual("b", pipeline.Commands.First().CommandArgs.First().Value);
         }
 
@@ -63,7 +63,7 @@ namespace Tests
             var pipeline = new Pipeline();
             pipeline.AddCommand("Replace -old:Deane -new:\"Annie was here\"");
 
-            Assert.AreEqual("Replace", pipeline.Commands.First().CommandName);
+            Assert.AreEqual("Replace", pipeline.Commands.First().FullyQualifiedCommandName);
             Assert.AreEqual("Deane", pipeline.Commands.First().CommandArgs.First().Value);
             Assert.AreEqual("Annie was here", pipeline.Commands.First().CommandArgs.Last().Value);
         }
@@ -80,8 +80,8 @@ Text.Replace -old:c -new:d
             var pipeline = new Pipeline();
             pipeline.AddCommand(commandString);
 
-            Assert.AreEqual("Text.Replace", pipeline.Commands.First().CommandName);
-            Assert.AreEqual("Text.Replace", pipeline.Commands[1].CommandName);
+            Assert.AreEqual("Text.Replace", pipeline.Commands.First().FullyQualifiedCommandName);
+            Assert.AreEqual("Text.Replace", pipeline.Commands[1].FullyQualifiedCommandName);
             Assert.AreEqual("b", pipeline.Commands.First().CommandArgs.Last().Value);
         }
 

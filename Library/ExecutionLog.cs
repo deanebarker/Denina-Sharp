@@ -21,7 +21,7 @@ namespace DeninaSharp.Core
 
         public ExecutionLog(PipelineCommand command, IDictionary<string, PipelineVariable> variables) : this()
         {
-            CommandName = command.CommandName;
+            CommandName = command.FullyQualifiedCommandName;
             CommandText = command.OriginalText;
 
             Variables = new Dictionary<string, string>();

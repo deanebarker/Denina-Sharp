@@ -203,7 +203,7 @@ namespace DeninaSharp.Core
             commands.Add(
                 new PipelineCommand()
                 {
-                    CommandName = LABEL_COMMAND,
+                    FullyQualifiedCommandName = LABEL_COMMAND,
                     Label = FINAL_COMMAND_LABEL,
                     CommandArgs = new Dictionary<object, string>() { { 0, FINAL_COMMAND_LABEL } }
                 }
@@ -290,7 +290,7 @@ namespace DeninaSharp.Core
                     // This command doesn't exist. We're going to try to be helpful and let the user know if it's becaue of a missing dependency.
                     var errorString = hiddenCommandMethods.ContainsKey(command.NormalizedCommandName)
                         ? string.Format(hiddenCommandMethods[command.NormalizedCommandName])  // This should be the reason the command is hidden
-                        : string.Format(@"No command loaded for ""{0}""", command.CommandName);
+                        : string.Format(@"No command loaded for ""{0}""", command.FullyQualifiedCommandName);
 
                     throw new DeninaException(errorString);
                 }
@@ -473,7 +473,7 @@ namespace DeninaSharp.Core
         {
             var command = new PipelineCommand
             {
-                CommandName = commandName,
+                FullyQualifiedCommandName = commandName,
                 CommandArgs = commandArgs
             };
             commands.Add(command);

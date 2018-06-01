@@ -48,7 +48,7 @@ namespace DeninaSharp.Core
                 // $myVar =>
                 if (tokens.Last == PIPE_TOKEN && tokens.Count == 2)
                 {
-                    command.CommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
+                    command.FullyQualifiedCommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
                     command.OutputVariable = NormalizeVariableName(tokens.First);
                     commands.Add(command);
                     continue;
@@ -57,7 +57,7 @@ namespace DeninaSharp.Core
                 // => $myVar
                 if (tokens.First == PIPE_TOKEN && tokens.Count == 2)
                 {
-                    command.CommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
+                    command.FullyQualifiedCommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
                     command.OutputVariable = NormalizeVariableName(tokens.Last);
                     commands.Add(command);
                     continue;
@@ -66,7 +66,7 @@ namespace DeninaSharp.Core
                 // WriteTo $myVar
                 if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.WRITE_TO_VARIABLE_COMMAND)
                 {
-                    command.CommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
+                    command.FullyQualifiedCommandName = Pipeline.WRITE_TO_VARIABLE_COMMAND;
                     command.OutputVariable = NormalizeVariableName(tokens.Second);
                     commands.Add(command);
                     continue;
@@ -75,7 +75,7 @@ namespace DeninaSharp.Core
                 // ReadFrom $myVar
                 if (PipelineCommand.EnsureCategoryName(tokens.First.ToLower()) == Pipeline.READ_FROM_VARIABLE_COMMAND)
                 {
-                    command.CommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
+                    command.FullyQualifiedCommandName = Pipeline.READ_FROM_VARIABLE_COMMAND;
                     command.InputVariable = NormalizeVariableName(tokens.Second);
                     commands.Add(command);
                     continue;
@@ -104,7 +104,7 @@ namespace DeninaSharp.Core
                 // This situation will be handled by this point and the related tokens removed so that all that remains is (1) DoSomething, and (2) SomeArgument. From here, the command is parsed normally.
 
                 // The first token is the command name...
-                command.CommandName = tokens.First();
+                command.FullyQualifiedCommandName = tokens.First();
 
                 //... the remaining tokens are the arguments.
                 var counter = 0;

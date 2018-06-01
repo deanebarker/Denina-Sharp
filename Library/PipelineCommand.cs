@@ -21,7 +21,8 @@ namespace DeninaSharp.Core
             Label = Guid.NewGuid().ToString();  // This is a placeholder. In some instances, this will be reset.
         }
 
-        public string CommandName { get; set; }
+        public string FullyQualifiedCommandName { get; set; }
+        public string CommandName => FullyQualifiedCommandName.Split(".".ToCharArray()).Last();
         public Dictionary<object, string> CommandArgs { get; set; }
         public string OutputVariable { get; set; }
         public string InputVariable { get; set; }
@@ -37,7 +38,7 @@ namespace DeninaSharp.Core
 
         public string NormalizedCommandName
         {
-            get { return CommandName.Contains(".") ? CommandName.ToLower() : EnsureCategoryName(CommandName).ToLower(); }
+            get { return FullyQualifiedCommandName.Contains(".") ? FullyQualifiedCommandName.ToLower() : EnsureCategoryName(FullyQualifiedCommandName).ToLower(); }
         }
 
         public void ResolveArguments()
