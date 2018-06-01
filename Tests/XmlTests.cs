@@ -47,6 +47,15 @@ namespace Tests
             Assert.AreEqual(pipeline.Execute(), "1");
         }
 
+        [TestMethod]
+        public void MakeFragment()
+        {
+            var xml = "<?generic-pi ?><a />";
+            var pipeline = GetPipeline();
+            pipeline.AddCommand("Xml.MakeFragment");
+            Assert.AreEqual("<a />", pipeline.Execute(xml));
+        }
+
         private Pipeline GetPipeline()
         {
             var pipeline = new Pipeline();

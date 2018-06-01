@@ -199,6 +199,28 @@ namespace DeninaSharp.Core.Filters
 
             return xmlDoc.SelectNodes(xpath).Count.ToString();
         }
+
+        [Filter("MakeFragment", "Strips off processing instructions to convert a document to an XML fragment string")]
+        public static string MakeFragment(string input, PipelineCommand command, ExecutionLog log)
+        {
+            XmlReader reader;
+            try
+            {
+                reader = XmlReader.Create(new StringReader(input));
+            }
+            catch(Exception e)
+            {
+                throw new DeninaException("Failed to parse XML", e);
+            }
+
+            // Move to the first element, thus skipping all the PIs
+            while(reader.NodeType != XmlNodeType.Element)
+            {
+                reader.Read();
+            }
+
+            return reader.ReadOuterXml();
+        }
     }
 
 }
