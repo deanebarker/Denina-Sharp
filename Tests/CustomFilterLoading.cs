@@ -11,25 +11,24 @@ namespace Tests
     public class CustomFilterLoading : BaseTests
     {
         [TestMethod]
-        public void LoadCustomFiltersFromType()
+        public void ReflectFiltersFromTypeWithFiltersAttributeAndCategoryName()
         {
-            Pipeline.ReflectType(typeof (CustomFilters));
-            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("custom.mymethod"));
-
-            var pipeline = new Pipeline();
-            pipeline.AddCommand("custom.MyMethod");
-            Assert.AreEqual("MyMethod", pipeline.Execute());
+            Pipeline.ReflectType(typeof (TypeWithFiltersAttributeAndCategoryName));
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("filtersattributename.myfilter"));
         }
 
         [TestMethod]
-        public void LoadCustomFiltersFromTypeWithCategoryName()
+        public void ReflectFiltersFromTypeWithFiltersAttributeButNoCategoryName()
         {
-            Pipeline.ReflectType(typeof (CustomFilters), "something");
-            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("something.mymethod"));
+            Pipeline.ReflectType(typeof (TypeWithFiltersAttributeButNoCategoryName));
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("typewithfiltersattributebutnocategoryname.myfilter"));
+        }
 
-            var pipeline = new Pipeline();
-            pipeline.AddCommand("something.MyMethod");
-            Assert.AreEqual("MyMethod", pipeline.Execute());
+        [TestMethod]
+        public void ReflectFiltersFromTypeWithNoFiltersAttribute()
+        {
+            Pipeline.ReflectType(typeof(TypeWithNoFiltersAttribute));
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("typewithnofiltersattribute.myfilter"));
         }
 
         [TestMethod]
@@ -47,29 +46,17 @@ namespace Tests
         }
 
         [TestMethod]
-        public void LoadNakedMethod()
+        public void AddMethodWithNoFilterAttribute()
         {
-            Pipeline.AddMethod(GetType().GetMethod("DoSomething"), "Deane", "DoSomething");
-            
-            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("deane.dosomething"));
-
-            var pipeline = new Pipeline();
-            pipeline.AddCommand("Deane.DoSomething");
-
-            Assert.AreEqual("It worked!", pipeline.Execute());
+            Pipeline.AddMethod(GetType().GetMethod("FilterMethodWithNoFilterAttribute"), "MyCategory", "MyFilter");        
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("mycategory.myfilter"));
         }
 
         [TestMethod]
-        public void LoadMethod()
+        public void ReflectMethodWithFilterAttribute()
         {
-            Pipeline.ReflectMethod(GetType().GetMethod("DoSomethingElse"), "Deane");
-
-            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("deane.dosomethingelse"));
-
-            var pipeline = new Pipeline();
-            pipeline.AddCommand("Deane.DoSomethingElse");
-
-            Assert.AreEqual("It worked!", pipeline.Execute());           
+            Pipeline.ReflectMethod(GetType().GetMethod("FilterMethodWithFilterAttribute"));
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("customfilterloading.myfilter"));         
         }
 
         [TestMethod]
@@ -135,13 +122,13 @@ namespace Tests
         }
 
 
-        public static string DoSomething(string input, PipelineCommand command, ExecutionLog log)
+        public static string FilterMethodWithNoFilterAttribute(string input, PipelineCommand command, ExecutionLog log)
         {
             return "It worked!";
         }
 
-        [Filter("DoSomethingElse")]
-        public static string DoSomethingElse(string input, PipelineCommand command, ExecutionLog log)
+        [Filter("MyFilter")]
+        public static string FilterMethodWithFilterAttribute(string input, PipelineCommand command, ExecutionLog log)
         {
             return "It worked!";
         }
@@ -153,6 +140,35 @@ namespace Tests
             return "It worked!";
         }
 
+    }
+
+    internal static class TypeWithNoFiltersAttribute
+    {
+        [Filter]
+        public static string MyFilter(string input, PipelineCommand command, ExecutionLog log)
+        {
+            return input;
+        }
+    }
+
+    [Filters]
+    internal static class TypeWithFiltersAttributeButNoCategoryName
+    {
+        [Filter]
+        public static string MyFilter(string input, PipelineCommand command, ExecutionLog log)
+        {
+            return input;
+        }
+    }
+
+    [Filters("FiltersAttributeName")]
+    internal static class TypeWithFiltersAttributeAndCategoryName
+    {
+        [Filter]
+        public static string MyFilter(string input, PipelineCommand command, ExecutionLog log)
+        {
+            return input;
+        }
     }
 
     [Filters("Text")]

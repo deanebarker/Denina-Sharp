@@ -134,14 +134,7 @@ namespace DeninaSharp.Core
 
         public static void ReflectType(Type type, string category = null)
         {
-            if (category == null)
-            {
-                if (!type.GetCustomAttributes(typeof (FiltersAttribute), true).Any())
-                {
-                    throw new Exception("Type does not have a TextFilters attribute. In this case, you must pass a category name into AddType.");
-                }
-                category = ((FiltersAttribute) type.GetCustomAttributes(typeof (FiltersAttribute), true).First()).Category;
-            }
+            category = category ?? ((FiltersAttribute)type.GetCustomAttributes(typeof(FiltersAttribute), true).FirstOrDefault())?.Category ?? type.Name;
 
             // Add to the documentation
             categoryDoc.Remove(category.ToLower());
@@ -153,7 +146,7 @@ namespace DeninaSharp.Core
             }
         }
 
-        public static void ReflectMethod(MethodInfo method, string category, string name = null)
+        public static void ReflectMethod(MethodInfo method, string category = null, string name = null)
         {
             foreach (var filterAttribute in method.GetCustomAttributes<FilterAttribute>())
             {
@@ -162,7 +155,11 @@ namespace DeninaSharp.Core
                  * 2. Relfected name from the FilterAttribute
                  * 3. Method name
                  * */
-                AddMethod(method, category, name ?? filterAttribute.Name ?? method.Name);
+                AddMethod(
+                    method, 
+                    category ?? method.DeclaringType.Name,
+                    name ?? filterAttribute.Name ?? method.Name
+                    );
             }
             return;
         }

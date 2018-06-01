@@ -10,9 +10,9 @@ namespace DeninaSharp.Core.Documentation
     {
         public CategoryDoc(Type type)
         {
-            var attribute = ((FiltersAttribute)type.GetCustomAttributes(typeof(FiltersAttribute), true).First());
-            Name = attribute.Category;
-            Description = Eval(attribute.Description);
+            var attribute = ((FiltersAttribute)type.GetCustomAttributes(typeof(FiltersAttribute), true).FirstOrDefault());
+            Name = attribute?.Category ?? type.Name;
+            Description = Eval(attribute?.Description);
         }
 
         public string Name { get; set; }
