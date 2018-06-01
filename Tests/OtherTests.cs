@@ -46,7 +46,7 @@ namespace Tests
                 Assert.IsTrue(e.Message.Contains("!!!"));
             }
 
-            Pipeline.AddMethod(typeof(Text).GetMethod("Append"), "text", "append");
+            Pipeline.ReflectMethod(typeof(Text).GetMethod("Append"), "text", "append");
         }
 
 

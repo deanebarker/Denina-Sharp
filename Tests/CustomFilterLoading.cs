@@ -13,7 +13,7 @@ namespace Tests
         [TestMethod]
         public void LoadCustomFiltersFromType()
         {
-            Pipeline.AddType(typeof (CustomFilters));
+            Pipeline.ReflectType(typeof (CustomFilters));
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("custom.mymethod"));
 
             var pipeline = new Pipeline();
@@ -24,7 +24,7 @@ namespace Tests
         [TestMethod]
         public void LoadCustomFiltersFromTypeWithCategoryName()
         {
-            Pipeline.AddType(typeof (CustomFilters), "something");
+            Pipeline.ReflectType(typeof (CustomFilters), "something");
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("something.mymethod"));
 
             var pipeline = new Pipeline();
@@ -38,12 +38,12 @@ namespace Tests
             var pipeline = new Pipeline("Text.Append -suffix:BAR");
             Assert.AreEqual("FOOBAR", pipeline.Execute("FOO"));
 
-            Pipeline.AddType(typeof (OverwriteFilterTestClass));  // This should overwrite Core.Append
+            Pipeline.ReflectType(typeof (OverwriteFilterTestClass));  // This should overwrite Core.Append
 
             Assert.AreEqual("FOOBAZ", pipeline.Execute("FOO"));
 
             // Now add the old filter back, or else another test fails...
-            Pipeline.AddType(typeof(Core));
+            Pipeline.ReflectType(typeof(Core));
         }
 
         [TestMethod]
@@ -62,7 +62,7 @@ namespace Tests
         [TestMethod]
         public void LoadMethod()
         {
-            Pipeline.AddMethod(GetType().GetMethod("DoSomethingElse"), "Deane");
+            Pipeline.ReflectMethod(GetType().GetMethod("DoSomethingElse"), "Deane");
 
             Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("deane.dosomethingelse"));
 
@@ -83,7 +83,7 @@ namespace Tests
         [TestMethod]
         public void TryToLoadBrokenDependency()
         {
-            Pipeline.AddMethod(GetType().GetMethod("NeedsMissingDependency"), "Test");
+            Pipeline.ReflectMethod(GetType().GetMethod("NeedsMissingDependency"), "Test");
 
             var pipeline = new Pipeline();
             
@@ -103,6 +103,15 @@ namespace Tests
             }
 
             Assert.Fail("We shouldn't get here...");
+        }
+
+        [TestMethod]
+        public void LoadUnderMultipleCommandNames()
+        {
+            Pipeline.ReflectType(typeof(MultiNameTest));
+
+            Assert.IsTrue(Pipeline.CommandMethods["multinametest.foo"] != null);
+            Assert.IsTrue(Pipeline.CommandMethods["multinametest.bar"] != null);
         }
 
 
@@ -133,6 +142,17 @@ namespace Tests
         public static string Append(string input, PipelineCommand command, ExecutionLog log)
         {
             return String.Concat(input, "BAZ");
+        }
+    }
+
+    [Filters("MultiNameTest")]
+    internal static class MultiNameTest
+    {
+        [Filter("Foo")]
+        [Filter("Bar")]
+        public static string MultiNameTestFilter(string input, PipelineCommand command, ExecutionLog log)
+        {
+            return input;
         }
     }
 

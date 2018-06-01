@@ -59,7 +59,7 @@ namespace DeninaSharp.Core
         public static void Init()
         {
             // Add the filters in this assembly
-            AddAssembly(typeof(Pipeline).Assembly);
+            ReflectAssembly(typeof(Pipeline).Assembly);
             ClearGlobalVariables();
             PipelineComplete = null;
             PipelineCreated = null;
@@ -114,7 +114,7 @@ namespace DeninaSharp.Core
         }
 
         
-        public static void AddAssembly(Assembly assembly)
+        public static void ReflectAssembly(Assembly assembly)
         {
             // Iterate all the classes in this assembly
             foreach (Type thisType in assembly.GetTypes())
@@ -123,12 +123,12 @@ namespace DeninaSharp.Core
                 if (thisType.GetCustomAttributes(typeof (FiltersAttribute), true).Any())
                 {
                     // Process It
-                    AddType(thisType);
+                    ReflectType(thisType);
                 }
             }
         }
 
-        public static void AddType(Type type, string category = null)
+        public static void ReflectType(Type type, string category = null)
         {
             if (category == null)
             {
@@ -145,19 +145,30 @@ namespace DeninaSharp.Core
 
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
             {
-                string name = ((FilterAttribute) method.GetCustomAttributes(typeof (FilterAttribute), true).First()).Name;
-                AddMethod(method, category, name);
+                ReflectMethod(method, category, null);
             }
         }
 
-        public static void AddMethod(MethodInfo method, string category, string name = null)
+        public static void ReflectMethod(MethodInfo method, string category, string name = null)
         {
-            name = name ?? method.Name;
+            foreach (var filterAttribute in method.GetCustomAttributes<FilterAttribute>())
+            {
+                /* To get the name of the command, we fallback from:
+                 * 1. Explicit name
+                 * 2. Relfected name from the FilterAttribute
+                 * 3. Method name
+                 * */
+                AddMethod(method, category, name ?? filterAttribute.Name ?? method.Name);
+            }
+            return;
+        }
 
+        public static void AddMethod(MethodInfo method, string category, string name, string description = null)
+        {
             var fullyQualifiedFilterName = string.Concat(category.ToLower(), ".", Convert.ToString(name).ToLower());
 
             // Check if it has any requirements
-            foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof (RequiresAttribute), true))
+            foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof(RequiresAttribute), true))
             {
                 if (Type.GetType(dependency.TypeName) == null && !hiddenCommandMethods.ContainsKey(fullyQualifiedFilterName))
                 {
@@ -168,13 +179,8 @@ namespace DeninaSharp.Core
                 }
             }
 
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                name = ((FilterAttribute) method.GetCustomAttributes(typeof (FilterAttribute), true).First()).Name;
-            }
-
             filterDoc.Remove(fullyQualifiedFilterName);
-            filterDoc.Add(fullyQualifiedFilterName, new FilterDoc(method));
+            filterDoc.Add(fullyQualifiedFilterName, new FilterDoc(method, name, description));
 
             commandMethods.Remove(fullyQualifiedFilterName); // Remove it if it exists already                  
             commandMethods.Add(fullyQualifiedFilterName, method);
