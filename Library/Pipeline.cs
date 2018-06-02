@@ -148,6 +148,11 @@ namespace DeninaSharp.Core
             }
         }
 
+        public static void ReflectMethod(FilterDelegate method, string category = null, string name = null)
+        {
+            ReflectMethod(method.Method, category, name);
+        }
+
         public static void ReflectMethod(MethodInfo method, string category = null, string name = null)
         {
             foreach (var filterAttribute in method.GetCustomAttributes<FilterAttribute>())
@@ -164,6 +169,11 @@ namespace DeninaSharp.Core
                     );
             }
             return;
+        }
+
+        public static void AddMethod(FilterDelegate method, string category, string name, string description = null)
+        {
+            AddMethod(method.Method, category, name, description);
         }
 
         public static void AddMethod(MethodInfo method, string category, string name, string description = null)
