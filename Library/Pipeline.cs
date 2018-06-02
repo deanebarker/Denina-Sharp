@@ -136,10 +136,11 @@ namespace DeninaSharp.Core
         public static void ReflectType(Type type, string category = null)
         {
             category = category ?? ((FiltersAttribute)type.GetCustomAttributes(typeof(FiltersAttribute), true).FirstOrDefault())?.Category ?? type.Name;
+            category = StringUtilities.RemoveNonLettersAndDigits(category);
 
             // Add to the documentation
-            categoryDoc.Remove(category.ToLower());
-            categoryDoc.Add(category.ToLower(), new CategoryDoc(type));
+            categoryDoc.Remove(category);
+            categoryDoc.Add(category, new CategoryDoc(type));
 
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
             {
@@ -167,8 +168,8 @@ namespace DeninaSharp.Core
 
         public static void AddMethod(MethodInfo method, string category, string name, string description = null)
         {
-            category = StringUtilities.RemoveNonLettersAndDigits(category).ToLower();
-            name = StringUtilities.RemoveNonLettersAndDigits(name).ToLower();
+            category = StringUtilities.RemoveNonLettersAndDigits(category);
+            name = StringUtilities.RemoveNonLettersAndDigits(name);
 
             var fullyQualifiedFilterName = string.Concat(category, ".", name);
 
@@ -187,8 +188,8 @@ namespace DeninaSharp.Core
             filterDoc.Remove(fullyQualifiedFilterName);
             filterDoc.Add(fullyQualifiedFilterName, new FilterDoc(method, name, description));
 
-            commandMethods.Remove(fullyQualifiedFilterName); // Remove it if it exists already                  
-            commandMethods.Add(fullyQualifiedFilterName, method);
+            commandMethods.Remove(fullyQualifiedFilterName.ToLower()); // Remove it if it exists already                  
+            commandMethods.Add(fullyQualifiedFilterName.ToLower(), method);
         }
 
         public string Execute(string input = null)
