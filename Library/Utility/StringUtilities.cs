@@ -11,6 +11,20 @@ namespace DeninaSharp.Core.Utility
 {
     public class StringUtilities
     {
+        public static string RemoveNonLettersAndDigits(string input)
+        {
+            var sb = new StringBuilder();
+            foreach (var character in input.ToCharArray())
+            {
+                if (Char.IsLetterOrDigit(character))
+                {
+                    sb.Append(character);
+                }
+            }
+
+            return sb.ToString();
+        }
+
         public static string Link(string input)
         {
             Uri uri;

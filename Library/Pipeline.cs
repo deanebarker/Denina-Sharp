@@ -1,5 +1,6 @@
 ﻿using DeninaSharp.Core.Configuration;
 using DeninaSharp.Core.Documentation;
+using DeninaSharp.Core.Utility;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -166,7 +167,10 @@ namespace DeninaSharp.Core
 
         public static void AddMethod(MethodInfo method, string category, string name, string description = null)
         {
-            var fullyQualifiedFilterName = string.Concat(category.ToLower(), ".", Convert.ToString(name).ToLower());
+            category = StringUtilities.RemoveNonLettersAndDigits(category).ToLower();
+            name = StringUtilities.RemoveNonLettersAndDigits(name).ToLower();
+
+            var fullyQualifiedFilterName = string.Concat(category, ".", name);
 
             // Check if it has any requirements
             foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof(RequiresAttribute), true))
