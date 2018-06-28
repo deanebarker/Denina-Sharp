@@ -65,6 +65,7 @@
     <Compile Include="TemplateTests.cs" />
     <Compile Include="TextTests.cs" />
     <Compile Include="DocumentationTests.cs" />
+    <Compile Include="UrlTests.cs" />
     <Compile Include="Utility\CustomFilters.cs" />
     <Compile Include="VariableTests.cs" />
     <Compile Include="XmlTests.cs" />

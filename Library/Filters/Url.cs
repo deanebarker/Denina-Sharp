@@ -16,7 +16,7 @@ namespace DeninaSharp.Core.Filters
         {
             var uriBuilder = new UriBuilder(input);
             NameValueCollection query = HttpUtility.ParseQueryString(uriBuilder.Query);
-            query[command.CommandArgs["1"]] = command.CommandArgs["2"];
+            query[command.GetArgument("key")] = command.GetArgument("value");
             uriBuilder.Query = query.ToString();
             return uriBuilder.Uri.AbsoluteUri;
         }
