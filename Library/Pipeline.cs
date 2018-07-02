@@ -31,16 +31,20 @@ namespace DeninaSharp.Core
         public static event PipelineEventHandler PipelineComplete;
         public static event PipelineEventHandler PipelineCreated;
 
-        private static readonly Dictionary<string, FilterDoc> filterDoc = new Dictionary<string, FilterDoc>();
-        public static ReadOnlyDictionary<string, FilterDoc> FilterDoc
+        public delegate void DocumentationEventHandler(object o, DocumentationEventArgs e);
+        public static event DocumentationEventHandler FilterDocLoaded;
+        public static event DocumentationEventHandler CategoryDocLoaded;
+
+        private static readonly Dictionary<string, FilterDoc> filterDocs = new Dictionary<string, FilterDoc>();
+        public static ReadOnlyDictionary<string, FilterDoc> FilterDocs
         {
-            get { return new ReadOnlyDictionary<string, FilterDoc>(filterDoc); }
+            get { return new ReadOnlyDictionary<string, FilterDoc>(filterDocs); }
         }
 
-        private static readonly Dictionary<string, CategoryDoc> categoryDoc = new Dictionary<string, CategoryDoc>();
-        public static ReadOnlyDictionary<string, CategoryDoc> CategoryDoc
+        private static readonly Dictionary<string, CategoryDoc> categoryDocs = new Dictionary<string, CategoryDoc>();
+        public static ReadOnlyDictionary<string, CategoryDoc> CategoryDocs
         {
-            get { return new ReadOnlyDictionary<string, CategoryDoc>(categoryDoc); }
+            get { return new ReadOnlyDictionary<string, CategoryDoc>(categoryDocs); }
         }
 
         private Stopwatch timer = new Stopwatch();
@@ -58,16 +62,25 @@ namespace DeninaSharp.Core
 
         static Pipeline()
         {
-            Init();
+            
         }
 
+        // This loads the filters from this assembly
         public static void Init()
         {
             // Add the filters in this assembly
             ReflectAssembly(typeof(Pipeline).Assembly);
+        }
+
+        // This resets the pipeline to default -- varibales and events -- but does not reload.
+        // This is used mainly for testing, to reset the pipeline between tests
+        public static void Reset()
+        {
             ClearGlobalVariables();
             PipelineComplete = null;
             PipelineCreated = null;
+            FilterDocLoaded = null;
+            CategoryDocLoaded = null;
         }
 
         public Pipeline(string commandString = null)
@@ -139,8 +152,15 @@ namespace DeninaSharp.Core
             category = StringUtilities.RemoveNonLettersAndDigits(category);
 
             // Add to the documentation
-            categoryDoc.Remove(category);
-            categoryDoc.Add(category, new CategoryDoc(type));
+            categoryDocs.Remove(category);
+
+            // Process the category doc through the event
+            var categoryDoc = new CategoryDoc(type);
+            var categoryDocLoadedEventArgs = new DocumentationEventArgs(categoryDoc);
+            OnCategoryDocLoaded(categoryDocLoadedEventArgs);
+
+            // Add the processed category doc
+            categoryDocs.Add(category, categoryDocLoadedEventArgs.CategoryDoc);
 
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
             {
@@ -195,8 +215,16 @@ namespace DeninaSharp.Core
                 }
             }
 
-            filterDoc.Remove(fullyQualifiedFilterName);
-            filterDoc.Add(fullyQualifiedFilterName, new FilterDoc(method, name, description));
+            // Remove this if it exists
+            filterDocs.Remove(fullyQualifiedFilterName);
+
+            // Process the filter doc through the event
+            var filterDoc = new FilterDoc(method, name, description);
+            var filterDocLoadedEventArgs = new DocumentationEventArgs(filterDoc);
+            OnFilterDocLoaded(filterDocLoadedEventArgs);
+
+            // Add the processed filter doc
+            filterDocs.Add(fullyQualifiedFilterName, filterDocLoadedEventArgs.FilterDoc);
 
             commandMethods.Remove(fullyQualifiedFilterName.ToLower()); // Remove it if it exists already                  
             commandMethods.Add(fullyQualifiedFilterName.ToLower(), method);
@@ -523,9 +551,20 @@ namespace DeninaSharp.Core
             PipelineComplete?.Invoke(null, e);
         }
 
+
         public static void OnPipelineCreated(PipelineEventArgs e)
         {
             PipelineCreated?.Invoke(null, e);
+        }
+
+        public static void OnFilterDocLoaded(DocumentationEventArgs e)
+        {
+            FilterDocLoaded?.Invoke(null, e);
+        }
+
+        public static void OnCategoryDocLoaded(DocumentationEventArgs e)
+        {
+            CategoryDocLoaded?.Invoke(null, e);
         }
     }
 }

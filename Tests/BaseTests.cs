@@ -14,6 +14,7 @@ namespace Tests
         {
             Monitor.Enter(Lock);
             Pipeline.Init();
+            Pipeline.Reset();
         }
 
         [TestCleanup]

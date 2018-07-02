@@ -105,6 +105,9 @@
   <ItemGroup>
     <EmbeddedResource Include="DocResources\Html\Extract\html-extract-input.html" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Documentation\DocumentationEventArgs.cs" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
