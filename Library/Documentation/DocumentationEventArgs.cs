@@ -8,9 +8,9 @@ namespace DeninaSharp.Core.Documentation
         public FilterDoc FilterDoc { get; set; }
         public CategoryDoc CategoryDoc { get; set; }
 
-		public DocumentationEventArgs(FilterDoc fitlerDoc)
+		public DocumentationEventArgs(FilterDoc filterDoc)
         {
-            FilterDoc = FilterDoc;
+            FilterDoc = filterDoc;
         }
         public DocumentationEventArgs(CategoryDoc categoryDoc)
         {
