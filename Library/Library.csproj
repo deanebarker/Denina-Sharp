@@ -62,7 +62,7 @@
     <Compile Include="Documentation\CodeSampleAttribute.cs" />
     <Compile Include="Documentation\CodeSampleDoc.cs" />
     <Compile Include="Documentation\DependencyDoc.cs" />
-    <Compile Include="Documentation\FilterDoc.cs" />
+    <Compile Include="Documentation\CommandDoc.cs" />
     <Compile Include="Documentation\RequiresAttribute.cs" />
     <Compile Include="Filters\If.cs" />
     <Compile Include="Filters\Sql.cs" />

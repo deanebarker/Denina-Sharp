@@ -5,12 +5,12 @@ namespace DeninaSharp.Core.Documentation
     public class DocumentationEventArgs : EventArgs
     {
 		// One of these will be NULL, depening on what we've loaded
-        public FilterDoc FilterDoc { get; set; }
+        public CommandDoc CommandDoc { get; set; }
         public CategoryDoc CategoryDoc { get; set; }
 
-		public DocumentationEventArgs(FilterDoc filterDoc)
+		public DocumentationEventArgs(CommandDoc commandDoc)
         {
-            FilterDoc = filterDoc;
+            CommandDoc = commandDoc;
         }
         public DocumentationEventArgs(CategoryDoc categoryDoc)
         {

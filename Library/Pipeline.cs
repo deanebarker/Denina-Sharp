@@ -38,10 +38,10 @@ namespace DeninaSharp.Core
         public delegate void CommandEventHandler(object o, CommandEventArgs e);
         public static event CommandEventHandler CommandLoading;
 
-        private static readonly Dictionary<string, FilterDoc> filterDocs = new Dictionary<string, FilterDoc>();
-        public static ReadOnlyDictionary<string, FilterDoc> FilterDocs
+        private static readonly Dictionary<string, CommandDoc> commandDocs = new Dictionary<string, CommandDoc>();
+        public static ReadOnlyDictionary<string, CommandDoc> CommandDocs
         {
-            get { return new ReadOnlyDictionary<string, FilterDoc>(filterDocs); }
+            get { return new ReadOnlyDictionary<string, CommandDoc>(commandDocs); }
         }
 
         private static readonly Dictionary<string, CategoryDoc> categoryDocs = new Dictionary<string, CategoryDoc>();
@@ -187,7 +187,7 @@ namespace DeninaSharp.Core
                  * 2. Relfected name from the FilterAttribute
                  * 3. Method name
                  * */
-                AddMethod(
+                AddFilter(
                     method, 
                     category ?? method.DeclaringType.Name,
                     name ?? filterAttribute.Name ?? method.Name
@@ -196,12 +196,12 @@ namespace DeninaSharp.Core
             return;
         }
 
-        public static void AddMethod(FilterDelegate method, string category, string name, string description = null)
+        public static void AddFilter(FilterDelegate method, string category, string name, string description = null)
         {
-            AddMethod(method.Method, category, name, description);
+            AddFilter(method.Method, category, name, description);
         }
 
-        public static void AddMethod(MethodInfo method, string category, string name, string description = null)
+        public static void AddFilter(MethodInfo method, string category, string name, string description = null)
         {
             category = StringUtilities.RemoveNonLettersAndDigits(category);
             name = StringUtilities.RemoveNonLettersAndDigits(name);
@@ -234,15 +234,15 @@ namespace DeninaSharp.Core
             commandMethods.Add(commandEventArgs.FullyQualifiedCommandName.ToLower(), commandEventArgs.Method);
 
             // Remove this if it exists
-            filterDocs.Remove(fullyQualifiedCommandName);
+            commandDocs.Remove(fullyQualifiedCommandName);
 
             // Process the filter doc through the event
-            var filterDoc = new FilterDoc(method, name, description);
+            var filterDoc = new CommandDoc(method, name, description);
             var filterDocLoadedEventArgs = new DocumentationEventArgs(filterDoc);
             OnFilterDocLoading(filterDocLoadedEventArgs);
 
             // Add the processed filter doc
-            filterDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.FilterDoc);
+            commandDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.CommandDoc);
         }
 
         public string Execute(string input = null)

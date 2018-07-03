@@ -6,11 +6,11 @@ using System.Web;
 
 namespace DeninaSharp.Core.Documentation
 {
-    public class FilterDoc
+    public class CommandDoc
     {
         // This constructor exists so that we can add a filter manually, without a FilterAttribute
         // Most filters will be reflected, but occasionally they'll want to add one manually, in which case we just take the string and description manually
-        public FilterDoc(MethodInfo method, string name, string description)
+        public CommandDoc(MethodInfo method, string name, string description)
         {
             Init(method, name, description);
         }
@@ -21,7 +21,7 @@ namespace DeninaSharp.Core.Documentation
         // Hopefully, they'll find this constructor, realize we tried this, and we had to add the other one because sometimes there *isn't* a FilterAttribute
         //
         // Post script: https://twitter.com/gadgetopia/status/1013843003851640832 (and, it was me who did this...)
-        public FilterDoc(MethodInfo method, FilterAttribute filterAttribute)
+        public CommandDoc(MethodInfo method, FilterAttribute filterAttribute)
         {
             Init(method, filterAttribute.Name, filterAttribute.Description);
         }

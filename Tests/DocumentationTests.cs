@@ -14,7 +14,7 @@ namespace Tests
         [TestMethod]
         public void LoadsForCategory()
         {
-            Assert.AreEqual(Pipeline.CommandMethods.Count(m => m.Key.StartsWith("Xml.")), Pipeline.FilterDocs.Count(d => d.Key.StartsWith("Xml.")));
+            Assert.AreEqual(Pipeline.CommandMethods.Count(m => m.Key.StartsWith("Xml.")), Pipeline.CommandDocs.Count(d => d.Key.StartsWith("Xml.")));
         }
 
         [TestMethod]
@@ -22,11 +22,11 @@ namespace Tests
         {
             Pipeline.FilterDocLoading += (s, e) =>
             {
-                e.FilterDoc.Name = "Foo";
+                e.CommandDoc.Name = "Foo";
             };
             Pipeline.Init();
 
-            Assert.AreEqual("Foo", Pipeline.FilterDocs.First().Value.Name);
+            Assert.AreEqual("Foo", Pipeline.CommandDocs.First().Value.Name);
         }
 
         [TestMethod]
