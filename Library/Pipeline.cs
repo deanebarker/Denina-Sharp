@@ -20,7 +20,7 @@ namespace DeninaSharp.Core
         public const string LABEL_COMMAND = "core.label";
         public const string FINAL_COMMAND_LABEL = "end";
 
-        public string NextCommandLabel { get; set; }
+        // Static members
 
         public static readonly Dictionary<string, Type> Types = new Dictionary<string, Type>(); // This is just to keep them handy for the documentor
 
@@ -39,34 +39,26 @@ namespace DeninaSharp.Core
         public static event CommandEventHandler CommandLoading;
 
         private static readonly Dictionary<string, CommandDoc> commandDocs = new Dictionary<string, CommandDoc>();
-        public static ReadOnlyDictionary<string, CommandDoc> CommandDocs
-        {
-            get { return new ReadOnlyDictionary<string, CommandDoc>(commandDocs); }
-        }
+        public static ReadOnlyDictionary<string, CommandDoc> CommandDocs => new ReadOnlyDictionary<string, CommandDoc>(commandDocs);
 
         private static readonly Dictionary<string, CategoryDoc> categoryDocs = new Dictionary<string, CategoryDoc>();
-        public static ReadOnlyDictionary<string, CategoryDoc> CategoryDocs
-        {
-            get { return new ReadOnlyDictionary<string, CategoryDoc>(categoryDocs); }
-        }
+        public static ReadOnlyDictionary<string, CategoryDoc> CategoryDocs => new ReadOnlyDictionary<string, CategoryDoc>(categoryDocs);
 
+        // Instance members
+
+        public string NextCommandLabel { get; set; }
         private Stopwatch timer = new Stopwatch();
-
         private readonly List<PipelineCommand> commands = new List<PipelineCommand>();
-
         private Dictionary<string, PipelineVariable> variables = new Dictionary<string, PipelineVariable>();
         private static Dictionary<string, PipelineVariable> globalVariables = new Dictionary<string, PipelineVariable>();
-
         public List<ExecutionLog> LogEntries { get; private set; }
 
         // This is the delegate through which we run all the filters
         // We do this through a delegate so we can handle anonymous functions
         public delegate string FilterDelegate(string input, PipelineCommand command, ExecutionLog log);
 
-        static Pipeline()
-        {
-            
-        }
+
+
 
         // This loads the filters from this assembly
         public static void Init()
@@ -561,30 +553,10 @@ namespace DeninaSharp.Core
                 .ForEach(z => RemoveCommand(z, reason));
         }
 
-        public static void OnPipelineComplete(PipelineEventArgs e)
-        {
-            PipelineComplete?.Invoke(null, e);
-        }
-
-
-        public static void OnPipelineCreated(PipelineEventArgs e)
-        {
-            PipelineCreated?.Invoke(null, e);
-        }
-
-        public static void OnFilterDocLoading(DocumentationEventArgs e)
-        {
-            FilterDocLoading?.Invoke(null, e);
-        }
-
-        public static void OnCategoryDocLoading(DocumentationEventArgs e)
-        {
-            CategoryDocLoading?.Invoke(null, e);
-        }
-
-        public static void OnCommandLoading(CommandEventArgs e)
-        {
-            CommandLoading?.Invoke(null, e);
-        }
+        public static void OnPipelineComplete(PipelineEventArgs e) => PipelineComplete?.Invoke(null, e);
+        public static void OnPipelineCreated(PipelineEventArgs e) => PipelineCreated?.Invoke(null, e);
+        public static void OnFilterDocLoading(DocumentationEventArgs e) => FilterDocLoading?.Invoke(null, e);
+        public static void OnCategoryDocLoading(DocumentationEventArgs e) => CategoryDocLoading?.Invoke(null, e);
+        public static void OnCommandLoading(CommandEventArgs e) => CommandLoading?.Invoke(null, e);
     }
 }
