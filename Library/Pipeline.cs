@@ -32,8 +32,8 @@ namespace DeninaSharp.Core
         public static event PipelineEventHandler PipelineCreated;
 
         public delegate void DocumentationEventHandler(object o, DocumentationEventArgs e);
-        public static event DocumentationEventHandler FilterDocLoaded;
-        public static event DocumentationEventHandler CategoryDocLoaded;
+        public static event DocumentationEventHandler FilterDocLoading;
+        public static event DocumentationEventHandler CategoryDocLoading;
 
         public delegate void CommandEventHandler(object o, CommandEventArgs e);
         public static event CommandEventHandler CommandLoading;
@@ -83,8 +83,8 @@ namespace DeninaSharp.Core
             ClearGlobalVariables();
             PipelineComplete = null;
             PipelineCreated = null;
-            FilterDocLoaded = null;
-            CategoryDocLoaded = null;
+            FilterDocLoading = null;
+            CategoryDocLoading = null;
             CommandLoading = null;
         }
 
@@ -162,7 +162,7 @@ namespace DeninaSharp.Core
             // Process the category doc through the event
             var categoryDoc = new CategoryDoc(type);
             var categoryDocLoadedEventArgs = new DocumentationEventArgs(categoryDoc);
-            OnCategoryDocLoaded(categoryDocLoadedEventArgs);
+            OnCategoryDocLoading(categoryDocLoadedEventArgs);
 
             // Add the processed category doc
             categoryDocs.Add(category, categoryDocLoadedEventArgs.CategoryDoc);
@@ -239,7 +239,7 @@ namespace DeninaSharp.Core
             // Process the filter doc through the event
             var filterDoc = new FilterDoc(method, name, description);
             var filterDocLoadedEventArgs = new DocumentationEventArgs(filterDoc);
-            OnFilterDocLoaded(filterDocLoadedEventArgs);
+            OnFilterDocLoading(filterDocLoadedEventArgs);
 
             // Add the processed filter doc
             filterDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.FilterDoc);
@@ -572,14 +572,14 @@ namespace DeninaSharp.Core
             PipelineCreated?.Invoke(null, e);
         }
 
-        public static void OnFilterDocLoaded(DocumentationEventArgs e)
+        public static void OnFilterDocLoading(DocumentationEventArgs e)
         {
-            FilterDocLoaded?.Invoke(null, e);
+            FilterDocLoading?.Invoke(null, e);
         }
 
-        public static void OnCategoryDocLoaded(DocumentationEventArgs e)
+        public static void OnCategoryDocLoading(DocumentationEventArgs e)
         {
-            CategoryDocLoaded?.Invoke(null, e);
+            CategoryDocLoading?.Invoke(null, e);
         }
 
         public static void OnCommandLoading(CommandEventArgs e)

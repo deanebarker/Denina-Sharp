@@ -20,7 +20,7 @@ namespace Tests
         [TestMethod]
         public void FilterDocLoadedEvent()
         {
-            Pipeline.FilterDocLoaded += (s, e) =>
+            Pipeline.FilterDocLoading += (s, e) =>
             {
                 e.FilterDoc.Name = "Foo";
             };
@@ -32,7 +32,7 @@ namespace Tests
         [TestMethod]
         public void CategoryDocLoadedEvent()
         {
-            Pipeline.CategoryDocLoaded += (s, e) =>
+            Pipeline.CategoryDocLoading += (s, e) =>
             {
                 e.CategoryDoc.Name = "Foo";
             };
