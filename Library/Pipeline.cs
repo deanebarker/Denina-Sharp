@@ -35,6 +35,9 @@ namespace DeninaSharp.Core
         public static event DocumentationEventHandler FilterDocLoaded;
         public static event DocumentationEventHandler CategoryDocLoaded;
 
+        public delegate void CommandEventHandler(object o, CommandEventArgs e);
+        public static event CommandEventHandler CommandLoading;
+
         private static readonly Dictionary<string, FilterDoc> filterDocs = new Dictionary<string, FilterDoc>();
         public static ReadOnlyDictionary<string, FilterDoc> FilterDocs
         {
@@ -68,7 +71,8 @@ namespace DeninaSharp.Core
         // This loads the filters from this assembly
         public static void Init()
         {
-            // Add the filters in this assembly
+            // Reset all the commands, and reload from this assembly
+            commandMethods.Clear();
             ReflectAssembly(typeof(Pipeline).Assembly);
         }
 
@@ -81,6 +85,7 @@ namespace DeninaSharp.Core
             PipelineCreated = null;
             FilterDocLoaded = null;
             CategoryDocLoaded = null;
+            CommandLoading = null;
         }
 
         public Pipeline(string commandString = null)
@@ -201,22 +206,35 @@ namespace DeninaSharp.Core
             category = StringUtilities.RemoveNonLettersAndDigits(category);
             name = StringUtilities.RemoveNonLettersAndDigits(name);
 
-            var fullyQualifiedFilterName = string.Concat(category, ".", name);
+            var fullyQualifiedCommandName = string.Concat(category, ".", name);
 
             // Check if it has any requirements
             foreach (RequiresAttribute dependency in method.GetCustomAttributes(typeof(RequiresAttribute), true))
             {
-                if (Type.GetType(dependency.TypeName) == null && !hiddenCommandMethods.ContainsKey(fullyQualifiedFilterName))
+                if (Type.GetType(dependency.TypeName) == null && !hiddenCommandMethods.ContainsKey(fullyQualifiedCommandName))
                 {
                     // This dependency doesn't exist, so we're not going to load this command.
                     // We're going to add this to the hidden commands dictionary, so we can give a more specific error message if this command is requested.
-                    hiddenCommandMethods.Add(fullyQualifiedFilterName, string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", fullyQualifiedFilterName, dependency.TypeName));
+                    hiddenCommandMethods.Add(fullyQualifiedCommandName, string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", fullyQualifiedCommandName, dependency.TypeName));
                     return;
                 }
             }
 
+            // Process this through the event
+            var commandEventArgs = new CommandEventArgs(fullyQualifiedCommandName, method);
+            OnCommandLoading(commandEventArgs);
+            if(commandEventArgs.Cancel)
+            {
+                // If they cancel, we just abandon and don't load the command, or the documentation
+                return;
+            }
+
+            // Load the processed command
+            commandMethods.Remove(commandEventArgs.FullyQualifiedCommandName.ToLower()); // Remove it if it exists already                  
+            commandMethods.Add(commandEventArgs.FullyQualifiedCommandName.ToLower(), commandEventArgs.Method);
+
             // Remove this if it exists
-            filterDocs.Remove(fullyQualifiedFilterName);
+            filterDocs.Remove(fullyQualifiedCommandName);
 
             // Process the filter doc through the event
             var filterDoc = new FilterDoc(method, name, description);
@@ -224,10 +242,7 @@ namespace DeninaSharp.Core
             OnFilterDocLoaded(filterDocLoadedEventArgs);
 
             // Add the processed filter doc
-            filterDocs.Add(fullyQualifiedFilterName, filterDocLoadedEventArgs.FilterDoc);
-
-            commandMethods.Remove(fullyQualifiedFilterName.ToLower()); // Remove it if it exists already                  
-            commandMethods.Add(fullyQualifiedFilterName.ToLower(), method);
+            filterDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.FilterDoc);
         }
 
         public string Execute(string input = null)
@@ -565,6 +580,11 @@ namespace DeninaSharp.Core
         public static void OnCategoryDocLoaded(DocumentationEventArgs e)
         {
             CategoryDocLoaded?.Invoke(null, e);
+        }
+
+        public static void OnCommandLoading(CommandEventArgs e)
+        {
+            CommandLoading?.Invoke(null, e);
         }
     }
 }

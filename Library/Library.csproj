@@ -52,6 +52,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandEventArgs.cs" />
     <Compile Include="Configuration\PipelineConfigVariable.cs" />
     <Compile Include="Configuration\PipelineConfigVariables.cs" />
     <Compile Include="ExecutionLog.cs" />

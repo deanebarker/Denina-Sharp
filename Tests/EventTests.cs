@@ -29,5 +29,23 @@ namespace Tests
             var result = pipeline.Execute();
             Assert.AreEqual("James Bond", result);
         }
+
+        [TestMethod]
+        public void CommandLoading()
+        {
+            Pipeline.CommandLoading += (s, e) =>
+            {
+                if (e.FullyQualifiedCommandName.ToLower() == "text.append")
+                {
+                    e.Cancel = true;
+                }
+            };
+
+            // We have to rerun Init, since it's run during test creation
+            // This is a testing anomaly. Normally, we'd bind our events and *then* run Init()
+            Pipeline.Init();
+
+            Assert.IsTrue(!Pipeline.CommandMethods.ContainsKey("text.append"));
+        }
     }
 }
