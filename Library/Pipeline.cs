@@ -566,11 +566,11 @@ namespace DeninaSharp.Core
                 .ForEach(z => RemoveCommand(z, reason));
         }
 
-        public static void OnPipelineComplete(PipelineEventArgs e) => PipelineComplete?.Invoke(null, e);
-        public static void OnPipelineCreated(PipelineEventArgs e) => PipelineCreated?.Invoke(null, e);
-        public static void OnFilterDocLoading(DocumentationEventArgs e) => FilterDocLoading?.Invoke(null, e);
-        public static void OnCategoryDocLoading(DocumentationEventArgs e) => CategoryDocLoading?.Invoke(null, e);
-        public static void OnCommandLoading(CommandEventArgs e) => CommandLoading?.Invoke(null, e);
-        public void OnFilterExecuting(FilterEventArgs e) => FilterExecuting?.Invoke(this, e);
+        private static void OnPipelineComplete(PipelineEventArgs e) => PipelineComplete?.Invoke(null, e);
+        private static void OnPipelineCreated(PipelineEventArgs e) => PipelineCreated?.Invoke(null, e);
+        private static void OnFilterDocLoading(DocumentationEventArgs e) => FilterDocLoading?.Invoke(null, e);
+        private static void OnCategoryDocLoading(DocumentationEventArgs e) => CategoryDocLoading?.Invoke(null, e);
+        private static void OnCommandLoading(CommandEventArgs e) => CommandLoading?.Invoke(null, e);
+        private void OnFilterExecuting(FilterEventArgs e) => FilterExecuting?.Invoke(this, e);
     }
 }
