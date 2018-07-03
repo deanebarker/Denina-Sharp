@@ -17,7 +17,7 @@ namespace Tests
             var p = new Pipeline("Text.Append -suffix:Baz");
             p.FilterExecuting += (s, e) =>
             {
-                // This should change the input test to "Bar", no matter what was passed in
+                // This should change the input text to "Bar", no matter what was passed in
                 e.Input = "Bar";
             };
 
@@ -25,5 +25,18 @@ namespace Tests
             Assert.AreEqual("BarBaz", p.Execute("Foo"));
         }
 
+        [TestMethod]
+        public void OnFilterExecuted()
+        {
+            var p = new Pipeline("Text.Append -suffix:Baz");
+            p.FilterExecuted += (s, e) =>
+            {
+                // This should change the output text to "Bar", no matter what was passed in
+                e.Output = "Bar";
+            };
+
+            // Even thought "Foo" is passed in, the event should change the input text to "Bar" just before the only command executes
+            Assert.AreEqual("Bar", p.Execute("Foo"));
+        }
     }
 }

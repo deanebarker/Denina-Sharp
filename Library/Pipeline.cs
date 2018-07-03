@@ -56,6 +56,7 @@ namespace DeninaSharp.Core
 
         public delegate void FilterEventHandler(Pipeline s, FilterEventArgs e);
         public event FilterEventHandler FilterExecuting;
+        public event FilterEventHandler FilterExecuted;
 
 
         // This is the delegate through which we run all the filters
@@ -360,32 +361,39 @@ namespace DeninaSharp.Core
                     timer.Reset();
                     timer.Start();
 
-                    executionLog.InputValue = GetVariable(command.InputVariable).ToString();
-
                     // Get the input from the designated variable
                     var filterInput = (string)GetVariable(command.InputVariable);
 
                     // Process the input through the event
-                    var filterEventArgs = new FilterEventArgs(command, filterInput, null);
-                    OnFilterExecuting(filterEventArgs);
-                    filterInput = filterEventArgs.Input;
-                    
+                    var executingFilterEventArgs = new FilterEventArgs(command, filterInput, null);
+                    OnFilterExecuting(executingFilterEventArgs);
+                    filterInput = executingFilterEventArgs.Input;
+
+                    // TO DO: How do we track changes made to the input in an event?
+                    executionLog.InputValue = GetVariable(command.InputVariable).ToString();
+
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
                     // We create a delete so that we can use anonymous functions. Since non-anonymous functions are static, and anonymous functions aren't static, we have to create a 
                     // delegate so we can handle both
                     var filter = (FilterDelegate)Delegate.CreateDelegate(typeof(FilterDelegate), null, method);
-                    var output = filter(filterInput, command, executionLog);
+                    var filterOutput = filter(filterInput, command, executionLog);
 
-                    executionLog.OutputValue = output.ToString();
+                    // Process the output through the event
+                    var executedFilterEventArgs = new FilterEventArgs(command, null, filterOutput);
+                    OnFilterExecuted(executedFilterEventArgs);
+                    filterOutput = executedFilterEventArgs.Output;
+
+                    // TO DO: How do we track changes made to the output in an event?
+                    executionLog.OutputValue = filterOutput.ToString();
 
                     // If we're appending, tack this onto what was passed in (really, prepend was was passed in)
                     if (command.AppendToOutput)
                     {
-                        output = string.Concat(GetVariable(command.OutputVariable), output);
+                        filterOutput = string.Concat(GetVariable(command.OutputVariable), filterOutput);
                     }
 
                     // We're going to "SafeSet" this, so they can't pipe output to a read-only variable
-                    SafeSetVariable(command.OutputVariable, output);
+                    SafeSetVariable(command.OutputVariable, filterOutput);
 
                     executionLog.ElapsedTime = timer.ElapsedMilliseconds;
 
@@ -572,5 +580,6 @@ namespace DeninaSharp.Core
         private static void OnCategoryDocLoading(DocumentationEventArgs e) => CategoryDocLoading?.Invoke(null, e);
         private static void OnCommandLoading(CommandEventArgs e) => CommandLoading?.Invoke(null, e);
         private void OnFilterExecuting(FilterEventArgs e) => FilterExecuting?.Invoke(this, e);
+        private void OnFilterExecuted(FilterEventArgs e) => FilterExecuted?.Invoke(this, e);
     }
 }
