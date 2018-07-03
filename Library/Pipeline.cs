@@ -534,31 +534,31 @@ namespace DeninaSharp.Core
             commands.Add(command);
         }
 
-        public static void RemoveFilter(string filterName, string reason = null)
+        public static void RemoveCommand(string commandName, string reason = null)
         {
             reason = reason ?? "It was removed from the command set";
 
-            if (!commandMethods.ContainsKey(filterName.ToLower()))
+            if (!commandMethods.ContainsKey(commandName.ToLower()))
             {
                 return;
             }
-            commandMethods.Remove(filterName.ToLower());
+            commandMethods.Remove(commandName.ToLower());
 
             // Add this to the hidden command methods
-            if (hiddenCommandMethods.ContainsKey(filterName.ToLower()))
+            if (hiddenCommandMethods.ContainsKey(commandName.ToLower()))
             {
-                hiddenCommandMethods.Remove(filterName.ToLower());
+                hiddenCommandMethods.Remove(commandName.ToLower());
             }
-            hiddenCommandMethods.Add(filterName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", filterName, reason));
+            hiddenCommandMethods.Add(commandName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", commandName, reason));
         }
 
-        public static void RemoveFilterCategory(string filterCategoryName, string reason = null)
+        public static void RemoveCommandCategory(string commandCategoryName, string reason = null)
         {
             commandMethods
-                .Where(x => x.Key.StartsWith(string.Concat(filterCategoryName.ToLower(), ".")))
+                .Where(x => x.Key.StartsWith(string.Concat(commandCategoryName.ToLower(), ".")))
                 .Select(y => y.Key)
                 .ToList()
-                .ForEach(z => RemoveFilter(z, reason));
+                .ForEach(z => RemoveCommand(z, reason));
         }
 
         public static void OnPipelineComplete(PipelineEventArgs e)
