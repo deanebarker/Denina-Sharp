@@ -53,6 +53,11 @@ namespace DeninaSharp.Core
         private static Dictionary<string, PipelineVariable> globalVariables = new Dictionary<string, PipelineVariable>();
         public List<ExecutionLog> LogEntries { get; private set; }
 
+
+        public delegate void FilterEventHandler(Pipeline s, FilterEventArgs e);
+        public event FilterEventHandler FilterExecuting;
+
+
         // This is the delegate through which we run all the filters
         // We do this through a delegate so we can handle anonymous functions
         public delegate string FilterDelegate(string input, PipelineCommand command, ExecutionLog log);
@@ -357,11 +362,19 @@ namespace DeninaSharp.Core
 
                     executionLog.InputValue = GetVariable(command.InputVariable).ToString();
 
+                    // Get the input from the designated variable
+                    var filterInput = (string)GetVariable(command.InputVariable);
+
+                    // Process the input through the event
+                    var filterEventArgs = new FilterEventArgs(command, filterInput, null);
+                    OnFilterExecuting(filterEventArgs);
+                    filterInput = filterEventArgs.Input;
+                    
                     // This is where we make the actual method call. We get the text out of the InputVariable slot, and we put it back into the OutputVariable slot. (These are usually the same slot...)
                     // We create a delete so that we can use anonymous functions. Since non-anonymous functions are static, and anonymous functions aren't static, we have to create a 
                     // delegate so we can handle both
                     var filter = (FilterDelegate)Delegate.CreateDelegate(typeof(FilterDelegate), null, method);
-                    var output = filter((string)GetVariable(command.InputVariable), command, executionLog);
+                    var output = filter(filterInput, command, executionLog);
 
                     executionLog.OutputValue = output.ToString();
 
@@ -558,5 +571,6 @@ namespace DeninaSharp.Core
         public static void OnFilterDocLoading(DocumentationEventArgs e) => FilterDocLoading?.Invoke(null, e);
         public static void OnCategoryDocLoading(DocumentationEventArgs e) => CategoryDocLoading?.Invoke(null, e);
         public static void OnCommandLoading(CommandEventArgs e) => CommandLoading?.Invoke(null, e);
+        public void OnFilterExecuting(FilterEventArgs e) => FilterExecuting?.Invoke(this, e);
     }
 }

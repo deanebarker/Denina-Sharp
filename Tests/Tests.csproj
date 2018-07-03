@@ -51,6 +51,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="FilterEvents.cs" />
     <Compile Include="FilterLoading.cs" />
     <Compile Include="CommandParsing.cs" />
     <Compile Include="CoreTests.cs" />

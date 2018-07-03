@@ -64,6 +64,7 @@
     <Compile Include="Documentation\DependencyDoc.cs" />
     <Compile Include="Documentation\CommandDoc.cs" />
     <Compile Include="Documentation\RequiresAttribute.cs" />
+    <Compile Include="FilterEventArgs.cs" />
     <Compile Include="Filters\If.cs" />
     <Compile Include="Filters\Sql.cs" />
     <Compile Include="Filters\Template.cs" />
