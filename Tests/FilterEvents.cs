@@ -26,6 +26,20 @@ namespace Tests
         }
 
         [TestMethod]
+        public void OnFilterExecutinModifyingCommand()
+        {
+            var p = new Pipeline("Text.Append -suffix:Baz");
+            p.FilterExecuting += (s, e) =>
+            {
+                e.Command.CommandArgs.Clear();
+                e.Command.CommandArgs.Add("suffix", "Bar");
+            };
+
+            // Even thought "Foo" is passed in, the event should change the input text to "Bar" just before the only command executes
+            Assert.AreEqual("FooBar", p.Execute("Foo"));
+        }
+
+        [TestMethod]
         public void OnFilterExecuted()
         {
             var p = new Pipeline("Text.Append -suffix:Baz");

@@ -368,6 +368,7 @@ namespace DeninaSharp.Core
                     var executingFilterEventArgs = new FilterEventArgs(command, filterInput, null);
                     OnFilterExecuting(executingFilterEventArgs);
                     filterInput = executingFilterEventArgs.Input;
+                    command = executingFilterEventArgs.Command; // I'm not sure I need to do this, but just to be explicit...
 
                     // TO DO: How do we track changes made to the input in an event?
                     executionLog.InputValue = GetVariable(command.InputVariable).ToString();
