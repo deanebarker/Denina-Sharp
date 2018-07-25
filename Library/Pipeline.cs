@@ -162,8 +162,11 @@ namespace DeninaSharp.Core
             var categoryDocLoadedEventArgs = new DocumentationEventArgs(categoryDoc);
             OnCategoryDocLoading(categoryDocLoadedEventArgs);
 
-            // Add the processed category doc
-            categoryDocs.Add(category, categoryDocLoadedEventArgs.CategoryDoc);
+            if (!categoryDocLoadedEventArgs.Cancel)
+            {
+                // Add the processed category doc
+                categoryDocs.Add(category, categoryDocLoadedEventArgs.CategoryDoc);
+            }
 
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
             {
@@ -240,8 +243,13 @@ namespace DeninaSharp.Core
             var filterDocLoadedEventArgs = new DocumentationEventArgs(filterDoc);
             OnFilterDocLoading(filterDocLoadedEventArgs);
 
-            // Add the processed filter doc
-            commandDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.CommandDoc);
+            // Do they want to cancel?
+            if (!filterDocLoadedEventArgs.Cancel)
+            {
+                // Add the processed filter doc
+                commandDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.CommandDoc);
+            }
+
         }
 
         public string Execute(string input = null)

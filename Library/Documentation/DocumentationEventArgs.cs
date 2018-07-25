@@ -8,6 +8,8 @@ namespace DeninaSharp.Core.Documentation
         public CommandDoc CommandDoc { get; set; }
         public CategoryDoc CategoryDoc { get; set; }
 
+        public bool Cancel { get; set; }
+
 		public DocumentationEventArgs(CommandDoc commandDoc)
         {
             CommandDoc = commandDoc;

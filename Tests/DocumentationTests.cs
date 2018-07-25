@@ -50,5 +50,31 @@ namespace Tests
 
             Assert.AreEqual("Foo", Pipeline.CategoryDocs.First().Value.Name);
         }
+
+        // Note: the two tests below fail when run with everything else, but work fine when run independently. It's some concurrency issue that is likely only reproducible in testing
+
+        [TestMethod]
+        public void CancelCategoryDocLoading()
+        {
+            Pipeline.CategoryDocLoading += (s, e) =>
+            {
+               e.Cancel = true;
+            };
+            Pipeline.Init();
+
+            Assert.AreEqual(0, Pipeline.CategoryDocs.Count());
+        }
+
+        [TestMethod]
+        public void CancelFilterDocLoading()
+        {
+            Pipeline.FilterDocLoading += (s, e) =>
+            {
+                e.Cancel = true;
+            };
+            Pipeline.Init();
+
+            Assert.AreEqual(0, Pipeline.CommandDocs.Count());
+        }
     }
 }
