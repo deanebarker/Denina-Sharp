@@ -5,6 +5,7 @@ using DeninaSharp.Core;
 using System.Linq;
 using System.Reflection;
 using System.IO;
+using DeninaSharp.Core.Filters;
 
 namespace Tests
 {
@@ -12,9 +13,18 @@ namespace Tests
     public class DocumentationTests : BaseTests
     {
         [TestMethod]
-        public void LoadsForCategory()
+        public void CorrectForCommand()
         {
-            Assert.AreEqual(Pipeline.CommandMethods.Count(m => m.Key.StartsWith("Xml.")), Pipeline.CommandDocs.Count(d => d.Key.StartsWith("Xml.")));
+            var filterAttributeOnXmlExtract = typeof(Xml).GetMethod("ExtractFromXml").GetCustomAttribute<FilterAttribute>();
+            var codeSampleAttributes = typeof(Xml).GetMethod("ExtractFromXml").GetCustomAttributes<CodeSampleAttribute>();
+            var argumentAttributes = typeof(Xml).GetMethod("ExtractFromXml").GetCustomAttributes<ArgumentMetaAttribute>();
+
+            var resultingDocObject = Pipeline.CommandDocs.First(m => m.Key == "XML.Extract");
+
+            Assert.AreEqual(filterAttributeOnXmlExtract.Name, resultingDocObject.Value.Name);
+            Assert.AreEqual(filterAttributeOnXmlExtract.Description, resultingDocObject.Value.Description);
+            Assert.AreEqual(codeSampleAttributes.Count(), resultingDocObject.Value.Samples.Count);
+            Assert.AreEqual(argumentAttributes.Count(), resultingDocObject.Value.Arguments.Count);
         }
 
         [TestMethod]

@@ -188,7 +188,8 @@ namespace DeninaSharp.Core
                 AddFilter(
                     method, 
                     category ?? method.DeclaringType.Name,
-                    name ?? filterAttribute.Name ?? method.Name
+                    name ?? filterAttribute.Name ?? method.Name,
+                    filterAttribute.Description
                     );
             }
             return;
@@ -407,6 +408,7 @@ namespace DeninaSharp.Core
                     e.CurrentCommandName = command.NormalizedCommandName;
                     throw;
                 }
+                // We are not going to handle a non-DeninaException. We'll just let that bubble up to the implementation's error handler
 
                 // Set the pointer to the next command
                 NextCommandLabel = command.SendToLabel;
