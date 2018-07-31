@@ -88,6 +88,7 @@
     <Compile Include="PipelineCommand.cs" />
     <Compile Include="Pipeline.cs" />
     <Compile Include="DeninaException.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utility\StringUtilities.cs" />
     <Compile Include="Utility\XsltExtensions.cs" />
   </ItemGroup>
@@ -98,9 +99,7 @@
     <EmbeddedResource Include="DocResources\Json\Extract\json-extract-input.json" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <EmbeddedResource Include="DocResources\Xml\Extract\extract-sample.xml" />
   </ItemGroup>
