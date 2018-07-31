@@ -66,7 +66,10 @@ namespace DeninaSharp.Core.Filters
         [CodeSample("James\nBond", "Html.LineBreaks", "James<br/>Bond")]
         public static string LineBreaks(string input, PipelineCommand command, ExecutionLog log)
         {
-            return input.Replace(Environment.NewLine, "<br/>");
+            input = input.Replace("\r\n", "\n");
+            input = input.Replace("\n", Environment.NewLine);
+            input = input.Replace(Environment.NewLine, "<br/>");
+            return input;
         }
 
         [Filter("MakeTag", "Creates an arbitrary HTML tag from supplied data.")]
