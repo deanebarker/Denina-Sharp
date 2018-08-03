@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using DeninaSharp.Core.Documentation;
 
 namespace DeninaSharp.Core
@@ -111,6 +112,17 @@ namespace DeninaSharp.Core
             return input.Contains(".") ? input : String.Concat(DEFAULT_CATEGORY_NAME, ".", input);
         }
 
-        
+        // The LogicHashCode is simply a hash of the command name and all the key/value combinations of the arguments in a standard order
+        // This represents a unique value of the _logic_ of a command. The things hashed represent things that control the _logic_.
+        // This can be used to avoid circular references when using Core.Include
+        public int GetLogicHashCode()
+        {
+            var sb = new StringBuilder();
+            sb.Append(NormalizedCommandName);
+            sb.Append(string.Join(string.Empty, CommandArgs.OrderBy(a => a.ToString()).Select(a => string.Concat(a.Key.ToString().ToLower(), a.Value))));
+            return sb.ToString().GetHashCode();
+        }
+
+
     }
 }

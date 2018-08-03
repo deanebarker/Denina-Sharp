@@ -17,6 +17,7 @@ namespace DeninaSharp.Core
         public const string GLOBAL_VARIABLE_NAME = "__global";
         public const string WRITE_TO_VARIABLE_COMMAND = "core.writeto";
         public const string READ_FROM_VARIABLE_COMMAND = "core.readfrom";
+        public const string INCLUSION_COMMAND = "core.include";
         public const string LABEL_COMMAND = "core.label";
         public const string FINAL_COMMAND_LABEL = "end";
 
@@ -43,6 +44,8 @@ namespace DeninaSharp.Core
 
         private static readonly Dictionary<string, CategoryDoc> categoryDocs = new Dictionary<string, CategoryDoc>();
         public static ReadOnlyDictionary<string, CategoryDoc> CategoryDocs => new ReadOnlyDictionary<string, CategoryDoc>(categoryDocs);
+
+        public static Func<PipelineCommand, IEnumerable<PipelineCommand>> CommandIncluder { get; set; }
 
         // Instance members
 
@@ -256,6 +259,34 @@ namespace DeninaSharp.Core
         {
             // Clear the debug data
             LogEntries.Clear();
+
+            // We need to resolve inclusions
+            // We can't do a foreach, because we're going to modify this list
+            // Also: _this does not account for recursion or circular inclusions!!!!_
+            // The GetLogicHashCode method can be used to compare command logic to ensure uniqueness
+            for (var i = 0; i < commands.Count(); i++)
+            {
+                var thisCommand = commands[i];
+                if (thisCommand.NormalizedCommandName == INCLUSION_COMMAND)
+                {
+                    if (CommandIncluder == null)
+                    {
+                        throw new Exception("Attempted to execute Core.Include when no CommandIncluder has been defined");
+                    }
+
+                    // Run the includer, passing the entire command
+                    var commandsToInclude = CommandIncluder(thisCommand);
+
+                    // Insert these commands AFTER the Include command
+                    commands.InsertRange(i+1, commandsToInclude);
+
+                    // Delete the Include command
+                    commands.Remove(thisCommand);
+
+                    // Included commands will also be processed for inclusions, since the next iteration of this loop will pickup at the first included command
+                }
+            }
+            // At this point, all inclusions should be resolved
 
             // Add a pass-through command at the end just to hold a label called "end".
             if (commands.Any(c => c.Label == FINAL_COMMAND_LABEL))

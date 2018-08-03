@@ -57,5 +57,32 @@ namespace Tests
             Pipeline.RemoveCommandCategory("text");
             Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("text.append"));
         }
+
+        [TestMethod]
+        public void GetLogicHashCode()
+        {
+            // These two commands are the same, just with arguments in different order. Their LogicHashCode should be the same.
+            var p1 = new PipelineCommand() { FullyQualifiedCommandName = "James.Bond", CommandArgs = new Dictionary<object, string>() { { "foo", "bar" }, { "bar", "baz" } } };
+            var p2 = new PipelineCommand() { FullyQualifiedCommandName = "James.Bond", CommandArgs = new Dictionary<object, string>() { { "bar", "baz" }, { "foo", "bar" } } };
+
+            Assert.AreEqual(p1.GetLogicHashCode(), p2.GetLogicHashCode());
+
+            // Now, let's make a small change
+            p2.CommandArgs["foo"] = "foo";
+
+            // Their LogicHashCodes should differ now
+            Assert.AreNotEqual(p1.GetLogicHashCode(), p2.GetLogicHashCode());
+
+            // We should also be able to compute a has with no arguments
+            var p3 = new PipelineCommand() { FullyQualifiedCommandName = "James.Bond" };
+            try
+            {
+                var result = p3.GetLogicHashCode();
+            }
+            catch(Exception e)
+            {
+                Assert.Fail("Exception when computing LogicHashCode of command with no arguments.");
+            }
+        }
     }
 }

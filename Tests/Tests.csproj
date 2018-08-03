@@ -51,6 +51,7 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="ErrorTests.cs" />
     <Compile Include="FilterEvents.cs" />
     <Compile Include="FilterLoading.cs" />
     <Compile Include="CommandParsing.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="HtmlTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="BaseTests.cs" />
+    <Compile Include="IncludedCommandTests.cs" />
     <Compile Include="OtherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlTests.cs" />
