@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Web.UI;
 
 namespace DeninaSharp.Core.Utility
@@ -64,6 +61,14 @@ namespace DeninaSharp.Core.Utility
 
             // It's neither, return it...
             return input;
+        }
+
+        public static string ConvertWildcardToRegex(string input)
+        {
+            return input
+                .Replace(".", @"\.")
+                .Replace("*", ".*")
+                .Replace("?", ".");
         }
     }
 }

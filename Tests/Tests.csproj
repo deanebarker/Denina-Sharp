@@ -61,7 +61,7 @@
     <Compile Include="HtmlTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="BaseTests.cs" />
-    <Compile Include="IncludedCommandTests.cs" />
+    <Compile Include="CommandFactoryTests.cs" />
     <Compile Include="OtherTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlTests.cs" />

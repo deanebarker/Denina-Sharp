@@ -8,6 +8,8 @@ namespace DeninaSharp.Core
     {
         public string CommandName { get; private set; }
         public string CommandText { get; private set; }
+
+        public string CommandFactorySource { get; private set; }
         public string InputValue { get; set; }
         public string OutputValue { get; set; }
         public bool SuccessfullyExecuted { get; set; }
@@ -23,6 +25,7 @@ namespace DeninaSharp.Core
         {
             CommandName = command.FullyQualifiedCommandName;
             CommandText = command.OriginalText;
+            CommandFactorySource = command.CommandFactorySource;
 
             Variables = new Dictionary<string, string>();
             Arguments = new List<DictionaryEntry>();

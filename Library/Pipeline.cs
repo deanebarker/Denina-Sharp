@@ -8,6 +8,7 @@ using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace DeninaSharp.Core
 {
@@ -45,7 +46,7 @@ namespace DeninaSharp.Core
         private static readonly Dictionary<string, CategoryDoc> categoryDocs = new Dictionary<string, CategoryDoc>();
         public static ReadOnlyDictionary<string, CategoryDoc> CategoryDocs => new ReadOnlyDictionary<string, CategoryDoc>(categoryDocs);
 
-        public static Func<PipelineCommand, IEnumerable<PipelineCommand>> CommandIncluder { get; set; }
+        private static Dictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>> commandFactories { get; set; }
 
         // Instance members
 
@@ -65,9 +66,6 @@ namespace DeninaSharp.Core
         // This is the delegate through which we run all the filters
         // We do this through a delegate so we can handle anonymous functions
         public delegate string FilterDelegate(string input, PipelineCommand command, ExecutionLog log);
-
-
-
 
         // This loads the filters from this assembly
         public static void Init()
@@ -137,7 +135,8 @@ namespace DeninaSharp.Core
             get { return new ReadOnlyDictionary<string, PipelineVariable>(globalVariables); }
         }
 
-        
+        public IEnumerable<object> RegexFactoryCommands { get; private set; }
+
         public static void ReflectAssembly(Assembly assembly)
         {
             // Iterate all the classes in this assembly
@@ -260,33 +259,41 @@ namespace DeninaSharp.Core
             // Clear the debug data
             LogEntries.Clear();
 
-            // We need to resolve inclusions
-            // We can't do a foreach, because we're going to modify this list
-            // Also: _this does not account for recursion or circular inclusions!!!!_
-            // The GetLogicHashCode method can be used to compare command logic to ensure uniqueness
-            for (var i = 0; i < commands.Count(); i++)
+            // Have any commandFactories been defined?
+            if (commandFactories != null)
             {
-                var thisCommand = commands[i];
-                if (thisCommand.NormalizedCommandName == INCLUSION_COMMAND)
+                // We need to execute any command factories and modify the command list
+                // We can't do a foreach, because we're going to modify this list
+                // Also: _this does not account for recursion or circular inclusions!!!!_
+                // The GetLogicHashCode method can be used to compare command logic to ensure uniqueness
+
+                for (var i = 0; i < commands.Count(); i++)
                 {
-                    if (CommandIncluder == null)
+                    var thisCommand = commands[i];
+                    var factoryCommand = commandFactories.FirstOrDefault(c => Regex.IsMatch(thisCommand.NormalizedCommandName, StringUtilities.ConvertWildcardToRegex(c.Key), RegexOptions.IgnoreCase));
+
+                    if (factoryCommand.Value != null) // This test is a little weird. KeyValue is a struct, so a normal null check doesn't work, so I do the null check against the Value...
                     {
-                        throw new Exception("Attempted to execute Core.Include when no CommandIncluder has been defined");
+                        // Run the factory, passing the entire command
+                        var commandsToInclude = factoryCommand.Value(thisCommand);
+
+                        // Include the source, for logging
+                        commandsToInclude.ToList().ForEach(c =>
+                        {
+                            c.CommandFactorySource = thisCommand.OriginalText;
+                        });
+
+                        // Insert these commands AFTER the factory command
+                        commands.InsertRange(i + 1, commandsToInclude);
+
+                        // Delete the factory command
+                        commands.Remove(thisCommand);
+
+                        // Inserted commands will also be processed for command factories, since the next iteration of this loop will pickup at the first inserted command
                     }
-
-                    // Run the includer, passing the entire command
-                    var commandsToInclude = CommandIncluder(thisCommand);
-
-                    // Insert these commands AFTER the Include command
-                    commands.InsertRange(i+1, commandsToInclude);
-
-                    // Delete the Include command
-                    commands.Remove(thisCommand);
-
-                    // Included commands will also be processed for inclusions, since the next iteration of this loop will pickup at the first included command
                 }
             }
-            // At this point, all inclusions should be resolved
+            // At this point, all command factories should be resolved for this and subsequent executions
 
             // Add a pass-through command at the end just to hold a label called "end".
             if (commands.Any(c => c.Label == FINAL_COMMAND_LABEL))
@@ -603,6 +610,25 @@ namespace DeninaSharp.Core
                 .Select(y => y.Key)
                 .ToList()
                 .ForEach(z => RemoveCommand(z, reason));
+        }
+
+        public static void RegisterCommandFactory(string key, Func<PipelineCommand, IEnumerable<PipelineCommand>> function)
+        {
+            if(commandFactories == null)
+            {
+                commandFactories = new Dictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>>();
+            }
+            
+            if(commandFactories.ContainsKey(key))
+            {
+                commandFactories.Remove(key);
+            }
+            commandFactories.Add(key, function);
+        }
+
+        public static void ClearCommandFactories()
+        {
+            commandFactories = new Dictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>>();
         }
 
         private static void OnPipelineComplete(PipelineEventArgs e) => PipelineComplete?.Invoke(null, e);

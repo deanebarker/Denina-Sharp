@@ -32,6 +32,8 @@ namespace DeninaSharp.Core
         public string SendToLabel { get; set; }
         public bool AppendToOutput{ get; set; }
 
+        public string CommandFactorySource { get; set; }
+
         public string DefaultArgument
         {
             get { return CommandArgs.FirstOrDefault().Value; }
