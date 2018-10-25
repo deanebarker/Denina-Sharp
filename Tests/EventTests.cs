@@ -47,5 +47,43 @@ namespace Tests
 
             Assert.IsTrue(!Pipeline.CommandMethods.ContainsKey("text.append"));
         }
+
+
+        [TestMethod]
+        public void VariableRetrieved()
+        {
+            var p = new Pipeline();
+            p.SetVariable("foo", "bar");
+            p.AddCommand("Text.Append -suffix:$foo");
+
+            p.VariableRetrieved += (s, e) =>
+            {
+                if (e.Key == "foo")
+                {
+                    e.Value = "baz";
+                }
+            };
+
+            // The variable of "foo" is initially set to "bar"
+            // The event handler above should always return "baz"
+            Assert.AreEqual("baz", p.Execute());
+        }
+
+        [TestMethod]
+        public void VariableRetrieving()
+        {
+            var p = new Pipeline();
+            p.AddCommand("Text.Append -suffix:$foo");
+
+            p.VariableRetrieving += (s, e) =>
+            {
+                e.Pipeline.SetVariable("foo", "bar");
+            };
+
+            Assert.AreEqual("bar", p.Execute());
+        }
+
+
+
     }
 }

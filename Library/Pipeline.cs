@@ -63,6 +63,16 @@ namespace DeninaSharp.Core
         public event FilterEventHandler FilterExecuting;
         public event FilterEventHandler FilterExecuted;
 
+        /* IMPORTANT NOTE ABOUT THESE METHODS
+        Variables are resolved on first execution of a pipeline.
+        This means that after that first execution, **there are no more variables**.
+        So, if you execute a pipline, THEN bind this event...it won't function how you expect
+        After the first execution, the engine doesn't "get" anymore variables.
+        They were all "gotten" on the first execution.
+        */
+        public delegate void VariableEventHandler(Pipeline s, VariableEventArgs e);
+        public event VariableEventHandler VariableRetrieving;
+        public event VariableEventHandler VariableRetrieved;
 
         // This is the delegate through which we run all the filters
         // We do this through a delegate so we can handle anonymous functions
@@ -508,6 +518,11 @@ namespace DeninaSharp.Core
         {
             key = PipelineCommandParser.NormalizeVariableName(key);
 
+            // See important comment at declaration above
+            var variableRetrievingEvents = new VariableEventArgs(this, key);
+            OnVariableRetrieving(variableRetrievingEvents);
+            key = variableRetrievingEvents.Key;
+
             if (!variables.ContainsKey(key))
             {
                 if (checkGlobal)
@@ -521,7 +536,14 @@ namespace DeninaSharp.Core
                 throw new DeninaException(string.Format("Attempt to access non-existent variable: \"{0}\"", key));
             }
 
-            return variables[PipelineCommandParser.NormalizeVariableName(key)].Value ?? string.Empty;
+            var value = variables[PipelineCommandParser.NormalizeVariableName(key)].Value;
+
+            // See important comment at declaration above
+            var variableRetrievedEvents = new VariableEventArgs(this, key, value);
+            OnVariableRetrieved(variableRetrievedEvents);
+            value = variableRetrievedEvents.Value;
+
+            return value ?? string.Empty;
         }
 
         public static object GetGlobalVariable(string key)
@@ -659,5 +681,7 @@ namespace DeninaSharp.Core
         private static void OnCommandLoading(CommandEventArgs e) => CommandLoading?.Invoke(null, e);
         private void OnFilterExecuting(FilterEventArgs e) => FilterExecuting?.Invoke(this, e);
         private void OnFilterExecuted(FilterEventArgs e) => FilterExecuted?.Invoke(this, e);
+        private void OnVariableRetrieving(VariableEventArgs e) => VariableRetrieving?.Invoke(this, e);
+        private void OnVariableRetrieved(VariableEventArgs e) => VariableRetrieved?.Invoke(this, e);
     }
 }
