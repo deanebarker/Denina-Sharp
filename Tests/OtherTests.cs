@@ -30,23 +30,27 @@ namespace Tests
         [TestMethod]
         public void RemoveFilter()
         {
-            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("text.append"));
-            Pipeline.RemoveCommand("text.append", "Never append text to anything!!!");
-            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("text.append"));
+            Func<string, PipelineCommand, ExecutionLog, string> myFilter = (input, command, log) =>
+            {
+                return "It worked!";
+            };
+            Pipeline.ReflectMethod(myFilter.Method, "Foo", "Bar");
+
+            Assert.IsTrue(Pipeline.CommandMethods.ContainsKey("foo.bar"));
+            Pipeline.RemoveCommand("Foo.Bar", "Never use this!!!");
+            Assert.IsFalse(Pipeline.CommandMethods.ContainsKey("foo.bar"));
 
             var pipeline = new Pipeline();
-            pipeline.AddCommand("Text.Append -prefix:foo");
+            pipeline.AddCommand("Foo.Bar");
 
             try
             {
-                pipeline.Execute("bar");
+                pipeline.Execute("baz");
             }
             catch (Exception e)
             {
                 Assert.IsTrue(e.Message.Contains("!!!"));
             }
-
-            Pipeline.ReflectMethod(typeof(Text).GetMethod("Append"), "text", "append");
         }
 
 
