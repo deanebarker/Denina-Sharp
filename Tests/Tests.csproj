@@ -53,11 +53,11 @@
   <ItemGroup>
     <Compile Include="ErrorTests.cs" />
     <Compile Include="FilterEvents.cs" />
-    <Compile Include="FilterLoading.cs" />
     <Compile Include="CommandParsing.cs" />
     <Compile Include="CoreTests.cs" />
     <Compile Include="EventTests.cs" />
     <Compile Include="FileTests.cs" />
+    <Compile Include="FilterLoading.cs" />
     <Compile Include="HtmlTests.cs" />
     <Compile Include="HttpTests.cs" />
     <Compile Include="BaseTests.cs" />
