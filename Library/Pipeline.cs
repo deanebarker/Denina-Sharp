@@ -2,6 +2,7 @@
 using DeninaSharp.Core.Documentation;
 using DeninaSharp.Core.Utility;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
@@ -24,10 +25,10 @@ namespace DeninaSharp.Core
 
         // Static members
 
-        public static readonly Dictionary<string, Type> Types = new Dictionary<string, Type>(); // This is just to keep them handy for the documentor
+        public static readonly ConcurrentDictionary<string, Type> Types = new ConcurrentDictionary<string, Type>(); // This is just to keep them handy for the documentor
 
-        private static readonly Dictionary<string, MethodInfo> commandMethods = new Dictionary<string, MethodInfo>();
-        private static readonly Dictionary<string, string> hiddenCommandMethods = new Dictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, MethodInfo> commandMethods = new ConcurrentDictionary<string, MethodInfo>();
+        private static readonly ConcurrentDictionary<string, string> hiddenCommandMethods = new ConcurrentDictionary<string, string>();
 
         public delegate void PipelineEventHandler(object o, PipelineEventArgs e);
         public static event PipelineEventHandler PipelineComplete;
@@ -40,13 +41,13 @@ namespace DeninaSharp.Core
         public delegate void CommandEventHandler(object o, CommandEventArgs e);
         public static event CommandEventHandler CommandLoading;
 
-        private static readonly Dictionary<string, CommandDoc> commandDocs = new Dictionary<string, CommandDoc>();
+        private static readonly ConcurrentDictionary<string, CommandDoc> commandDocs = new ConcurrentDictionary<string, CommandDoc>();
         public static ReadOnlyDictionary<string, CommandDoc> CommandDocs => new ReadOnlyDictionary<string, CommandDoc>(commandDocs);
 
-        private static readonly Dictionary<string, CategoryDoc> categoryDocs = new Dictionary<string, CategoryDoc>();
+        private static readonly ConcurrentDictionary<string, CategoryDoc> categoryDocs = new ConcurrentDictionary<string, CategoryDoc>();
         public static ReadOnlyDictionary<string, CategoryDoc> CategoryDocs => new ReadOnlyDictionary<string, CategoryDoc>(categoryDocs);
 
-        private static Dictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>> commandFactories { get; set; }
+        private static ConcurrentDictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>> commandFactories { get; set; }
 
         // Instance members
 
@@ -85,6 +86,7 @@ namespace DeninaSharp.Core
             FilterDocLoading = null;
             CategoryDocLoading = null;
             CommandLoading = null;
+            ClearCommandFactories();
         }
 
         public Pipeline(string commandString = null)
@@ -157,7 +159,7 @@ namespace DeninaSharp.Core
             category = StringUtilities.RemoveNonLettersAndDigits(category);
 
             // Add to the documentation
-            categoryDocs.Remove(category);
+            categoryDocs.TryRemove(category, out CategoryDoc whoCares);
 
             // Process the category doc through the event
             var categoryDoc = new CategoryDoc(type);
@@ -167,7 +169,7 @@ namespace DeninaSharp.Core
             if (!categoryDocLoadedEventArgs.Cancel)
             {
                 // Add the processed category doc
-                categoryDocs.Add(category, categoryDocLoadedEventArgs.CategoryDoc);
+                categoryDocs.TryAdd(category, categoryDocLoadedEventArgs.CategoryDoc);
             }
 
             foreach (var method in type.GetMethods().Where(m => m.GetCustomAttributes(typeof (FilterAttribute), true).Any()))
@@ -183,21 +185,40 @@ namespace DeninaSharp.Core
 
         public static void ReflectMethod(MethodInfo method, string category = null, string name = null)
         {
-            foreach (var filterAttribute in method.GetCustomAttributes<FilterAttribute>())
+            // This has to be a list for the sole reason that we might have more than one FilterAttribute
+            var identifiers = new List<Tuple<string, string, string>>();
+
+            if (name != null)
             {
-                /* To get the name of the command, we fallback from:
-                 * 1. Explicit name
-                 * 2. Relfected name from the FilterAttribute
-                 * 3. Method name
-                 * */
-                AddFilter(
-                    method, 
-                    category ?? method.DeclaringType.Name,
-                    name ?? filterAttribute.Name ?? method.Name,
-                    filterAttribute.Description
-                    );
+                // The identifiers are explicit, yay!
+                identifiers.Add(Tuple.Create(category ?? method.DeclaringType.Name, name, (string)null));
             }
-            return;
+            else
+            {
+                // Do we have filter attributes?
+                foreach (var filterAttribute in method.GetCustomAttributes<FilterAttribute>())
+                {
+                    // Get stuff off the attribute
+                    identifiers.Add(Tuple.Create(category ?? method.DeclaringType.Name, filterAttribute.Name ?? method.Name, filterAttribute.Description));
+                }
+
+                // If we have no filter attributes either, then reflect some identifiers from the methodd
+                if (!identifiers.Any())
+                {
+                    identifiers.Add(Tuple.Create(method.DeclaringType.Name, method.Name, (string)null));
+                }
+            }
+
+            // Add the filter under every identifier
+            foreach (var identifier in identifiers)
+            {
+                AddFilter(
+                     method,
+                     identifier.Item1,
+                     identifier.Item2,
+                     identifier.Item3
+                 );
+            }
         }
 
         public static void AddFilter(FilterDelegate method, string category, string name, string description = null)
@@ -219,7 +240,7 @@ namespace DeninaSharp.Core
                 {
                     // This dependency doesn't exist, so we're not going to load this command.
                     // We're going to add this to the hidden commands dictionary, so we can give a more specific error message if this command is requested.
-                    hiddenCommandMethods.Add(fullyQualifiedCommandName, string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", fullyQualifiedCommandName, dependency.TypeName));
+                    hiddenCommandMethods.TryAdd(fullyQualifiedCommandName, string.Format(@"Command ""{0}"" could not be loaded due to a missing dependency on type ""{1}""", fullyQualifiedCommandName, dependency.TypeName));
                     return;
                 }
             }
@@ -234,11 +255,11 @@ namespace DeninaSharp.Core
             }
 
             // Load the processed command
-            commandMethods.Remove(commandEventArgs.FullyQualifiedCommandName.ToLower()); // Remove it if it exists already                  
-            commandMethods.Add(commandEventArgs.FullyQualifiedCommandName.ToLower(), commandEventArgs.Method);
+            commandMethods.TryRemove(commandEventArgs.FullyQualifiedCommandName.ToLower(), out MethodInfo discardCommandMethods); // Remove it if it exists already                  
+            commandMethods.TryAdd(commandEventArgs.FullyQualifiedCommandName.ToLower(), commandEventArgs.Method);
 
             // Remove this if it exists
-            commandDocs.Remove(fullyQualifiedCommandName);
+            commandDocs.TryRemove(fullyQualifiedCommandName, out CommandDoc discardCommandDocs);
 
             // Process the filter doc through the event
             var filterDoc = new CommandDoc(method, name, description);
@@ -249,7 +270,7 @@ namespace DeninaSharp.Core
             if (!filterDocLoadedEventArgs.Cancel)
             {
                 // Add the processed filter doc
-                commandDocs.Add(fullyQualifiedCommandName, filterDocLoadedEventArgs.CommandDoc);
+                commandDocs.TryAdd(fullyQualifiedCommandName, filterDocLoadedEventArgs.CommandDoc);
             }
 
         }
@@ -593,14 +614,14 @@ namespace DeninaSharp.Core
             {
                 return;
             }
-            commandMethods.Remove(commandName.ToLower());
+            commandMethods.TryRemove(commandName.ToLower(), out MethodInfo discardCommandMethods);
 
             // Add this to the hidden command methods
             if (hiddenCommandMethods.ContainsKey(commandName.ToLower()))
             {
-                hiddenCommandMethods.Remove(commandName.ToLower());
+                hiddenCommandMethods.TryRemove(commandName.ToLower(), out string discardHiddenCommandMethods);
             }
-            hiddenCommandMethods.Add(commandName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", commandName, reason));
+            hiddenCommandMethods.TryAdd(commandName.ToLower(), string.Format(@"""{0}"" is unavailable for this reason: {1}", commandName, reason));
         }
 
         public static void RemoveCommandCategory(string commandCategoryName, string reason = null)
@@ -616,19 +637,19 @@ namespace DeninaSharp.Core
         {
             if(commandFactories == null)
             {
-                commandFactories = new Dictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>>();
+                commandFactories = new ConcurrentDictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>>();
             }
             
             if(commandFactories.ContainsKey(key))
             {
-                commandFactories.Remove(key);
+                commandFactories.TryRemove(key, out Func<PipelineCommand, IEnumerable<PipelineCommand>> discardCommandFactories);
             }
-            commandFactories.Add(key, function);
+            commandFactories.TryAdd(key, function);
         }
 
         public static void ClearCommandFactories()
         {
-            commandFactories = new Dictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>>();
+            commandFactories = new ConcurrentDictionary<string, Func<PipelineCommand, IEnumerable<PipelineCommand>>>();
         }
 
         private static void OnPipelineComplete(PipelineEventArgs e) => PipelineComplete?.Invoke(null, e);
